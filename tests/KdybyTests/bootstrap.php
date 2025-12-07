@@ -33,5 +33,8 @@ function id($val) {
 }
 
 function run(Tester\TestCase $testCase) {
-	$testCase->run(isset($_SERVER['argv'][1]) ? $_SERVER['argv'][1] : NULL);
+	echo "Running " . get_class($testCase) . "\n";
+	$testToRun = isset($_SERVER['argv'][1]) ? $_SERVER['argv'][1] : NULL;
+	echo "Test to run: " . ($testToRun ?: 'all') . "\n";
+	$testCase->run($testToRun);
 }
