@@ -31,8 +31,11 @@ jobs:
     - name: Run parallel-lint
       run: ./vendor/bin/parallel-lint -e php,phpt --exclude vendor .
 
+    - name: Tester environment
+      run: ./vendor/bin/tester -c ./tests/php.ini-unix -d extension=tokenizer.so ./tests/KdybyTests/ --info
+
     - name: Run tests
-      run: ./vendor/bin/tester -c ./tests/php.ini-unix ./tests/KdybyTests/
+      run: ./vendor/bin/tester -c ./tests/php.ini-unix -d extension=tokenizer.so ./tests/KdybyTests/
 
     - name: Display test failures
       if: failure()
