@@ -1,9 +1,9 @@
 {
-	"name": "kdyby/bootstrap-form-renderer",
+	"name": "jozefizso/bootstrap-form-renderer",
 	"type": "library",
 	"description": "Nette forms renderer with bootstrap",
 	"keywords": ["nette", "kdyby", "forms", "bootstrap"],
-	"homepage": "http://kdyby.org",
+	"homepage": "https://github.com/jozefizso/BootstrapFormRenderer",
 	"license": ["BSD-3-Clause", "GPL-2.0", "GPL-3.0"],
 	"authors": [
 		{
@@ -13,8 +13,7 @@
 		}
 	],
 	"support": {
-		"email": "filip@prochazka.su",
-		"issues": "https://github.com/kdyby/BootstrapFormRenderer/issues"
+		"issues": "https://github.com/jozefizso/BootstrapFormRenderer/issues"
 	},
 	"require": {
 		"nette/nette": "2.1.*"

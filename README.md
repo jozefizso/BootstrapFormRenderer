@@ -1,45 +1,30 @@
-Kdyby/BootstrapFormRenderer
-======
+# BootstrapFormRenderer
 
-[![Build Status](https://travis-ci.org/Kdyby/BootstrapFormRenderer.svg?branch=master)](https://travis-ci.org/Kdyby/BootstrapFormRenderer)
-[![Downloads this Month](https://img.shields.io/packagist/dm/kdyby/bootstrap-form-renderer.svg)](https://packagist.org/packages/kdyby/bootstrap-form-renderer)
-[![Latest stable](https://img.shields.io/packagist/v/kdyby/bootstrap-form-renderer.svg)](https://packagist.org/packages/kdyby/bootstrap-form-renderer)
-
-
-Save me please!
----------------
-
-The maintainer of this project has no more time to maintain it. It may even contain unfixed bugs :(
-
-If you need something like this and you're willing to join in, you're welcome to take over this project.
-
-![help](https://cdn.kdyby.org/keyboard-help.png)
+[![Tests](https://github.com/jozefizso/BootstrapFormRenderer/actions/workflows/test.yml/badge.svg)](https://github.com/jozefizso/BootstrapFormRenderer/actions/workflows/test.yml)
+[![Downloads this Month](https://img.shields.io/packagist/dm/jozefizso/bootstrap-form-renderer.svg)](https://packagist.org/packages/jozefizso/bootstrap-form-renderer)
+[![Latest stable](https://img.shields.io/packagist/v/jozefizso/bootstrap-form-renderer.svg)](https://packagist.org/packages/jozefizso/bootstrap-form-renderer)
 
 
-Requirements
-------------
+## Requirements
 
-Kdyby/BootstrapFormRenderer requires PHP 5.3.2 or higher.
-
-- [Nette Framework](https://github.com/nette/nette)
+* PHP 5.6
+* [Nette Framework](https://github.com/nette/nette) 2.1
 
 
-Installation
-------------
+## Usage
 
-The best way to install Kdyby/BootstrapFormRenderer is using  [Composer](http://getcomposer.org/):
+Use composer to install the library:
 
 ```sh
-$ composer require kdyby/bootstrap-form-renderer:@dev
+$ composer require jozefizso/bootstrap-form-renderer
 ```
 
 
-Documentation
-------------
+## License
 
-Learn more in the [documentation](https://github.com/Kdyby/BootstrapFormRenderer/blob/master/docs/en/index.md).
+You may use BootstrapFormRenderer library under the terms of either
+the New BSD License or the GNU General Public License (GPL) version 2 or 3.
 
+Read [LICENSE](license.md) for more information.
 
------
-
-Homepage [http://www.kdyby.org](http://www.kdyby.org) and repository [http://github.com/kdyby/BootstrapFormRenderer](http://github.com/kdyby/BootstrapFormRenderer).
+_Forked from the original [Kdyby/BootstrapFormRenderer](https://github.com/kdyby/BootstrapFormRenderer) by Filip Procházka._
