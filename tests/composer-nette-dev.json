@@ -40,8 +40,8 @@
 		"tracy/tracy": "@dev"
 	},
 	"require-dev": {
-		"nette/tester": "@dev",
-		"jakub-onderka/php-parallel-lint": "~0.6"
+		"nette/tester": "@v1.x-dev",
+		"jakub-onderka/php-parallel-lint": "~0.9.2"
 	},
 	"autoload": {
 		"psr-0": {
