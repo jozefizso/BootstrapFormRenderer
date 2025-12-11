@@ -1,4 +1,7 @@
-vendor
+### Composer ###
+composer.phar
+/vendor/
+# ignore a library lock file http://getcomposer.org/doc/02-libraries.md#lock-file
 composer.lock
 
 ### VisualStudioCode ###
