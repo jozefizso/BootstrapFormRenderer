@@ -1,0 +1,21 @@
+# Editor configuration
+
+[*.{php,phpt}]
+indent_size = 4
+indent_style = tab
+insert_final_newline = true
+
+[*.latte]
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+
+[composer.json]
+indent_size = 4
+indent_style = tab
+
+
+[*.md]
+indent_size = 2
+indent_style = space
+insert_final_newline = false
