@@ -9,14 +9,21 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['5.6', '7.0']
+
+    name: PHP ${{ matrix.php-version }}
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v6
 
-    - name: Setup PHP 5.6
+    - name: Setup PHP ${{ matrix.php-version }}
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '5.6'
+        php-version: ${{ matrix.php-version }}
         coverage: none
 
     - name: Install dependencies
