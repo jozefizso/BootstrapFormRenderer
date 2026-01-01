@@ -191,6 +191,10 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 			$el->addClass('btn');
 
 		} else {
+			if ($control instanceof Controls\Button) {
+				$el->addClass('btn');
+			}
+
 			$label = $control->labelPrototype;
 			if ($control instanceof Controls\Checkbox) {
 				$label->addClass('checkbox');
