@@ -33,10 +33,10 @@ jobs:
       run: ./vendor/bin/parallel-lint -e php,phpt --exclude vendor .
 
     - name: Tester environment
-      run: ./vendor/bin/tester -c ./tests/php.ini-unix -d extension=tokenizer.so ./tests/KdybyTests/ --info
+      run: ./vendor/bin/tester -c ./tests/php-tests.ini ./tests/KdybyTests/ --info
 
     - name: Run tests
-      run: ./vendor/bin/tester -c ./tests/php.ini-unix -d extension=tokenizer.so ./tests/KdybyTests/
+      run: ./vendor/bin/tester -c ./tests/php-tests.ini ./tests/KdybyTests/
 
     - name: Display test failures
       if: failure()
