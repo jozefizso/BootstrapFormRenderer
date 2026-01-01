@@ -36,8 +36,16 @@ jobs:
       run: ./vendor/bin/tester -c ./tests/php-tests.ini ./tests/KdybyTests/ --info
 
     - name: Run tests
-      run: ./vendor/bin/tester -c ./tests/php-tests.ini ./tests/KdybyTests/
+      run: ./vendor/bin/tester -c ./tests/php-tests.ini -o junit ./tests/KdybyTests/ > ./test-results.xml
 
     - name: Display test failures
       if: failure()
       run: for i in $(find ./tests -name \*.actual); do echo "--- $i"; cat $i; echo; echo; done
+
+    - name: Publish test results
+      uses: dorny/test-reporter@feature/700-nette-tester-junit-reporter
+      if: always()
+      with:
+        name: Test Results (PHP ${{ matrix.php-version }})
+        path: ./test-results.xml
+        reporter: tester-junit
