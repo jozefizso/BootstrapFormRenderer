@@ -79,7 +79,7 @@ class BootstrapRendererTest extends TestCase
 		$form->addUpload('photo', 'Fotka');
 		$form->addSubmit('up', 'Nahrát fotku');
 		$form->addTextArea('desc', 'Popis');
-		$form->addProtection('nemam', 10);
+		$form->addProtection('nemam');
 		$form->addSubmit('submit', 'Uložit')->setAttribute('class', 'btn-primary');
 		$form->addSubmit('delete', 'Smazat');
 
