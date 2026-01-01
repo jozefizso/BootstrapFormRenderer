@@ -237,7 +237,7 @@ class BootstrapRendererTest extends TestCase
 		foreach ($form->getComponents(TRUE, 'Nette\Forms\Controls\CsrfProtection') as $control) {
 			/** @var \Nette\Forms\Controls\CsrfProtection $control */
 			$control->session = new Nette\Http\Session($form->httpRequest, new Nette\Http\Response);
-			$control->session->setStorage(new ArraySessionStorage($control->session));
+			$control->session->setHandler(new ArraySessionStorage($control->session));
 			$control->session->start();
 		}
 
@@ -314,7 +314,7 @@ class ControlMock extends Nette\Application\UI\Control
  *
  * @internal
  */
-class ArraySessionStorage extends Nette\Object implements Nette\Http\ISessionStorage
+class ArraySessionStorage implements \SessionHandlerInterface
 {
 
 	/**
@@ -334,6 +334,7 @@ class ArraySessionStorage extends Nette\Object implements Nette\Http\ISessionSto
 	public function open($savePath, $sessionName)
 	{
 		$this->session = array();
+		return true;
 	}
 
 
@@ -341,13 +342,14 @@ class ArraySessionStorage extends Nette\Object implements Nette\Http\ISessionSto
 	public function close()
 	{
 		$this->session = array();
+		return true;
 	}
 
 
 
 	public function read($id)
 	{
-		return isset($this->session[$id]) ? $this->session[$id] : NULL;
+		return isset($this->session[$id]) ? $this->session[$id] : '';
 	}
 
 
@@ -355,20 +357,22 @@ class ArraySessionStorage extends Nette\Object implements Nette\Http\ISessionSto
 	public function write($id, $data)
 	{
 		$this->session[$id] = $data;
+		return true;
 	}
 
 
 
-	public function remove($id)
+	public function destroy($id)
 	{
 		unset($this->session[$id]);
+		return true;
 	}
 
 
 
-	public function clean($maxlifetime)
+	public function gc($maxlifetime)
 	{
-
+		return true;
 	}
 
 }
