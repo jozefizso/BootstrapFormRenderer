@@ -16,15 +16,29 @@
 		"issues": "https://github.com/jozefizso/BootstrapFormRenderer/issues"
 	},
 	"require": {
-		"nette/nette": "~2.1@dev"
+		"php": ">=5.6",
+		"nette/nette": "~2.1.0"
 	},
 	"require-dev": {
 		"nette/tester": "~1.7.2",
-		"jakub-onderka/php-parallel-lint": "~0.9.2"
+		"jakub-onderka/php-parallel-lint": "~0.9.2",
+		"cweagans/composer-patches": "^1.7"
+	},
+	"extra": {
+		"patches": {
+			"nette/tester": {
+				"Don't truncate test names": "patches/nette-tester-no-truncate-test-names.patch"
+			}
+		}
 	},
 	"autoload": {
 		"psr-0": {
 			"Kdyby\\BootstrapFormRenderer\\": "src/"
+		}
+	},
+	"config": {
+		"allow-plugins": {
+			"cweagans/composer-patches": true
 		}
 	}
 }
