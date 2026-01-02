@@ -291,7 +291,7 @@ class BootstrapRendererTest extends TestCase
 	 */
 	private function createTemplate()
 	{
-		$template = $this->container->{$this->container->getMethodName('nette.template', FALSE)}();
+		$template = $this->container->{$this->container->getMethodName('nette.template')}();
 		/** @var \Nette\Templating\FileTemplate $template */
 		$template->setCacheStorage(new PhpFileStorage($this->container->expand('%tempDir%/cache'), $this->container->getService('nette.cacheJournal')));
 		return $template;
