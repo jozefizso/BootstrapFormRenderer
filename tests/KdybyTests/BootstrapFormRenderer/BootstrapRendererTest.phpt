@@ -147,6 +147,7 @@ class BootstrapRendererTest extends TestCase
 		$form->addRadioList('sex', 'Sex', array(1 => 'Man', 'Woman'));
 		$form->addSelect('day', 'Day', array(1 => 'Monday', 'Tuesday'));
 		$form->addTextArea('desc', 'Description');
+		$form->addText('req', 'Required')->setRequired('This field is required');
 		$form->addSubmit('send', 'Odeslat');
 
 //		$form['checks'] = new \Kdyby\Forms\Controls\CheckboxList('Regions', array(
