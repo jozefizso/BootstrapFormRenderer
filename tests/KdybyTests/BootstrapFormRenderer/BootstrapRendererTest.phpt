@@ -200,6 +200,41 @@ class BootstrapRendererTest extends TestCase
 
 
 	/**
+	 * @return \Nette\Application\UI\Form
+	 */
+	private function dataCreateMinimalForm()
+	{
+		$form = new Form;
+		$form->addText('name', 'Name');
+		$form->addSubmit('send', 'Submit');
+
+		return $form;
+	}
+
+
+	/**
+	 * @return array
+	 */
+	public function dataFormStyling()
+	{
+		return array_map(function ($f) { return array(basename($f)); }, glob(__DIR__ . '/form-styling/input/*.latte'));
+	}
+
+
+
+	/**
+	 * @dataProvider dataFormStyling
+	 * @param string $latteFile
+	 */
+	public function testFormStyling($latteFile)
+	{
+		$form = $this->dataCreateMinimalForm();
+		$this->assertFormTemplateOutput(__DIR__ . '/form-styling/input/' . $latteFile, __DIR__ . '/form-styling/output/' . basename($latteFile, '.latte') . '.html', $form);
+	}
+
+
+
+	/**
 	 * @return array
 	 */
 	public function dataRenderingCheckboxList()
