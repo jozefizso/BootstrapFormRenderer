@@ -149,11 +149,16 @@ class BootstrapRendererTest extends TestCase
 		$form->addTextArea('desc', 'Description');
 		$form->addSubmit('send', 'Odeslat');
 
-//		$form['checks'] = new \Kdyby\Forms\Controls\CheckboxList('Regions', array(
-//			1 => 'Jihomoravský',
-//			2 => 'Severomoravský',
-//			3 => 'Slezský',
-//		));
+		$form->addCheckboxList('checks', 'Regions', array(
+			1 => 'Region North',
+			2 => 'Region South',
+			3 => 'Region West',
+		))->setOption('display', 'stacked');
+		$form->addCheckboxList('checksInline', 'Regions Inline', array(
+			1 => 'Region North',
+			2 => 'Region South',
+			3 => 'Region West',
+		))->setOption('display', 'inline');
 
 		$someGroup = $form->addGroup('Some Group', FALSE)
 			->setOption('id', 'nemam')
@@ -189,6 +194,28 @@ class BootstrapRendererTest extends TestCase
 	{
 		$form = $this->dataCreateForm();
 		$this->assertFormTemplateOutput(__DIR__ . '/individual/input/' . $latteFile, __DIR__ . '/individual/output/' . basename($latteFile, '.latte') . '.html', $form);
+	}
+
+
+
+	/**
+	 * @return array
+	 */
+	public function dataRenderingCheckboxList()
+	{
+		return array_map(function ($f) { return array(basename($f)); }, glob(__DIR__ . '/checkboxlist/input/*.latte'));
+	}
+
+
+
+	/**
+	 * @dataProvider dataRenderingCheckboxList
+	 * @param string $latteFile
+	 */
+	public function testRenderingCheckboxList($latteFile)
+	{
+		$form = $this->dataCreateForm();
+		$this->assertFormTemplateOutput(__DIR__ . '/checkboxlist/input/' . $latteFile, __DIR__ . '/checkboxlist/output/' . basename($latteFile, '.latte') . '.html', $form);
 	}
 
 
