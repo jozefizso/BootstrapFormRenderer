@@ -238,18 +238,11 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 			return array();
 		}
 
-		$form = $this->form;
-		$translate = function ($errors) use ($form) {
-			if ($translator = $form->getTranslator()) { // If we have translator, translate!
-				foreach ($errors as $key => $val) {
-					$errors[$key] = $translator->translate($val);
-				}
-			}
-
-			return $errors;
-		};
-
-		return $translate($formErrors);
+		// In Nette 2.1, validation rule messages are already translated
+		// by Rules::formatMessage() using the form translator.
+		// We return errors as-is to avoid double translation.
+		// Html instances are also supported and passed through.
+		return $formErrors;
 	}
 
 
@@ -402,10 +395,10 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 		}
 		$error = reset($errors);
 
-		// If we have translator, translate!
-		if (!$error instanceof Html && ($translator = $control->form->getTranslator())) {
-			$error = $translator->translate($error); // wtf?
-		}
+		// In Nette 2.1, validation rule messages are already translated
+		// by Rules::formatMessage() using the form translator.
+		// We return errors as-is to avoid double translation.
+		// Html instances are also supported and passed through.
 
 		// create element
 		return Html::el('p', array('class' => 'help-inline'))

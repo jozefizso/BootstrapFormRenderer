@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="../../bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<form action="" method="post" class="form-horizontal">
+<div id="frm-foo-name-pair" class="control-group required error">
+  <label class="required control-label" for="frm-foo-name">Celé meno</label>
+  <div class="controls">
+    <input type="text" name="name" id="frm-foo-name" required data-nette-rules='[{"op":":filled","msg":"Zadajte prosím vaše meno"},{"op":":minLength","msg":"Meno musí mať aspoň 3 znaky","arg":3}]' value="Jo">
+    <p class="help-inline">Meno musí mať aspoň 3 znaky</p>
+  </div>
+</div>
+<div id="frm-foo-email-pair" class="control-group required error">
+  <label class="required control-label" for="frm-foo-email">E-mailová adresa</label>
+  <div class="controls">
+    <div class="input-prepend">
+      <span class="add-on">@</span><input type="email" name="email" id="frm-foo-email" required data-nette-rules='[{"op":":filled","msg":"Zadajte prosím váš e-mail"},{"op":":email","msg":"Zadajte prosím platnú e-mailovú adresu"}]' value="invalid">
+    </div>
+    <p class="help-inline">Zadajte prosím platnú e-mailovú adresu</p>
+  </div>
+</div>
+<div id="frm-foo-phone-pair" class="control-group error">
+  <label class="control-label" for="frm-foo-phone">Telefónne číslo</label>
+  <div class="controls">
+    <input type="text" name="phone" id="frm-foo-phone" data-nette-rules='[{"op":":pattern","msg":"Telefón musí byť vo formáte XXX-XXX-XXXX","arg":"[0-9]{3}-[0-9]{3}-[0-9]{4}"}]' pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" value="123">
+    <p class="help-inline">Telefón musí byť vo formáte XXX-XXX-XXXX</p>
+  </div>
+</div>
+<div id="frm-foo-age-pair" class="control-group error">
+  <label class="control-label" for="frm-foo-age">Vek</label>
+  <div class="controls">
+    <input type="text" name="age" id="frm-foo-age" data-nette-rules='[{"op":":integer","msg":"Vek musí byť číslo"},{"op":":range","msg":"Vek musí byť medzi 18 a 100","arg":[18,100]}]' value="150">
+    <p class="help-inline">Vek musí byť medzi 18 a 100</p>
+  </div>
+</div>
+<div id="frm-foo-message-pair" class="control-group required error">
+  <label class="required control-label" for="frm-foo-message">Správa</label>
+  <div class="controls">
+    <textarea name="message" id="frm-foo-message" required data-nette-rules='[{"op":":filled","msg":"Zadajte prosím vašu správu"},{"op":":minLength","msg":"Správa musí mať aspoň 10 znakov","arg":10}]'>x</textarea>
+    <p class="help-inline">Správa musí mať aspoň 10 znakov</p>
+  </div>
+</div>
+<div class="form-actions">
+  <input type="submit" name="send" class="btn" id="frm-foo-send" value="Odoslať správu">
+</div>
+</form>
+</div>
+</body>
+</html>
