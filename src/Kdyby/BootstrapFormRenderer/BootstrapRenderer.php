@@ -165,7 +165,6 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 	 */
 	private function prepareControl(Controls\BaseControl $control)
 	{
-		$translator = $this->form->getTranslator();
 		$control->setOption('rendered', FALSE);
 
 		if ($control->isRequired()) {
@@ -175,9 +174,6 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 
 		$el = $control->getControlPrototype();
 		if ($placeholder = $control->getOption('placeholder')) {
-			if (!$placeholder instanceof Html && $translator) {
-				$placeholder = $translator->translate($placeholder);
-			}
 			$el->placeholder($placeholder);
 		}
 

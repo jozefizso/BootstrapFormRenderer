@@ -319,6 +319,75 @@ class BootstrapRendererTest extends TestCase
 
 
 	/**
+	 * @param bool $withTranslator
+	 * @return \Nette\Application\UI\Form
+	 */
+	private function dataCreatePlaceholderForm($withTranslator = FALSE)
+	{
+		$form = new Form;
+		if ($withTranslator) {
+			$form->setTranslator(new DummyTranslator());
+		}
+
+		$form->addText('email', 'Email')
+			->setType('email')
+			->setOption('placeholder', 'Enter your email');
+		$form->addText('name', 'Name')
+			->setOption('placeholder', 'Enter your name');
+		$form->addTextArea('message', 'Message')
+			->setOption('placeholder', 'Type your message here');
+		$form->addSubmit('send', 'Submit');
+
+		return $form;
+	}
+
+
+
+	/**
+	 * @return array
+	 */
+	public function dataRenderingPlaceholder()
+	{
+		return array_map(function ($f) { return array(basename($f)); }, glob(__DIR__ . '/placeholder/input/*.latte'));
+	}
+
+
+
+	/**
+	 * @dataProvider dataRenderingPlaceholder
+	 * @param string $latteFile
+	 */
+	public function testRenderingPlaceholder($latteFile)
+	{
+		$form = $this->dataCreatePlaceholderForm();
+		$this->assertFormTemplateOutput(__DIR__ . '/placeholder/input/' . $latteFile, __DIR__ . '/placeholder/output/' . basename($latteFile, '.latte') . '.html', $form);
+	}
+
+
+
+	/**
+	 * @return array
+	 */
+	public function dataRenderingPlaceholderWithTranslator()
+	{
+		return array_map(function ($f) { return array(basename($f)); }, glob(__DIR__ . '/placeholder-translated/input/*.latte'));
+	}
+
+
+
+	/**
+	 * @dataProvider dataRenderingPlaceholderWithTranslator
+	 * @param string $latteFile
+	 */
+	public function testRenderingPlaceholderWithTranslator($latteFile)
+	{
+		$form = $this->dataCreatePlaceholderForm(TRUE);
+		$this->assertFormTemplateOutput(__DIR__ . '/placeholder-translated/input/' . $latteFile, __DIR__ . '/placeholder-translated/output/' . basename($latteFile, '.latte') . '.html', $form);
+	}
+
+
+
+	/**
 	 * @param $latteFile
 	 * @param $expectedOutput
 	 * @param \Nette\Application\UI\Form $form
@@ -473,6 +542,48 @@ class ArraySessionStorage implements \SessionHandlerInterface
 	public function gc($maxlifetime)
 	{
 		return true;
+	}
+
+}
+
+/**
+ * Simple translator for testing placeholder translation
+ * Translates English form labels and placeholders to Slovak
+ * @author Claude Code
+ */
+class DummyTranslator implements Nette\Localization\ITranslator
+{
+
+	/**
+	 * Translation table for English to Slovak
+	 * @var array
+	 */
+	private $translations = array(
+		'Email' => 'E-mail',
+		'Name' => 'Meno',
+		'Message' => 'Správa',
+		'Submit' => 'Odoslať',
+		'Enter your email' => 'Zadajte váš e-mail',
+		'Enter your name' => 'Zadajte vaše meno',
+		'Type your message here' => 'Napíšte svoju správu',
+	);
+
+	/**
+	 * Translates the given string to Slovak
+	 *
+	 * @param string $message
+	 * @param int $count
+	 * @return string
+	 */
+	public function translate($message, $count = NULL)
+	{
+		if (isset($this->translations[$message])) {
+			return $this->translations[$message];
+		}
+
+		// return modified string to indicate missing translation
+		// this helps to identify double translations in code
+		return "MISSING_TRANSLATION: $message";
 	}
 
 }
