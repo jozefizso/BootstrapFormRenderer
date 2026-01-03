@@ -43,7 +43,7 @@ jobs:
       run: for i in $(find ./tests -name \*.actual); do echo "--- $i"; cat $i; echo; echo; done
 
     - name: Publish test results
-      uses: dorny/test-reporter@feature/700-nette-tester-junit-reporter
+      uses: dorny/test-reporter@v2.5.0
       if: always()
       with:
         name: Test Results (PHP ${{ matrix.php-version }})
