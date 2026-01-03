@@ -225,7 +225,12 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 	 */
 	public function findErrors()
 	{
-		$formErrors = $this->form->getErrors();
+		// When errorsAtInputs = TRUE (default), show only form-level errors in alerts
+		// Control errors will be shown inline next to the inputs
+		// When errorsAtInputs = FALSE, show all errors (form + control) in alerts
+		$formErrors = $this->errorsAtInputs
+			? $this->form->getOwnErrors()
+			: $this->form->getErrors();
 
 		if (!$formErrors) {
 			return array();
@@ -242,11 +247,7 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 			return $errors;
 		};
 
-		if (!$this->errorsAtInputs) {
-			return $translate($formErrors);
-		}
-
-		return $translate($this->form->getErrors());
+		return $translate($formErrors);
 	}
 
 
