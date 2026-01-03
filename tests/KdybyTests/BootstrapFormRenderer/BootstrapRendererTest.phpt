@@ -256,6 +256,43 @@ class BootstrapRendererTest extends TestCase
 
 
 
+	/**
+	 * @return \Nette\Application\UI\Form
+	 */
+	private function dataCreateInputAddonsForm()
+	{
+		$form = new Form;
+		$form->addText('prepend', 'Prepend')->setOption('input-prepend', '@');
+		$form->addText('append', 'Append')->setOption('input-append', '.00');
+		$form->addText('both', 'Both')->setOption('input-prepend', '$')->setOption('input-append', '.00');
+		$form->addSubmit('send', 'Submit');
+
+		return $form;
+	}
+
+
+	/**
+	 * @return array
+	 */
+	public function dataRenderingInputAddons()
+	{
+		return array_map(function ($f) { return array(basename($f)); }, glob(__DIR__ . '/input-addons/input/*.latte'));
+	}
+
+
+
+	/**
+	 * @dataProvider dataRenderingInputAddons
+	 * @param string $latteFile
+	 */
+	public function testRenderingInputAddons($latteFile)
+	{
+		$form = $this->dataCreateInputAddonsForm();
+		$this->assertFormTemplateOutput(__DIR__ . '/input-addons/input/' . $latteFile, __DIR__ . '/input-addons/output/' . basename($latteFile, '.latte') . '.html', $form);
+	}
+
+
+
 	public function testMultipleFormsInTemplate()
 	{
 		$control = new Nette\ComponentModel\Container();
