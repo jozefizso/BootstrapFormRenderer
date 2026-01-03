@@ -388,6 +388,67 @@ class BootstrapRendererTest extends TestCase
 
 
 	/**
+	 * @return \Nette\Application\UI\Form
+	 */
+	private function dataCreateGroupOrderingForm()
+	{
+		$form = new Form;
+
+		// Create two visible groups with distinct controls
+		$groupA = $form->addGroup('Group A', FALSE);
+		$groupA->add($form->addText('fieldA', 'Field A'));
+
+		$groupB = $form->addGroup('Group B', FALSE);
+		$groupB->add($form->addText('fieldB', 'Field B'));
+
+		$form->addSubmit('send', 'Submit');
+
+		return $form;
+	}
+
+
+
+	/**
+	 * @return array
+	 */
+	public function dataRenderingGroupOrdering()
+	{
+		return array_map(function ($f) { return array(basename($f)); }, glob(__DIR__ . '/group-ordering/input/*.latte'));
+	}
+
+
+
+	/**
+	 * @dataProvider dataRenderingGroupOrdering
+	 * @param string $latteFile
+	 */
+	public function testRenderingGroupOrdering($latteFile)
+	{
+		$form = $this->dataCreateGroupOrderingForm();
+
+		// Set up the renderer with priorGroups before setting it on the form
+		$renderer = new BootstrapRenderer($this->createTemplate());
+		$renderer->priorGroups = array('Group B');
+		$form->setRenderer($renderer);
+
+		// Reset rendered flags
+		foreach ($form->getControls() as $control) {
+			$control->setOption('rendered', FALSE);
+		}
+
+		if (property_exists($form, 'httpRequest')) {
+			$form->httpRequest = new Nette\Http\Request(new Nette\Http\UrlScript('http://www.kdyby.org'));
+		}
+
+		$control = new ControlMock();
+		$control['foo'] = $form;
+
+		$this->assertTemplateOutput(array('form' => $form, '_form' => $form, 'control' => $control, '_control' => $control), __DIR__ . '/group-ordering/input/' . $latteFile, __DIR__ . '/group-ordering/output/' . basename($latteFile, '.latte') . '.html');
+	}
+
+
+
+	/**
 	 * @param $latteFile
 	 * @param $expectedOutput
 	 * @param \Nette\Application\UI\Form $form
