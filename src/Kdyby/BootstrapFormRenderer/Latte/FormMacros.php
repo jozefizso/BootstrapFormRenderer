@@ -19,11 +19,6 @@ use Nette\Latte\PhpWriter;
 use Nette\Reflection\ClassType;
 
 
-if (!class_exists('Nette\Bridges\FormsLatte\FormMacros')) {
-	class_alias('Nette\Latte\Macros\FormMacros', 'Nette\Bridges\FormsLatte\FormMacros');
-}
-
-
 /**
  * Standard macros:
  * <code>
@@ -136,7 +131,7 @@ class FormMacros extends Latte\Macros\MacroSet
 			return '';
 		}
 
-		return $writer->write('Nette\Bridges\FormsLatte\FormMacros::renderFormEnd($__form)');
+		return $writer->write('Nette\Latte\Macros\FormMacros::renderFormEnd($__form)');
 	}
 
 
@@ -213,7 +208,7 @@ class FormMacros extends Latte\Macros\MacroSet
 			$form->render('begin', $args);
 
 		} else {
-			Nette\Bridges\FormsLatte\FormMacros::renderFormBegin($form, $args);
+			Nette\Latte\Macros\FormMacros::renderFormBegin($form, $args);
 		}
 	}
 
