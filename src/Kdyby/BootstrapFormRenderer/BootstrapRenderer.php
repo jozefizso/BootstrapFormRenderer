@@ -38,7 +38,9 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 	);
 
 	/**
-	 * set to false, if you want to display the field errors also as form errors
+	 * Controls how validation errors are displayed:
+	 * - TRUE (default): Control errors appear inline next to inputs; only form-level errors show in alerts
+	 * - FALSE: All errors (form-level + control errors) appear in alert boxes; no inline errors
 	 * @var bool
 	 */
 	public $errorsAtInputs = TRUE;
