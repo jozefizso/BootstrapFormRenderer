@@ -449,6 +449,130 @@ class BootstrapRendererTest extends TestCase
 
 
 	/**
+	 * @return \Nette\Application\UI\Form
+	 */
+	private function dataCreateContactFormWithValidation($withTranslator = FALSE)
+	{
+		$form = new Form;
+		if ($withTranslator) {
+			$form->setTranslator(new TranslationTestTranslator());
+		}
+
+		// Real-world contact form fields with validation (Nette 2.1 compatible)
+		$form->addText('name', 'Full Name')
+			->setRequired('Please enter your name')
+			->addRule($form::MIN_LENGTH, 'Name must be at least %d characters', 3);
+
+		$form->addText('email', 'Email Address')
+			->setType('email')
+			->setRequired('Please enter your email')
+			->addRule($form::EMAIL, 'Please enter a valid email address');
+
+		$form->addText('phone', 'Phone Number')
+			->addRule($form::PATTERN, 'Phone must be in format XXX-XXX-XXXX', '[0-9]{3}-[0-9]{3}-[0-9]{4}');
+
+		$form->addText('age', 'Age')
+			->addRule($form::INTEGER, 'Age must be a number')
+			->addRule($form::RANGE, 'Age must be between %d and %d', array(18, 100));
+
+		$form->addTextArea('message', 'Message')
+			->setRequired('Please enter your message')
+			->addRule($form::MIN_LENGTH, 'Message must be at least %d characters', 10);
+
+		$form->addSubmit('send', 'Send Message');
+
+		return $form;
+	}
+
+	/**
+	 * Test that validation errors with a translator are not double-translated
+	 */
+	public function testValidationErrorsWithTranslatorNoDoubleTranslation()
+	{
+		$form = $this->dataCreateContactFormWithValidation(TRUE);
+
+		// Simulate form submission with validation errors
+		$form->setValues(array(
+			'name' => 'Jo', // Too short - will trigger MIN_LENGTH rule
+			'email' => 'invalid-email', // Invalid email - will trigger EMAIL rule
+			'phone' => '123456', // Invalid pattern
+			'age' => '150', // Out of range
+			'message' => 'Short', // Too short
+		));
+
+		// Validate to trigger errors
+		$form->validate();
+
+		// Check that errors were added
+		Assert::true(count($form['name']->getErrors()) > 0);
+		Assert::true(count($form['email']->getErrors()) > 0);
+
+		// Get the actual error messages
+		$nameErrors = $form['name']->getErrors();
+		$emailErrors = $form['email']->getErrors();
+
+		// The error should be translated ONCE by Rules::formatMessage()
+		// NOT double-translated by the renderer
+		// If double-translated, we'd see [CHÝBA PREKLAD] markers or duplicated Slovak text
+		Assert::same('Meno musí mať aspoň 3 znaky', reset($nameErrors));
+		Assert::same('Zadajte prosím platnú e-mailovú adresu', reset($emailErrors));
+	}
+
+	/**
+	 * Test that Html errors are passed through without translation
+	 */
+	public function testHtmlErrorsWithTranslator()
+	{
+		$form = new Form;
+		$form->setTranslator(new TranslationTestTranslator());
+
+		$form->addText('username', 'Username');
+
+		// Add an Html error manually (this simulates custom validation)
+		$htmlError = Html::el('strong')->setText('Username is already taken');
+		$form['username']->addError($htmlError);
+
+		// Get the error back
+		$errors = $form['username']->getErrors();
+		$error = reset($errors);
+
+		// The Html object should be returned as-is, not translated
+		Assert::type('Nette\Utils\Html', $error);
+		Assert::same('<strong>Username is already taken</strong>', $error->render());
+	}
+
+	/**
+	 * @return array
+	 */
+	public function dataRenderingTranslation()
+	{
+		return array_map(function ($f) { return array(basename($f)); }, glob(__DIR__ . '/translation/input/*.latte'));
+	}
+
+	/**
+	 * Test rendering forms with translator - ensures no double translation
+	 *
+	 * @dataProvider dataRenderingTranslation
+	 * @param string $latteFile
+	 */
+	public function testRenderingTranslation($latteFile)
+	{
+		$form = $this->dataCreateContactFormWithValidation(TRUE);
+
+		// Trigger validation errors
+		$form->setValues(array(
+			'name' => 'Jo',
+			'email' => 'invalid',
+			'phone' => '123',
+			'age' => '150',
+			'message' => 'x',
+		));
+		$form->validate();
+
+		$this->assertFormTemplateOutput(__DIR__ . '/translation/input/' . $latteFile, __DIR__ . '/translation/output/' . basename($latteFile, '.latte') . '.html', $form);
+	}
+
+	/**
 	 * @return array
 	 */
 	public function dataRenderingErrorsAtInputs()
@@ -707,6 +831,64 @@ class DummyTranslator implements Nette\Localization\ITranslator
 		// return modified string to indicate missing translation
 		// this helps to identify double translations in code
 		return "MISSING_TRANSLATION: $message";
+	}
+
+}
+
+/**
+ * Translator for testing that errors are not double-translated
+ * Translates English form messages to Slovak
+ * @author Claude Code
+ */
+class TranslationTestTranslator implements Nette\Localization\ITranslator
+{
+
+	/**
+	 * Translation table for English to Slovak
+	 * @var array
+	 */
+	private $translations = array(
+		// Field labels
+		'Full Name' => 'Celé meno',
+		'Email Address' => 'E-mailová adresa',
+		'Phone Number' => 'Telefónne číslo',
+		'Age' => 'Vek',
+		'Message' => 'Správa',
+		'Send Message' => 'Odoslať správu',
+		'Username' => 'Používateľské meno',
+
+		// Error messages
+		'Please enter your name' => 'Zadajte prosím vaše meno',
+		'Name must be at least %d characters' => 'Meno musí mať aspoň %d znaky',
+		'Please enter your email' => 'Zadajte prosím váš e-mail',
+		'Please enter a valid email address' => 'Zadajte prosím platnú e-mailovú adresu',
+		'Phone must be in format XXX-XXX-XXXX' => 'Telefón musí byť vo formáte XXX-XXX-XXXX',
+		'Age must be a number' => 'Vek musí byť číslo',
+		'Age must be between %d and %d' => 'Vek musí byť medzi %d a %d',
+		'Please enter your message' => 'Zadajte prosím vašu správu',
+		'Message must be at least %d characters' => 'Správa musí mať aspoň %d znakov',
+	);
+
+	/**
+	 * Translates the given string to Slovak
+	 *
+	 * @param string $message
+	 * @param int $count
+	 * @return string
+	 */
+	public function translate($message, $count = NULL)
+	{
+		// For Html instances, return as-is (translator shouldn't be called on these)
+		if ($message instanceof Html) {
+			return $message;
+		}
+
+		if (isset($this->translations[$message])) {
+			return $this->translations[$message];
+		}
+
+		// Return with marker to detect missing translations or double translation attempts
+		return 'MISSING_TRANSLATION: ' . $message;
 	}
 
 }
