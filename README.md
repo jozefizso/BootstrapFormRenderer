@@ -11,7 +11,8 @@ When you build web forms using the Nette Framework, they normally render as plai
 wraps your form fields in the proper Bootstrap markup - adding the right CSS classes, error styling, field grouping,
 and layout structure that Bootstrap requires.
 
-### Key features
+## Key features
+
 - **Automatic Bootstrap styling** - Transforms standard Nette forms into Bootstrap-styled forms without manual HTML markup
 - **Form validation styling** - Automatically applies Bootstrap error states and displays validation messages
 - **Flexible layouts** - Supports horizontal and other Bootstrap form layouts
@@ -23,8 +24,8 @@ and layout structure that Bootstrap requires.
 
 ## Requirements
 
-* PHP 5.6 or 7.0
-* [Nette Framework](https://github.com/nette/nette) 2.1
+- PHP 5.6 or 7.0
+- [Nette Framework](https://github.com/nette/nette) 2.1
 
 
 ## Getting Started
@@ -32,7 +33,7 @@ and layout structure that Bootstrap requires.
 Use [composer](http://getcomposer.org/doc/00-intro.md) to install the library:
 
 ```sh
-$ composer require jozefizso/bootstrap-form-renderer
+composer require jozefizso/bootstrap-form-renderer
 ```
 
 
