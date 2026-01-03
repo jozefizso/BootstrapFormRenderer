@@ -38,7 +38,9 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 	);
 
 	/**
-	 * set to false, if you want to display the field errors also as form errors
+	 * Controls how validation errors are displayed:
+	 * - TRUE (default): Control errors appear inline next to inputs; only form-level errors show in alerts
+	 * - FALSE: All errors (form-level + control errors) appear in alert boxes; no inline errors
 	 * @var bool
 	 */
 	public $errorsAtInputs = TRUE;
@@ -225,7 +227,12 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 	 */
 	public function findErrors()
 	{
-		$formErrors = $this->form->getErrors();
+		// When errorsAtInputs = TRUE (default), show only form-level errors in alerts
+		// Control errors will be shown inline next to the inputs
+		// When errorsAtInputs = FALSE, show all errors (form + control) in alerts
+		$formErrors = $this->errorsAtInputs
+			? $this->form->getOwnErrors()
+			: $this->form->getErrors();
 
 		if (!$formErrors) {
 			return array();
@@ -242,11 +249,7 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 			return $errors;
 		};
 
-		if (!$this->errorsAtInputs) {
-			return $translate($formErrors);
-		}
-
-		return $translate($this->form->getErrors());
+		return $translate($formErrors);
 	}
 
 

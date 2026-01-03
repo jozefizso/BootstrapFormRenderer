@@ -449,6 +449,68 @@ class BootstrapRendererTest extends TestCase
 
 
 	/**
+	 * @return array
+	 */
+	public function dataRenderingErrorsAtInputs()
+	{
+		return array_map(function ($f) { return array(basename($f)); }, glob(__DIR__ . '/errors-at-inputs/input/*.latte'));
+	}
+
+
+
+	/**
+	 * Test errorsAtInputs property behavior in different states:
+	 * - true-*: errorsAtInputs = TRUE (default) - only form-level errors in alerts, control errors inline
+	 * - false-*: errorsAtInputs = FALSE - all errors in alerts, no inline errors
+	 *
+	 * @dataProvider dataRenderingErrorsAtInputs
+	 * @param string $latteFile
+	 */
+	public function testRenderingErrorsAtInputs($latteFile)
+	{
+		$form = $this->dataCreateRichForm();
+
+		// Determine which state to test based on filename prefix
+		$isErrorsAtInputsFalse = strpos($latteFile, 'false-') === 0;
+
+		if ($isErrorsAtInputsFalse) {
+			// Test errorsAtInputs = FALSE: all errors in alerts, no inline errors
+			$renderer = new BootstrapRenderer($this->createTemplate());
+			$renderer->errorsAtInputs = FALSE;
+			$form->setRenderer($renderer);
+
+			foreach ($form->getControls() as $control) {
+				$control->setOption('rendered', FALSE);
+			}
+
+			if (property_exists($form, 'httpRequest')) {
+				$form->httpRequest = new Nette\Http\Request(new Nette\Http\UrlScript('http://www.kdyby.org'));
+			}
+			foreach ($form->getComponents(TRUE, 'Nette\Forms\Controls\CsrfProtection') as $control) {
+				/** @var \Nette\Forms\Controls\CsrfProtection $control */
+				$control->session = new Nette\Http\Session($form->httpRequest, new Nette\Http\Response);
+				$control->session->setHandler(new ArraySessionStorage($control->session));
+				$control->session->start();
+			}
+
+			$controlMock = new ControlMock();
+			$controlMock['foo'] = $form;
+
+			$this->assertTemplateOutput(array('form' => $form, '_form' => $form, 'control' => $controlMock, '_control' => $controlMock), __DIR__ . '/errors-at-inputs/input/' . $latteFile, __DIR__ . '/errors-at-inputs/output/' . basename($latteFile, '.latte') . '.html');
+
+			foreach ($form->getComponents(TRUE, 'Nette\Forms\Controls\CsrfProtection') as $control) {
+				/** @var \Nette\Forms\Controls\CsrfProtection $control */
+				$control->session->close();
+			}
+		} else {
+			// Test errorsAtInputs = TRUE (default): form errors in alerts, control errors inline
+			$this->assertFormTemplateOutput(__DIR__ . '/errors-at-inputs/input/' . $latteFile, __DIR__ . '/errors-at-inputs/output/' . basename($latteFile, '.latte') . '.html', $form);
+		}
+	}
+
+
+
+	/**
 	 * @param $latteFile
 	 * @param $expectedOutput
 	 * @param \Nette\Application\UI\Form $form

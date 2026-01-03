@@ -211,6 +211,39 @@ Renders a form group with its fieldset, legend, and all controls:
 {group "Personal Information"}
 ```
 
+## Validation Errors Rendering
+
+The renderer provides control over how validation errors are displayed
+through the `$errorsAtInputs` property:
+
+### Default Behavior (errorsAtInputs = TRUE)
+
+By default, the renderer distinguishes between form-level and control-level errors:
+- **Form-level errors** (added with `$form->addError()`) appear in Bootstrap alert boxes at the top of the form
+- **Control errors** (added with `$control->addError()`) appear inline next to their inputs with the `help-inline` class
+
+```php
+$form->setRenderer(new BootstrapRenderer());
+// errorsAtInputs = TRUE by default
+```
+
+This prevents duplicate error messages and provides better UX by showing each error in the most appropriate location.
+
+### Show All Errors in Alerts (errorsAtInputs = FALSE)
+
+If you prefer to display all errors (both form-level and control errors) in alert boxes without inline errors:
+
+```php
+$renderer = new BootstrapRenderer();
+$renderer->errorsAtInputs = FALSE;
+$form->setRenderer($renderer);
+```
+
+With this setting:
+- All errors appear in Bootstrap alert boxes at the top
+- No inline error messages are displayed next to inputs
+- The control groups still receive the `error` CSS class for styling
+
 ## License
 
 You may use BootstrapFormRenderer library under the terms of either
