@@ -60,13 +60,20 @@ All the usage cases expects you to have the form component in variable named <co
 If you wanna use the special macros, you have to register them into Latte Engine.
 
 ```php
-Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->compiler);
+Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
 ```
 
 Or simply register the extension in `app/bootstrap.php` to allow them globally.
 
 ```php
 Kdyby\BootstrapFormRenderer\DI\RendererExtension::register($configurator);
+```
+
+Alternatively, you can register the extension in your `config.neon`:
+
+```neon
+extensions:
+    twBootstrapRenderer: Kdyby\BootstrapFormRenderer\DI\RendererExtension
 ```
 
 
