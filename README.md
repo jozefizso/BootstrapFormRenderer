@@ -36,6 +36,19 @@ Use [composer](http://getcomposer.org/doc/00-intro.md) to install the library:
 composer require jozefizso/bootstrap-form-renderer
 ```
 
+### Compatibility with Nette Framework
+
+| Version  | Branch      | PHP      | compatible | Nette series  |
+|----------|-------------|----------|------------|---------------|
+| `^3.0.0` | `main`      | `>= 7.1` | `8.0`      | Nette 3.0     |
+| `^2.4.0` | `nette-2.4` | `>= 5.6` | `8.0`      | Nette 2.4     |
+| `^2.3.0` | `nette-2.3` | `>= 5.6` | `7.1`      | Nette 2.3     |
+| `^2.2.0` | `nette-2.2` | `>= 5.6` | `7.0`      | Nette 2.2     |
+| `^2.1.0` | `nette-2.1` | `>= 5.6` | `7.0`      | Nette 2.1     |
+| `^2.0.0` | `nette-2.0` | `>= 5.2` | `5.6`      | Nette 2.0     |
+
+_**Note:** Compatibility always applies to the latest patch release within each minor version series._
+
 
 ## Usage
 
