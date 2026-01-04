@@ -244,6 +244,34 @@ With this setting:
 - No inline error messages are displayed next to inputs
 - The control groups still receive the `error` CSS class for styling
 
+
+## Translation Behavior
+
+BootstrapFormRenderer works seamlessly with Nette 2.1's built-in translation system. When you set a translator on your form using `$form->setTranslator($translator)`, almost everything is automatically translated—you don't need to manually translate individual elements.
+
+### What Gets Translated Automatically
+
+**Nette 2.1 automatically translates:**
+- Control labels and captions
+- Placeholders on text inputs and textareas
+- Validation rule messages (both default and custom)
+- Select options, radio button labels, and checkbox labels
+
+**BootstrapFormRenderer translates:**
+- Form group labels and descriptions
+- Control descriptions (the `description` option)
+
+### Important Guidelines
+
+1. **Manual errors** - If you add errors manually using `$form->addError()` or `$control->addError()` with plain strings, translate them yourself before calling `addError()`. Rule-generated errors are translated automatically.
+
+2. **Pre-rendered HTML** - Use `Nette\Utils\Html` for content that shouldn't be translated:
+   ```php
+   $htmlError = Html::el('strong')->setText('Already exists');
+   $form['username']->addError($htmlError); // Not translated
+   ```
+
+
 ## License
 
 You may use BootstrapFormRenderer library under the terms of either
