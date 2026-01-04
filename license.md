@@ -18,6 +18,7 @@ New BSD License
 ---------------
 
 Copyright (c) 2008 Filip Procházka (http://filip-prochazka.com)
+Copyright (c) 2025 Jozef Izso
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
