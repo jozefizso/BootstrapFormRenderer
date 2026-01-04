@@ -1,0 +1,48 @@
+Short version for non-lawyers:
+
+The BootstrapFormRenderer project is triple-licensed under BSD-3-Clause,
+GPL-2.0-only, and GPL-3.0-only terms.
+
+You may use this project under the terms of either the BSD 3-Clause License
+or the GNU General Public License version 2 or version 3.
+
+It is Copyright (c) The BootstrapFormRenderer Contributors.
+
+
+Longer version:
+
+Copyrights in the BootstrapFormRenderer project are retained by their
+contributors. No copyright assignment is required to contribute to the
+BootstrapFormRenderer project.
+
+Some files include explicit copyright notices and/or license notices.
+For full authorship information, see the version control history or
+https://github.com/jozefizso/BootstrapFormRenderer/graphs/contributors
+
+
+Original Work:
+
+This project is a fork of Kdyby/BootstrapFormRenderer by Filip Procházka.
+
+Copyright (c) 2008 Filip Procházka (http://filip-prochazka.com)
+
+
+License:
+
+Except as otherwise noted, BootstrapFormRenderer is licensed under the
+BSD 3-Clause License, or the GNU General Public License version 2, or
+the GNU General Public License version 3, at your option.
+
+The full text of these licenses can be found in the file license.md
+distributed with this source code.
+
+For the BSD 3-Clause License, see the "New BSD License" section.
+For GPL-2.0, see: http://www.gnu.org/licenses/gpl-2.0.html
+For GPL-3.0, see: http://www.gnu.org/licenses/gpl-3.0.html
+
+
+Contributing:
+
+Unless you explicitly state otherwise, any contribution intentionally
+submitted for inclusion in the work by you shall be triple-licensed as
+above, without any additional terms or conditions.
