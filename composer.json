@@ -31,5 +31,15 @@
 		"psr-0": {
 			"Kdyby\\BootstrapFormRenderer\\": "src/"
 		}
+	},
+	"scripts": {
+		"lint": "parallel-lint -e php,phpt --exclude vendor .",
+		"test": "tester -c ./tests/php-tests.ini ./tests/KdybyTests/",
+		"test:info": "tester -c ./tests/php-tests.ini ./tests/KdybyTests/ --info",
+		"test:junit": "tester -c ./tests/php-tests.ini -o junit ./tests/KdybyTests/",
+		"check": [
+			"@lint",
+			"@test"
+		]
 	}
 }

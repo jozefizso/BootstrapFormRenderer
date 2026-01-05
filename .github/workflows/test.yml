@@ -30,13 +30,13 @@ jobs:
       run: composer install --no-interaction --prefer-source --dev
 
     - name: Run parallel-lint
-      run: ./vendor/bin/parallel-lint -e php,phpt --exclude vendor .
+      run: composer lint
 
     - name: Tester environment
-      run: ./vendor/bin/tester -c ./tests/php-tests.ini ./tests/KdybyTests/ --info
+      run: composer test:info
 
     - name: Run tests
-      run: ./vendor/bin/tester -c ./tests/php-tests.ini -o junit ./tests/KdybyTests/ > ./test-results.xml
+      run: composer test:junit > ./test-results.xml
 
     - name: Display test failures
       if: failure()
