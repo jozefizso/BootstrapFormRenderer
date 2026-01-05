@@ -79,11 +79,11 @@ Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
 
 ### Step 2: Create Bootstrap-Styled Forms
 
-There are two ways to create forms with Bootstrap styling:
+There are three ways to create forms with Bootstrap styling:
 
 #### Option A: Using Bootstrap2FormFactory (Recommended)
 
-The easiest approach is to use the factory that's automatically registered when you enable the extension:
+The recommended approach is to use the factory that's automatically registered when you enable the extension:
 
 ```php
 use Kdyby\BootstrapFormRenderer\Bootstrap2FormFactory;
@@ -95,7 +95,7 @@ class RegistrationPresenter extends Nette\Application\UI\Presenter
 
     protected function createComponentContactForm()
     {
-        // Forms will have Bootstrap style applied
+        // Factory creates Bootstrap2Form instances
         $form = $this->bootstrap2FormFactory->create();
 
         // Add your form fields as usual
@@ -108,9 +108,33 @@ class RegistrationPresenter extends Nette\Application\UI\Presenter
 }
 ```
 
-#### Option B: Manual Renderer Setup
+#### Option B: Using Bootstrap2Form Class
 
-If you prefer manual control of forms rendering, you can apply
+For simple cases or rapid prototyping, you can directly instantiate the `Bootstrap2Form` class:
+
+```php
+use Kdyby\BootstrapFormRenderer\Bootstrap2Form;
+
+class RegistrationPresenter extends Nette\Application\UI\Presenter
+{
+    protected function createComponentContactForm()
+    {
+        // Bootstrap2Form has BootstrapRenderer already configured
+        $form = new Bootstrap2Form;
+
+        // Add your form fields as usual
+        $form->addText('name', 'Name');
+        $form->addText('email', 'E-mail')->setType('email');
+        $form->addSubmit('register', 'Register');
+
+        return $form;
+    }
+}
+```
+
+#### Option C: Manual Renderer Setup
+
+If you need maximum control or are working with existing code, you can apply
 the `BootstrapRenderer` directly:
 
 ```php
@@ -133,11 +157,6 @@ protected function createComponentContactForm()
 }
 ```
 
-**Performance tip:** If you're in a presenter context, you can reuse the presenter's template instance for better performance:
-
-```php
-$form->setRenderer(new BootstrapRenderer($this->createTemplate()));
-```
 
 ### Step 3: Render Your Form in Templates
 
