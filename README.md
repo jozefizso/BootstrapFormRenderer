@@ -77,9 +77,41 @@ Or if you need to register just the Latte macros manually:
 Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
 ```
 
-### Step 2: Apply the Renderer to Your Forms
+### Step 2: Create Bootstrap-Styled Forms
 
-In your presenter or form factory, apply the Bootstrap renderer to your form:
+There are two ways to create forms with Bootstrap styling:
+
+#### Option A: Using Bootstrap2FormFactory (Recommended)
+
+The easiest approach is to use the factory that's automatically registered when you enable the extension:
+
+```php
+use Kdyby\BootstrapFormRenderer\Bootstrap2FormFactory;
+
+class RegistrationPresenter extends Nette\Application\UI\Presenter
+{
+    /** @var Bootstrap2FormFactory @inject */
+    public $bootstrap2FormFactory;
+
+    protected function createComponentContactForm()
+    {
+        // Forms will have Bootstrap style applied
+        $form = $this->bootstrap2FormFactory->create();
+
+        // Add your form fields as usual
+        $form->addText('name', 'Name');
+        $form->addText('email', 'E-mail')->setType('email');
+        $form->addSubmit('register', 'Register');
+
+        return $form;
+    }
+}
+```
+
+#### Option B: Manual Renderer Setup
+
+If you prefer manual control of forms rendering, you can apply
+the `BootstrapRenderer` directly:
 
 ```php
 use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
@@ -93,8 +125,8 @@ protected function createComponentContactForm()
     $form->setRenderer(new BootstrapRenderer);
 
     // Add your form fields as usual
-    $form->addText('name', 'Your Name:');
-    $form->addEmail('email', 'Email:');
+    $form->addText('name', 'Name');
+    $form->addText('email', 'E-mail')->setType('email');
     $form->addSubmit('send', 'Send');
 
     return $form;

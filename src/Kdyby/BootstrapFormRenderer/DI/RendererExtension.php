@@ -40,6 +40,10 @@ class RendererExtension extends Nette\DI\CompilerExtension
 
 		$install = 'Kdyby\BootstrapFormRenderer\Latte\FormMacros::install';
 		$engine->addSetup($install . '(?->getCompiler())', array('@self'));
+
+		// Register Bootstrap2FormFactory for easy form creation with Bootstrap renderer
+		$builder->addDefinition($this->prefix('bootstrap2FormFactory'))
+			->setClass('Kdyby\BootstrapFormRenderer\Bootstrap2FormFactory');
 	}
 
 
