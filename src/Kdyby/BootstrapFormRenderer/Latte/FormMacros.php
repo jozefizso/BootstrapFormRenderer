@@ -14,6 +14,7 @@ use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
 use Nette;
 use Nette\Forms\Form;
 use Nette\Latte;
+use Nette\Latte\CompileException;
 use Nette\Latte\MacroNode;
 use Nette\Latte\PhpWriter;
 
@@ -25,14 +26,14 @@ use Nette\Latte\PhpWriter;
  * {form errors} as {$form->render('errors')}
  * {form body} as {$form->render('body')}
  * {form controls} as {$form->render('controls')}
- * {form actions} as {$form->render('actions')}
+ * {form buttons} as {$form->render('buttons')}
  * {/form} as {$form->render('end')}
  * </code>
  *
  * Self-closing form (Latte 2.1 semantics):
  *
  * <code>
- * {form name /} renders begin + end only (no body)
+ * {form name /} as {form name}{/form} (begin + hidden fields + end; no body)
  * </code>
  *
  * Old macros `input` & `label` are working the same.
@@ -47,6 +48,10 @@ use Nette\Latte\PhpWriter;
  * {group name} as {$form->render($form->getGroup('name'))}
  * {container name} as {$form->render($form['name'])}
  * </code>
+ *
+ * Related:
+ * - {@see \Nette\Latte\Macros\FormMacros} (Latte 2.1 core form macros)
+ * - {@see \Kdyby\BootstrapFormRenderer\BootstrapRenderer} (Bootstrap rendering implementation)
  *
  * @author Filip Procházka <filip@prochazka.su>
  */
@@ -76,12 +81,19 @@ class FormMacros extends Latte\Macros\MacroSet
 	 * @param \Nette\Latte\MacroNode $node
 	 * @param \Nette\Latte\PhpWriter $writer
 	 * @return string
+	 * @throws \Nette\Latte\CompileException
 	 */
 	public function macroFormBegin(MacroNode $node, PhpWriter $writer)
 	{
+		if ($node->htmlNode && strtolower($node->htmlNode->name) === 'form') {
+			throw new CompileException('Did you mean <form n:name=...> ?');
+		}
 		$word = $node->tokenizer->fetchWord();
-		$node->isEmpty = in_array($word, array('errors', 'body', 'controls', 'buttons'));
+		if ($word === FALSE) {
+			throw new CompileException("Missing form name in {{$node->name}}.");
+		}
 		$node->tokenizer->reset();
+		$node->isEmpty = in_array($word, array('errors', 'body', 'controls', 'buttons'));
 
 		return $writer->write('$form = $__form = $_form = ' . get_called_class() . '::renderFormPart(%node.word, %node.array, get_defined_vars())');
 	}
@@ -102,9 +114,15 @@ class FormMacros extends Latte\Macros\MacroSet
 	/**
 	 * @param \Nette\Latte\MacroNode $node
 	 * @param \Nette\Latte\PhpWriter $writer
+	 * @throws \Nette\Latte\CompileException
 	 */
 	public function macroPair(MacroNode $node, PhpWriter $writer)
 	{
+		$name = $node->tokenizer->fetchWord();
+		if ($name === FALSE) {
+			throw new CompileException("Missing name in {{$node->name}}.");
+		}
+		$node->tokenizer->reset();
 		return $writer->write('$__form->render($__form[%node.word], %node.array)');
 	}
 
@@ -113,9 +131,15 @@ class FormMacros extends Latte\Macros\MacroSet
 	/**
 	 * @param \Nette\Latte\MacroNode $node
 	 * @param \Nette\Latte\PhpWriter $writer
+	 * @throws \Nette\Latte\CompileException
 	 */
 	public function macroGroup(MacroNode $node, PhpWriter $writer)
 	{
+		$name = $node->tokenizer->fetchWord();
+		if ($name === FALSE) {
+			throw new CompileException("Missing name in {{$node->name}}.");
+		}
+		$node->tokenizer->reset();
 		return $writer->write('$__form->render(is_object(%node.word) ? %node.word : $__form->getGroup(%node.word))');
 	}
 
@@ -124,9 +148,15 @@ class FormMacros extends Latte\Macros\MacroSet
 	/**
 	 * @param \Nette\Latte\MacroNode $node
 	 * @param \Nette\Latte\PhpWriter $writer
+	 * @throws \Nette\Latte\CompileException
 	 */
 	public function macroContainer(MacroNode $node, PhpWriter $writer)
 	{
+		$name = $node->tokenizer->fetchWord();
+		if ($name === FALSE) {
+			throw new CompileException("Missing name in {{$node->name}}.");
+		}
+		$node->tokenizer->reset();
 		return $writer->write('$__form->render($__form[%node.word], %node.array)');
 	}
 
