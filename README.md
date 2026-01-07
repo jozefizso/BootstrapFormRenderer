@@ -173,17 +173,27 @@ The simplest way to render a complete form with all Bootstrap styling:
 {control contactForm}
 ```
 
-Or using the short syntax:
+### Partial Form Rendering
+
+For more control over the form layout, you can render individual parts:
+
+#### Opening and Closing Tags Only
+
+To render just the form's opening `<form>` and closing `</form>` tags (without any form body), use the self-closing syntax:
 
 ```latte
 {form contactForm /}
 ```
 
-### Partial Form Rendering
+This is equivalent to:
 
-For more control over the form layout, you can render individual parts:
+```latte
+{form contactForm}{/form}
+```
 
-#### Opening Tag
+Both render only the begin and end tags, following standard Latte 2.1 semantics. Use this when you want to manually render form content or integrate with other components.
+
+#### Opening Tag with Custom Content
 
 ```latte
 {form contactForm}
