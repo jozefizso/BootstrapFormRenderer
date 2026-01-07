@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.1.2
+
+### Breaking Changes
+
+#### Form Macros - Latte 2.1 Semantics
+
+- **Breaking**: `{form name /}` now aligns with standard Latte 2.1 behavior and renders only the opening and closing form tags (begin + end), without the form body. ([#60](https://github.com/jozefizso/BootstrapFormRenderer/issues/60))
+  - Previously, the self-closing `{form name /}` syntax rendered the entire form (begin + errors + body + end) via `$form->render(NULL)`, diverging from Latte 2.1 expectations.
+  - Now, `{form name /}` is equivalent to `{form name}{/form}` and only outputs the `<form>` opening tag and `</form>` closing tag with hidden fields.
+  - **Migration**: Replace `{form name /}` with `{control name}` (recommended) or `{form name}{form errors}{form body}{/form}` for full form rendering.
+  - Removed `findCurrentToken()` reflection method and compiler internals that were used to detect the trailing `/` syntax.
+
 ## v2.1.0
 
 This release targets Nette Framework 2.1 and requires PHP 5.6+.
