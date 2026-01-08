@@ -95,7 +95,7 @@ class FormMacros extends Latte\Macros\MacroSet
 		$node->tokenizer->reset();
 		$node->isEmpty = in_array($word, array('errors', 'body', 'controls', 'buttons'));
 
-		return $writer->write('$form = $__form = $_form = ' . get_called_class() . '::renderFormPart(%node.word, %node.array, get_defined_vars())');
+		return $writer->write('$form = $_form = ' . get_called_class() . '::renderFormPart(%node.word, %node.array, get_defined_vars())');
 	}
 
 
@@ -106,7 +106,7 @@ class FormMacros extends Latte\Macros\MacroSet
 	 */
 	public function macroFormEnd(MacroNode $node, PhpWriter $writer)
 	{
-		return $writer->write('Nette\Latte\Macros\FormMacros::renderFormEnd($__form)');
+		return $writer->write('Nette\Latte\Macros\FormMacros::renderFormEnd($_form)');
 	}
 
 
@@ -123,7 +123,7 @@ class FormMacros extends Latte\Macros\MacroSet
 			throw new CompileException("Missing name in {{$node->name}}.");
 		}
 		$node->tokenizer->reset();
-		return $writer->write('$__form->render($__form[%node.word], %node.array)');
+		return $writer->write('$_form->render($_form[%node.word], %node.array)');
 	}
 
 
@@ -140,7 +140,7 @@ class FormMacros extends Latte\Macros\MacroSet
 			throw new CompileException("Missing name in {{$node->name}}.");
 		}
 		$node->tokenizer->reset();
-		return $writer->write('$__form->render(is_object(%node.word) ? %node.word : $__form->getGroup(%node.word))');
+		return $writer->write('$_form->render(is_object(%node.word) ? %node.word : $_form->getGroup(%node.word))');
 	}
 
 
@@ -157,7 +157,7 @@ class FormMacros extends Latte\Macros\MacroSet
 			throw new CompileException("Missing name in {{$node->name}}.");
 		}
 		$node->tokenizer->reset();
-		return $writer->write('$__form->render($__form[%node.word], %node.array)');
+		return $writer->write('$_form->render($_form[%node.word], %node.array)');
 	}
 
 
@@ -175,18 +175,18 @@ class FormMacros extends Latte\Macros\MacroSet
 			self::renderFormBegin($mode, $args);
 			return $mode;
 
-		} elseif (($control = self::scopeVar($scope, 'control')) && ($form = $control->getComponent($mode, FALSE)) instanceof Form) {
+		} elseif (isset($scope['_control']) && ($form = $scope['_control']->getComponent($mode, FALSE)) instanceof Form) {
 			self::renderFormBegin($form, $args);
 			return $form;
 
-		} elseif (($form = self::scopeVar($scope, 'form')) instanceof Form) {
-			$form->render($mode, $args);
+		} elseif (isset($scope['_form']) && $scope['_form'] instanceof Form) {
+			$scope['_form']->render($mode, $args);
 
 		} else {
-			throw new Nette\InvalidStateException('No instanceof Nette\Forms\Form found in local scope.');
+			throw new Nette\InvalidStateException('No instanceof Nette\Forms\Form found in local scope. Ensure $_control is available in your template.');
 		}
 
-		return $form;
+		return $scope['_form'];
 	}
 
 
@@ -207,18 +207,5 @@ class FormMacros extends Latte\Macros\MacroSet
 
 
 
-	/**
-	 * @param array $scope
-	 * @param string $var
-	 * @return mixed|NULL
-	 */
-	private static function scopeVar(array $scope, $var)
-	{
-		return isset($scope['__' . $var])
-			? $scope['__' . $var]
-			: (isset($scope['_' . $var])
-				? $scope['_' . $var]
-				: (isset($scope[$var]) ? $scope[$var] : NULL));
-	}
 
 }
