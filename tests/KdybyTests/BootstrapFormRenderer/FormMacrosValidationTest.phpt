@@ -35,7 +35,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		$engine = new Engine();
 		FormMacros::install($engine->getCompiler());
-		return $engine($template);
+		return $engine->getCompiler()->compile($engine->getParser()->parse($template));
 	}
 
 
