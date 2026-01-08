@@ -85,7 +85,7 @@ class FormMacros extends Latte\Macros\MacroSet
 	 */
 	public function macroFormBegin(MacroNode $node, PhpWriter $writer)
 	{
-		if ($node->htmlNode && strtolower($node->htmlNode->name) === 'form') {
+		if ($node->prefix) {
 			throw new CompileException('Did you mean <form n:name=...> ?');
 		}
 		$word = $node->tokenizer->fetchWord();

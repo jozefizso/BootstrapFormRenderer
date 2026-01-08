@@ -85,13 +85,24 @@ class FormMacrosValidationTest extends TestCase
 
 
 	/**
-	 * Test that {form} inside <form> element throws CompileException
+	 * Test that using {form} as an n: attribute throws CompileException
 	 */
-	public function testFormInsideFormElementThrowsException()
+	public function testFormAsAttributeThrowsException()
 	{
 		Assert::exception(function () {
-			$this->compile('<form>{form myForm}{/form}</form>');
+			$this->compile('<form n:form="myForm"></form>');
 		}, CompileException::class, 'Did you mean <form n:name=...> ?');
+	}
+
+
+	/**
+	 * Test that {form body} can be used inside <form n:name="..."> element
+	 */
+	public function testFormBodyInsideNamedFormCompiles()
+	{
+		$compiled = $this->compile('<form n:name="myForm">{form body}</form>');
+		Assert::type('string', $compiled);
+		Assert::contains('renderFormPart', $compiled);
 	}
 
 }
