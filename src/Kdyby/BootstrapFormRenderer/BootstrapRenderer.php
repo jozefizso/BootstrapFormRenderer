@@ -10,6 +10,7 @@
 
 namespace Kdyby\BootstrapFormRenderer;
 
+use Latte\Engine;
 use Nette;
 use Nette\Bridges\FormsLatte\FormMacros;
 use Nette\Forms\Controls;
@@ -89,7 +90,11 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 
 			} else {
 				$this->template = new FileTemplate();
-				$this->template->registerFilter(new Nette\Latte\Engine());
+				$latte = new Engine();
+				Nette\Bridges\ApplicationLatte\UIMacros::install($latte->getCompiler());
+				Nette\Bridges\FormsLatte\FormMacros::install($latte->getCompiler());
+				\Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($latte->getCompiler());
+				$this->template->registerFilter($latte);
 			}
 		}
 
@@ -238,7 +243,7 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 			return array();
 		}
 
-		// In Nette 2.1, validation rule messages are already translated
+		// In Nette 2.2, validation rule messages are already translated
 		// by Rules::formatMessage() using the form translator.
 		// We return errors as-is to avoid double translation.
 		// Html instances are also supported and passed through.
@@ -395,7 +400,7 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 		}
 		$error = reset($errors);
 
-		// In Nette 2.1, validation rule messages are already translated
+		// In Nette 2.2, validation rule messages are already translated
 		// by Rules::formatMessage() using the form translator.
 		// We return errors as-is to avoid double translation.
 		// Html instances are also supported and passed through.

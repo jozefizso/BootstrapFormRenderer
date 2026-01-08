@@ -75,7 +75,7 @@ All tests use `dataCreateRichForm()` which includes:
 
 ## Implementation
 
-The fix uses Nette 2.1's API methods:
+The fix uses Nette 2.2's API methods:
 - `Form::getOwnErrors()` - Returns only form-level errors (used when `errorsAtInputs = TRUE`)
 - `Form::getErrors()` - Returns all errors including control errors (used when `errorsAtInputs = FALSE`)
 

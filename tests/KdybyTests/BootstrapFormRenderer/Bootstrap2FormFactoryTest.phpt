@@ -74,7 +74,7 @@ class Bootstrap2FormFactoryTest extends TestCase
 		$form = $factory->create();
 
 		// Get the form's renderer through reflection since there's no getter
-		// In Nette 2.1, the renderer property is in the parent Form class
+		// The renderer is stored as a private property on Nette\Forms\Form
 		$reflection = new \ReflectionClass('Nette\Forms\Form');
 		$property = $reflection->getProperty('renderer');
 		$property->setAccessible(TRUE);
@@ -130,7 +130,7 @@ class Bootstrap2FormFactoryTest extends TestCase
 		$form = $factory->create();
 
 		// Get the form's renderer through reflection
-		// In Nette 2.1, the renderer property is in the parent Form class
+		// The renderer is stored as a private property on Nette\Forms\Form
 		$reflection = new \ReflectionClass('Nette\Forms\Form');
 		$property = $reflection->getProperty('renderer');
 		$property->setAccessible(TRUE);

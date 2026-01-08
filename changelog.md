@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.2.0
+
+This release targets Nette Framework 2.2 and Latte 2.2, and drops support for Nette 2.1.
+
+- The DI extension now registers macros on `nette.latteFactory` (Latte 2.2 / Nette 2.2)
+- Macro installation order ensures `{control}` and `{form}` macros work correctly:
+  1. `Nette\Bridges\ApplicationLatte\UIMacros` (provides `{control}`)
+  2. `Nette\Bridges\FormsLatte\FormMacros` (provides baseline `{form}`)
+  3. `Kdyby\BootstrapFormRenderer\Latte\FormMacros` (extends `{form}` with Bootstrap features)
+- Removed backwards compatibility code for Nette 2.0/2.1 (class aliases)
+
+
 ## v2.1.2
 
 ### Breaking Changes

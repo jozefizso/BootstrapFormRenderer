@@ -458,7 +458,7 @@ class BootstrapRendererTest extends TestCase
 			$form->setTranslator(new TranslationTestTranslator());
 		}
 
-		// Real-world contact form fields with validation (Nette 2.1 compatible)
+		// Real-world contact form fields with validation (Nette 2.2 compatible)
 		$form->addText('name', 'Full Name')
 			->setRequired('Please enter your name')
 			->addRule($form::MIN_LENGTH, 'Name must be at least %d characters', 3);

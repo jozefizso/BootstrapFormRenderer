@@ -10,22 +10,10 @@
 
 namespace Kdyby\BootstrapFormRenderer\DI;
 
-use Kdyby;
 use Nette\DI\Compiler;
 use Nette;
 
 
-
-if (!class_exists('Nette\DI\CompilerExtension')) {
-	class_alias('Nette\Config\CompilerExtension', 'Nette\DI\CompilerExtension');
-	class_alias('Nette\Config\Compiler', 'Nette\DI\Compiler');
-	class_alias('Nette\Config\Helpers', 'Nette\DI\Config\Helpers');
-}
-
-if (isset(Nette\Loaders\NetteLoader::getInstance()->renamed['Nette\Configurator']) || !class_exists('Nette\Configurator')) {
-	unset(Nette\Loaders\NetteLoader::getInstance()->renamed['Nette\Configurator']); // fuck you
-	class_alias('Nette\Config\Configurator', 'Nette\Configurator');
-}
 
 /**
  * @author Filip Procházka <filip@prochazka.su>
@@ -36,10 +24,13 @@ class RendererExtension extends Nette\DI\CompilerExtension
 	public function loadConfiguration()
 	{
 		$builder = $this->getContainerBuilder();
-		$engine = $builder->getDefinition('nette.latte');
 
-		$install = 'Kdyby\BootstrapFormRenderer\Latte\FormMacros::install';
-		$engine->addSetup($install . '(?->getCompiler())', array('@self'));
+		// Register onCompile callbacks on Latte factory (Nette 2.2 / Latte 2.2)
+		// This installs {control}, base {form}/{input}/{label} and our custom Bootstrap macros.
+		$latteFactory = $builder->getDefinition('nette.latteFactory');
+		$latteFactory->addSetup('?->onCompile[] = function ($engine) { Nette\Bridges\ApplicationLatte\UIMacros::install($engine->getCompiler()); }', array('@self'));
+		$latteFactory->addSetup('?->onCompile[] = function ($engine) { Nette\Bridges\FormsLatte\FormMacros::install($engine->getCompiler()); }', array('@self'));
+		$latteFactory->addSetup('?->onCompile[] = function ($engine) { Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler()); }', array('@self'));
 
 		// Register Bootstrap2FormFactory for easy form creation with Bootstrap renderer
 		$builder->addDefinition($this->prefix('bootstrap2FormFactory'))

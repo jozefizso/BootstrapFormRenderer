@@ -25,7 +25,7 @@ and layout structure that Bootstrap requires.
 ## Requirements
 
 - PHP 5.6 or 7.0
-- [Nette Framework](https://github.com/nette/nette) 2.1
+- [Nette Framework](https://github.com/nette/nette) 2.2
 
 
 ## Getting Started
@@ -74,7 +74,9 @@ Kdyby\BootstrapFormRenderer\DI\RendererExtension::register($configurator);
 Or if you need to register just the Latte macros manually:
 
 ```php
-Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
+$engine->onCompile[] = function (Latte\Engine $engine) {
+    Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
+};
 ```
 
 ### Step 2: Create Bootstrap-Styled Forms
@@ -191,7 +193,7 @@ This is equivalent to:
 {form contactForm}{/form}
 ```
 
-Both render only the begin and end tags, following standard Latte 2.1 semantics. Use this when you want to manually render form content or integrate with other components.
+Both render only the begin and end tags, following standard Latte 2.2 semantics. Use this when you want to manually render form content or integrate with other components.
 
 #### Opening Tag with Custom Content
 
@@ -321,11 +323,11 @@ With this setting:
 
 ## Translation Behavior
 
-BootstrapFormRenderer works seamlessly with Nette 2.1's built-in translation system. When you set a translator on your form using `$form->setTranslator($translator)`, almost everything is automatically translated—you don't need to manually translate individual elements.
+BootstrapFormRenderer works seamlessly with Nette 2.2's built-in translation system. When you set a translator on your form using `$form->setTranslator($translator)`, almost everything is automatically translated—you don't need to manually translate individual elements.
 
 ### What Gets Translated Automatically
 
-**Nette 2.1 automatically translates:**
+**Nette 2.2 automatically translates:**
 - Control labels and captions
 - Placeholders on text inputs and textareas
 - Validation rule messages (both default and custom)
@@ -348,12 +350,12 @@ BootstrapFormRenderer works seamlessly with Nette 2.1's built-in translation sys
 
 ## Latte Variable Conventions
 
-BootstrapFormRenderer aligns with Latte 2.1 standard runtime variable conventions:
+BootstrapFormRenderer aligns with Latte 2.2 standard runtime variable conventions:
 
 - **`$_control`** - The current component/presenter context (required for form lookup)
 - **`$_form`** - The current form inside `{form}...{/form}` blocks
 
-These variables are automatically provided by Nette 2.1 presenter templates.
+These variables are automatically provided by Nette 2.2 presenter templates.
 
 ### Template Requirements
 
@@ -362,7 +364,7 @@ When rendering forms in your templates:
 - The `$_control` variable must be available for the `{form name}` macro to resolve forms
 - Inside `{form}...{/form}` blocks, `$_form` provides access to the current form
 
-This is automatically handled in standard Nette 2.1 presenter templates and requires no additional configuration.
+This is automatically handled in standard Nette 2.2 presenter templates and requires no additional configuration.
 
 
 ## License
