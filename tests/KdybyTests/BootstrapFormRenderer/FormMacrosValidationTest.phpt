@@ -13,9 +13,8 @@
 namespace KdybyTests\FormRenderer;
 
 use Kdyby\BootstrapFormRenderer\Latte\FormMacros;
-use Nette\Latte\Compiler;
 use Nette\Latte\CompileException;
-use Nette\Latte\Parser;
+use Nette\Latte\Engine;
 use Tester\Assert;
 use Tester\TestCase;
 
@@ -29,15 +28,25 @@ class FormMacrosValidationTest extends TestCase
 {
 
 	/**
+	 * @param string $template
+	 * @return string Compiled PHP code
+	 */
+	private function compile($template)
+	{
+		$engine = new Engine();
+		FormMacros::install($engine->getCompiler());
+		return $engine($template);
+	}
+
+
+
+	/**
 	 * Test that {form} without name throws CompileException
 	 */
 	public function testFormWithoutNameThrowsException()
 	{
 		Assert::exception(function () {
-			$parser = new Parser();
-			$compiler = new Compiler();
-			FormMacros::install($compiler);
-			$compiler->compile($parser->parse('{form}{/form}'));
+			$this->compile('{form}{/form}');
 		}, CompileException::class, 'Missing form name in {form}.');
 	}
 
@@ -48,10 +57,7 @@ class FormMacrosValidationTest extends TestCase
 	public function testPairWithoutNameThrowsException()
 	{
 		Assert::exception(function () {
-			$parser = new Parser();
-			$compiler = new Compiler();
-			FormMacros::install($compiler);
-			$compiler->compile($parser->parse('{form myForm}{pair}{/form}'));
+			$this->compile('{form myForm}{pair}{/form}');
 		}, CompileException::class, 'Missing name in {pair}.');
 	}
 
@@ -62,10 +68,7 @@ class FormMacrosValidationTest extends TestCase
 	public function testGroupWithoutNameThrowsException()
 	{
 		Assert::exception(function () {
-			$parser = new Parser();
-			$compiler = new Compiler();
-			FormMacros::install($compiler);
-			$compiler->compile($parser->parse('{form myForm}{group}{/form}'));
+			$this->compile('{form myForm}{group}{/form}');
 		}, CompileException::class, 'Missing name in {group}.');
 	}
 
@@ -76,10 +79,7 @@ class FormMacrosValidationTest extends TestCase
 	public function testContainerWithoutNameThrowsException()
 	{
 		Assert::exception(function () {
-			$parser = new Parser();
-			$compiler = new Compiler();
-			FormMacros::install($compiler);
-			$compiler->compile($parser->parse('{form myForm}{container}{/form}'));
+			$this->compile('{form myForm}{container}{/form}');
 		}, CompileException::class, 'Missing name in {container}.');
 	}
 
@@ -90,10 +90,7 @@ class FormMacrosValidationTest extends TestCase
 	public function testFormInsideFormElementThrowsException()
 	{
 		Assert::exception(function () {
-			$parser = new Parser();
-			$compiler = new Compiler();
-			FormMacros::install($compiler);
-			$compiler->compile($parser->parse('<form>{form myForm}{/form}</form>'));
+			$this->compile('<form>{form myForm}{/form}</form>');
 		}, CompileException::class, 'Did you mean <form n:name=...> ?');
 	}
 
