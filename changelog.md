@@ -4,6 +4,21 @@
 
 ### Breaking Changes
 
+#### Form Macros - Latte 2.1 Runtime Variables
+
+- **Breaking**: Form macros now use only Latte 2.1 / Nette 2.1 core runtime variables (`$_control`, `$_form`) and no longer support internal aliases or fallback variables. ([#65](https://github.com/jozefizso/BootstrapFormRenderer/issues/65))
+  - Removed `$__form` internal variable from macro-generated code
+  - Removed fallback resolution for `$control`, `$form`, `$__control`, and `$__form` variables
+  - Form macros now rely exclusively on:
+    - `$_control` for component/form lookup in `{form name}` macros
+    - `$_form` for the current form context inside `{form}...{/form}` blocks
+  - These variables are automatically provided by Nette 2.1 presenter templates
+  - **Migration**:
+    - Custom templates that referenced `$__form` must switch to `$form` or `$_form`
+    - Ensure templates are rendered in a standard Nette 2.1 presenter context that provides `$_control`
+    - Custom renderer templates should pass only `form` and `_form` (not `__form`) to includes
+  - Reference: Aligns with `Nette\Latte\Macros\FormMacros` behavior in Latte 2.1
+
 #### Form Macros - Latte 2.1 Semantics
 
 - **Breaking**: `{form name /}` now aligns with standard Latte 2.1 behavior and renders only the opening and closing form tags (begin + end), without the form body. ([#60](https://github.com/jozefizso/BootstrapFormRenderer/issues/60))
