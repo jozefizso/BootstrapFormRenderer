@@ -92,8 +92,12 @@ class FormMacros extends Latte\Macros\MacroSet
 		if ($word === FALSE) {
 			throw new CompileException("Missing form name in {{$node->name}}.");
 		}
+		$inlineParts = array('errors', 'body', 'controls', 'buttons');
+		if ($node->htmlNode && strtolower($node->htmlNode->name) === 'form' && !in_array($word, $inlineParts, TRUE)) {
+			throw new CompileException('Did you mean <form n:name=...> ?');
+		}
 		$node->tokenizer->reset();
-		$node->isEmpty = in_array($word, array('errors', 'body', 'controls', 'buttons'));
+		$node->isEmpty = in_array($word, $inlineParts, TRUE);
 
 		return $writer->write('$form = $_form = ' . get_called_class() . '::renderFormPart(%node.word, %node.array, get_defined_vars())');
 	}

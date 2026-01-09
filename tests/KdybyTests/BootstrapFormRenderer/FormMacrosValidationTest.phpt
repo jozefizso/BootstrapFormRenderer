@@ -105,6 +105,28 @@ class FormMacrosValidationTest extends TestCase
 		Assert::contains('renderFormPart', $compiled);
 	}
 
+
+	/**
+	 * Test that {form name} inside a literal <form> element throws CompileException
+	 */
+	public function testFormInsideFormElementThrowsException()
+	{
+		Assert::exception(function () {
+			$this->compile('<form>{form myForm}{/form}</form>');
+		}, CompileException::class, 'Did you mean <form n:name=...> ?');
+	}
+
+
+	/**
+	 * Test that inline form parts can be used inside <form n:name="..."> element
+	 */
+	public function testFormInlinePartsInsideNamedFormCompile()
+	{
+		$compiled = $this->compile('<form n:name="myForm">{form errors}{form controls}{form buttons}</form>');
+		Assert::type('string', $compiled);
+		Assert::contains('renderFormPart', $compiled);
+	}
+
 }
 
 
