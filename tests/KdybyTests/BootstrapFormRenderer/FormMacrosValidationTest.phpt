@@ -113,7 +113,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		Assert::exception(function () {
 			$this->compile('<form>{form myForm}{/form}</form>');
-		}, CompileException::class, 'Did you mean <form n:name=...> ?');
+		}, CompileException::class, 'Cannot render {form} inside an existing <form> element.');
 	}
 
 

@@ -94,7 +94,7 @@ class FormMacros extends Latte\Macros\MacroSet
 		}
 		$inlineParts = array('errors', 'body', 'controls', 'buttons');
 		if ($node->htmlNode && strtolower($node->htmlNode->name) === 'form' && !in_array($word, $inlineParts, TRUE)) {
-			throw new CompileException('Did you mean <form n:name=...> ?');
+			throw new CompileException("Cannot render {{$node->name}} inside an existing <form> element.");
 		}
 		$node->tokenizer->reset();
 		$node->isEmpty = in_array($word, $inlineParts, TRUE);
