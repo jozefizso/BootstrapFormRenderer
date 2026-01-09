@@ -85,13 +85,46 @@ class FormMacrosValidationTest extends TestCase
 
 
 	/**
-	 * Test that {form} inside <form> element throws CompileException
+	 * Test that using {form} as an n: attribute throws CompileException
+	 */
+	public function testFormAsAttributeThrowsException()
+	{
+		Assert::exception(function () {
+			$this->compile('<form n:form="myForm"></form>');
+		}, CompileException::class, 'Did you mean <form n:name=...> ?');
+	}
+
+
+	/**
+	 * Test that {form body} can be used inside <form n:name="..."> element
+	 */
+	public function testFormBodyInsideNamedFormCompiles()
+	{
+		$compiled = $this->compile('<form n:name="myForm">{form body}</form>');
+		Assert::type('string', $compiled);
+		Assert::contains('renderFormPart', $compiled);
+	}
+
+
+	/**
+	 * Test that {form name} inside a literal <form> element throws CompileException
 	 */
 	public function testFormInsideFormElementThrowsException()
 	{
 		Assert::exception(function () {
 			$this->compile('<form>{form myForm}{/form}</form>');
-		}, CompileException::class, 'Did you mean <form n:name=...> ?');
+		}, CompileException::class, 'Cannot render {form} inside an existing <form> element.');
+	}
+
+
+	/**
+	 * Test that inline form parts can be used inside <form n:name="..."> element
+	 */
+	public function testFormInlinePartsInsideNamedFormCompile()
+	{
+		$compiled = $this->compile('<form n:name="myForm">{form errors}{form controls}{form buttons}</form>');
+		Assert::type('string', $compiled);
+		Assert::contains('renderFormPart', $compiled);
 	}
 
 }
