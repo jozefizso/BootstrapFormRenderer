@@ -36,10 +36,26 @@ class RendererExtension extends Nette\DI\CompilerExtension
 	public function loadConfiguration()
 	{
 		$builder = $this->getContainerBuilder();
-		$engine = $builder->getDefinition('nette.latte');
 
-		$install = 'Kdyby\BootstrapFormRenderer\Latte\FormMacros::install';
-		$engine->addSetup($install . '(?->getCompiler())', array('@self'));
+		// Install macros on both nette.latte (deprecated) and nette.latteFactory (Nette 2.2)
+		// This ensures macros work regardless of which path is used for template creation
+		foreach (array('nette.latte', 'nette.latteFactory') as $serviceName) {
+			if ($builder->hasDefinition($serviceName)) {
+				$engine = $builder->getDefinition($serviceName);
+				$engine->addSetup('?->onCompile[] = function ($engine) { ?::install($engine->getCompiler()); }', array(
+					'@self',
+					'Nette\Bridges\ApplicationLatte\UIMacros',
+				));
+				$engine->addSetup('?->onCompile[] = function ($engine) { ?::install($engine->getCompiler()); }', array(
+					'@self',
+					'Nette\Bridges\FormsLatte\FormMacros',
+				));
+				$engine->addSetup('?->onCompile[] = function ($engine) { ?::install($engine->getCompiler()); }', array(
+					'@self',
+					'Kdyby\BootstrapFormRenderer\Latte\FormMacros',
+				));
+			}
+		}
 
 		// Register Bootstrap2FormFactory for easy form creation with Bootstrap renderer
 		$builder->addDefinition($this->prefix('bootstrap2FormFactory'))
