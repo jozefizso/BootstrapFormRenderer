@@ -4,6 +4,25 @@ This repository now targets `nette/nette ~2.2.0` (`composer.lock` currently pins
 
 The goal of this task is to make the package work cleanly on Nette 2.2 (and keep PHP `>=5.6` support), while removing usage of renamed/deprecated Latte/Nette APIs that currently break the tests.
 
+## Milestone issues (nette-2.2)
+
+Open issues in the milestone and how they map to this task:
+
+- #7 Apply Nette 2.2 rendering changes (umbrella; includes BootstrapRenderer, FormMacros, RendererExtension updates).
+- #8 Update dependencies for Nette 2.2 (composer.json / lock updates).
+- #9 Update CI workflow for Nette 2.2 (PHP + Nette matrix; target PHP 5.6 + 7.0 only).
+- #72 Register UI + Forms macros on `nette.latteFactory`.
+- #73 Fix renamed-class warning for `Nette\Latte\Macros\FormMacros` usage in `BootstrapRenderer`.
+- #74 Refactor `Latte\FormMacros` to Latte 2.2 (`Latte\*`) APIs.
+- #75 Update macro-validation tests to use `Latte\Engine` + `StringLoader`.
+- #76 Reevaluate/remove legacy Nette 2.1 shims in `RendererExtension`.
+- #77 Reduce dependency on deprecated `Nette\Templating\FileTemplate` in `BootstrapRenderer`.
+- #79 Fix unit test fixtures for Nette 2.2 empty `value=""` rendering (TextInput omits empty value).
+
+Notes:
+- #7 is an umbrella; the concrete technical steps are mostly captured by #72–#77 and #79.
+- #8 and #9 are project-level changes (dependencies/CI), not required to resolve the immediate Latte macro failures but needed for the final release.
+
 ## Observed test failures (from `test-results.xml`)
 
 Distinct failure signatures:
@@ -54,6 +73,7 @@ On Nette 2.2, the actual compiler instance is `Latte\Compiler`, so strict type c
 ### Phase 1 — Make macros installation work under Nette 2.2 (fixes `{form}` / `{control}` unknown)
 
 1. **Update DI integration to target `nette.latteFactory` (and keep `nette.latte` for deprecated users)**
+   - Related: #72
    - File: `src/Kdyby/BootstrapFormRenderer/DI/RendererExtension.php`
    - Today we only add setup to `nette.latte`, but templates created by `nette.template` use `nette.latteFactory->create()`.
    - Follow the Nette 2.2 pattern used in `NetteExtension::setupLatte()`:
@@ -75,11 +95,13 @@ Acceptance criteria for Phase 1:
 ### Phase 2 — Remove renamed/deprecated Latte API usage (fixes `E_USER_WARNING` failures)
 
 3. **Replace renamed macro class usage in renderer**
+   - Related: #73
    - File: `src/Kdyby/BootstrapFormRenderer/BootstrapRenderer.php`
    - Replace `use Nette\Latte\Macros\FormMacros;` with `use Nette\Bridges\FormsLatte\FormMacros;` (or fully-qualified calls).
    - Ensure begin/end rendering uses `Nette\Bridges\FormsLatte\FormMacros::renderFormBegin()` / `renderFormEnd()` instead of the renamed `Nette\Latte\Macros\FormMacros`.
 
 4. **Refactor our macro implementation to Latte 2.2 namespaces**
+   - Related: #74
    - File: `src/Kdyby/BootstrapFormRenderer/Latte/FormMacros.php`
    - Replace `Nette\Latte\*` imports with `Latte\*` imports:
      - `Latte\CompileException`, `Latte\MacroNode`, `Latte\PhpWriter`, `Latte\Macros\MacroSet`, `Latte\Compiler`
@@ -93,6 +115,7 @@ Acceptance criteria for Phase 2:
 ### Phase 3 — Update tests to use Latte 2.2 engine correctly
 
 5. **Fix compile-time macro validation tests to compile from strings using Latte 2.2**
+   - Related: #75
    - File: `tests/KdybyTests/BootstrapFormRenderer/FormMacrosValidationTest.phpt`
    - Use `Latte\Engine` + `Latte\Loaders\StringLoader` and `Engine::compile()` (or `renderToString()` if needed) so the engine treats the input as source text, not a file.
    - Install the macros via `$engine->onCompile[] = function (Latte\Engine $engine) { ... }` rather than manually reaching into parser/compiler where possible.
@@ -100,20 +123,24 @@ Acceptance criteria for Phase 2:
 6. **Keep the integration tests but ensure they exercise the same macro installation path as production**
    - The existing container-based tests should pass once Phase 1 is done (macros installed on `nette.latteFactory`).
    - If any template rendering still depends on deprecated `Nette\Templating\FileTemplate` behaviour, consider switching tests to `Nette\Bridges\ApplicationLatte\TemplateFactory` to match Nette 2.2 “happy path”.
+   - Related: #77 (reducing `FileTemplate` usage).
+
+7. **Update HTML fixtures for Nette 2.2 control rendering differences**
+   - Related: #79
+   - Update golden fixtures where `TextInput` omits empty `value=""` on Nette 2.2.
 
 Acceptance criteria for Phase 3:
 - `composer test` passes under PHP 5.6 and PHP 7.0 with `nette/nette ~2.2.0`.
 
-### Phase 4 — Optional cleanup / tech debt reduction (post-green)
+### Phase 4 — Cleanup (required for Nette 2.2-only support)
 
-7. **Reevaluate Nette 2.1 compatibility shims**
+7. **Remove Nette 2.1 compatibility shims (Nette 2.2-only)**
+   - Related: #76
    - File: `src/Kdyby/BootstrapFormRenderer/DI/RendererExtension.php`
-   - The `class_alias()` and `NetteLoader::renamed` hacks may no longer be required now that the baseline is Nette 2.2.
-   - Decide whether to:
-     - keep them (if dual-support is still desired), or
-     - remove them (if the project is Nette 2.2+ only).
+   - Remove `class_alias()` and `NetteLoader::renamed` hacks; no Nette 2.1 dual-support required.
 
 8. **Consider migrating internal rendering away from deprecated `Nette\Templating\FileTemplate`**
+   - Related: #77
    - `BootstrapRenderer` can be made to accept `Nette\Application\UI\ITemplate` (or a minimal abstraction) so it naturally works with `Nette\Bridges\ApplicationLatte\Template`.
    - This reduces reliance on deprecated templating APIs and matches Nette 2.2 architecture.
 
@@ -124,4 +151,3 @@ Acceptance criteria for Phase 3:
   - no “Unknown macro …”
   - no “has been renamed …” warnings
   - no recoverable errors related to Latte typehints
-
