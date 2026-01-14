@@ -13,8 +13,8 @@
 namespace KdybyTests\FormRenderer;
 
 use Kdyby\BootstrapFormRenderer\Latte\FormMacros;
-use Nette\Latte\CompileException;
-use Nette\Latte\Engine;
+use Latte\CompileException;
+use Latte\Engine;
 use Tester\Assert;
 use Tester\TestCase;
 
@@ -34,8 +34,13 @@ class FormMacrosValidationTest extends TestCase
 	private function compile($template)
 	{
 		$engine = new Engine();
-		FormMacros::install($engine->getCompiler());
-		return $engine->getCompiler()->compile($engine->getParser()->parse($template));
+		$engine->setLoader(new \Latte\Loaders\StringLoader());
+		$engine->onCompile[] = function ($engine) {
+			\Nette\Bridges\ApplicationLatte\UIMacros::install($engine->getCompiler());
+			\Nette\Bridges\FormsLatte\FormMacros::install($engine->getCompiler());
+			FormMacros::install($engine->getCompiler());
+		};
+		return $engine->compile($template);
 	}
 
 

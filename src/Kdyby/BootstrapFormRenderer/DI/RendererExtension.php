@@ -42,18 +42,9 @@ class RendererExtension extends Nette\DI\CompilerExtension
 		foreach (array('nette.latte', 'nette.latteFactory') as $serviceName) {
 			if ($builder->hasDefinition($serviceName)) {
 				$engine = $builder->getDefinition($serviceName);
-				$engine->addSetup('?->onCompile[] = function ($engine) { ?::install($engine->getCompiler()); }', array(
-					'@self',
-					'Nette\Bridges\ApplicationLatte\UIMacros',
-				));
-				$engine->addSetup('?->onCompile[] = function ($engine) { ?::install($engine->getCompiler()); }', array(
-					'@self',
-					'Nette\Bridges\FormsLatte\FormMacros',
-				));
-				$engine->addSetup('?->onCompile[] = function ($engine) { ?::install($engine->getCompiler()); }', array(
-					'@self',
-					'Kdyby\BootstrapFormRenderer\Latte\FormMacros',
-				));
+				$engine->addSetup('?->onCompile[] = function ($engine) { Nette\Bridges\ApplicationLatte\UIMacros::install($engine->getCompiler()); }', array('@self'));
+				$engine->addSetup('?->onCompile[] = function ($engine) { Nette\Bridges\FormsLatte\FormMacros::install($engine->getCompiler()); }', array('@self'));
+				$engine->addSetup('?->onCompile[] = function ($engine) { Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler()); }', array('@self'));
 			}
 		}
 
