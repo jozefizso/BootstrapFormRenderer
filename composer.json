@@ -37,6 +37,7 @@
 		"test": "tester -c ./tests/php-tests.ini ./tests/KdybyTests/",
 		"test:info": "tester -c ./tests/php-tests.ini ./tests/KdybyTests/ --info",
 		"test:junit": "tester -c ./tests/php-tests.ini -o junit ./tests/KdybyTests/",
+		"test:clean": "rm -rf ./temp/cache/*",
 		"check": [
 			"@lint",
 			"@test"
