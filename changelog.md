@@ -1,5 +1,32 @@
 # Changelog
 
+
+## v2.1.4
+
+This release removes the class alias for legacy Nette objects:
+
+* `Nette\Config\CompilerExtension`
+* `Nette\Config\Compiler`
+* `Nette\Config\Helpers`
+* `Nette\Config\Configurator`
+
+_These are not required for the library to function correctly in Nette 2.1 only._
+
+
+## v2.1.3
+
+### Fixes
+* The `{form body}` expression can be used inside a `<form>` element.
+
+Allows the expected syntax with HTML form and Latte control:
+
+```html
+<form n:name="frm" class="custom-styling">
+  {form body}
+</form>
+```
+
+
 ## v2.1.2
 
 ### Breaking Changes
