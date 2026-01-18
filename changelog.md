@@ -17,6 +17,9 @@ nette:
 			- Kdyby\BootstrapFormRenderer\Latte\FormMacros
 ```
 
+### Changes
+* Use `Latte\Engine` as a fallback when rendering form outside a Nette presenter ([#73](https://github.com/jozefizso/BootstrapFormRenderer/issues/73))
+
 
 ## v2.1.4
 
