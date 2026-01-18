@@ -102,11 +102,6 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 		if ($this->form !== $form) {
 			$this->form = $form;
 
-			// translators
-			if ($translator = $this->form->getTranslator()) {
-				$this->template->setTranslator($translator);
-			}
-
 			// controls placeholders & classes
 			foreach ($this->form->getControls() as $control) {
 				$this->prepareControl($control);
