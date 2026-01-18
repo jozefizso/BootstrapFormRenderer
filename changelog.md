@@ -1,5 +1,22 @@
 # Changelog
 
+## v2.2.0-preview
+
+This release targets Nette Framework 2.2, Latte 2.2 and requires PHP 5.6+.
+The Bootstrap v2.3.2 is the reference version for markup and test fixtures.
+
+
+### Rendering
+
+Enable Bootstrap forms rendering in a Nette 2.2 application with this config:
+
+```neon
+nette:
+	latte:
+		macros:
+			- Kdyby\BootstrapFormRenderer\Latte\FormMacros
+```
+
 
 ## v2.1.4
 
