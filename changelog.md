@@ -18,6 +18,7 @@ nette:
 ```
 
 ### Changes
+* BootstrapFormRenderer extensions will register into Latte 2.2 engine factory
 * Use `Latte\Engine` as a fallback when rendering form outside a Nette presenter ([#73](https://github.com/jozefizso/BootstrapFormRenderer/issues/73))
 
 
