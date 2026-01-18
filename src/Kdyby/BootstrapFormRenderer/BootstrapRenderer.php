@@ -10,6 +10,7 @@
 
 namespace Kdyby\BootstrapFormRenderer;
 
+use Latte\Engine;
 use Nette;
 use Nette\Bridges\FormsLatte\FormMacros;
 use Nette\Forms\Controls;
@@ -89,7 +90,10 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 
 			} else {
 				$this->template = new FileTemplate();
-				$this->template->registerFilter(new Nette\Latte\Engine());
+				$engine = new Engine();
+				FormMacros::install($engine->getCompiler());
+				\Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
+				$this->template->registerFilter($engine);
 			}
 		}
 
