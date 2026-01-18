@@ -23,10 +23,22 @@ class RendererExtension extends Nette\DI\CompilerExtension
 	public function loadConfiguration()
 	{
 		$builder = $this->getContainerBuilder();
-		$engine = $builder->getDefinition('nette.latte');
 
-		$install = 'Kdyby\BootstrapFormRenderer\Latte\FormMacros::install';
-		$engine->addSetup($install . '(?->getCompiler())', array('@self'));
+		// Install macros on the Latte engine produced by `nette.latteFactory`.
+		//
+		// Nette 2.2 installs UI/form macros automatically only when templates are created via TemplateFactory.
+		// If the app uses the deprecated `nette.template` service (Nette\Templating\FileTemplate), these macros
+		// must be installed on the engine itself, otherwise `{control}` / `{form}` / `{input}` won't compile.
+		//
+		// We install Nette macros first, then our `{form ...}` overrides last (to keep `{input}` / `{label}` from Nette).
+		foreach (array('nette.latteFactory', 'nette.latte') as $serviceName) {
+			if ($builder->hasDefinition($serviceName)) {
+				$engine = $builder->getDefinition($serviceName);
+				$engine->addSetup('?->onCompile[] = function ($engine) { Nette\Bridges\ApplicationLatte\UIMacros::install($engine->getCompiler()); }', array('@self'));
+				$engine->addSetup('?->onCompile[] = function ($engine) { Nette\Bridges\FormsLatte\FormMacros::install($engine->getCompiler()); }', array('@self'));
+				$engine->addSetup('?->onCompile[] = function ($engine) { Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler()); }', array('@self'));
+			}
+		}
 
 		// Register Bootstrap2FormFactory for easy form creation with Bootstrap renderer
 		$builder->addDefinition($this->prefix('bootstrap2FormFactory'))
