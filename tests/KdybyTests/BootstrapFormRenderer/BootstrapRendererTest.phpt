@@ -16,7 +16,6 @@ use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
 use Kdyby\BootstrapFormRenderer\DI\RendererExtension;
 use Nette;
 use Nette\Application\UI\Form;
-use Nette\Caching\Storages\PhpFileStorage;
 use Nette\Configurator;
 use Nette\Utils\Html;
 use Nette\Utils\Strings;
@@ -703,14 +702,13 @@ class BootstrapRendererTest extends TestCase
 
 
 	/**
-	 * @return Nette\Templating\FileTemplate
+	 * @return Nette\Application\UI\ITemplate
 	 */
 	private function createTemplate()
 	{
-		$template = $this->container->{$this->container->getMethodName('nette.template')}();
-		/** @var \Nette\Templating\FileTemplate $template */
-		$template->setCacheStorage(new PhpFileStorage($this->container->expand('%tempDir%/cache'), $this->container->getService('nette.cacheJournal')));
-		return $template;
+		/** @var \Nette\Application\UI\ITemplateFactory $templateFactory */
+		$templateFactory = $this->container->getByType('Nette\Application\UI\ITemplateFactory');
+		return $templateFactory->createTemplate(new ControlMock());
 	}
 
 }
