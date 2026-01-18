@@ -11,12 +11,13 @@
 namespace Kdyby\BootstrapFormRenderer\Latte;
 use Kdyby;
 use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
+use Latte;
+use Latte\CompileException;
+use Latte\MacroNode;
+use Latte\PhpWriter;
 use Nette;
+use Nette\Bridges\FormsLatte\FormMacros as NetteFormMacros;
 use Nette\Forms\Form;
-use Nette\Latte;
-use Nette\Latte\CompileException;
-use Nette\Latte\MacroNode;
-use Nette\Latte\PhpWriter;
 
 
 /**
@@ -50,7 +51,7 @@ use Nette\Latte\PhpWriter;
  * </code>
  *
  * Related:
- * - {@see \Nette\Latte\Macros\FormMacros} (Latte 2.1 core form macros)
+ * - {@see \Nette\Bridges\FormsLatte\FormMacros} (Latte 2.2 core form macros)
  * - {@see \Kdyby\BootstrapFormRenderer\BootstrapRenderer} (Bootstrap rendering implementation)
  *
  * @author Filip Procházka <filip@prochazka.su>
@@ -59,8 +60,8 @@ class FormMacros extends Latte\Macros\MacroSet
 {
 
 	/**
-	 * @param \Nette\Latte\Compiler $compiler
-	 * @return \Nette\Latte\Macros\MacroSet|void
+	 * @param \Latte\Compiler $compiler
+	 * @return \Latte\Macros\MacroSet|void
 	 */
 	public static function install(Latte\Compiler $compiler)
 	{
@@ -78,10 +79,10 @@ class FormMacros extends Latte\Macros\MacroSet
 
 
 	/**
-	 * @param \Nette\Latte\MacroNode $node
-	 * @param \Nette\Latte\PhpWriter $writer
+	 * @param \Latte\MacroNode $node
+	 * @param \Latte\PhpWriter $writer
 	 * @return string
-	 * @throws \Nette\Latte\CompileException
+	 * @throws \Latte\CompileException
 	 */
 	public function macroFormBegin(MacroNode $node, PhpWriter $writer)
 	{
@@ -105,20 +106,20 @@ class FormMacros extends Latte\Macros\MacroSet
 
 
 	/**
-	 * @param \Nette\Latte\MacroNode $node
-	 * @param \Nette\Latte\PhpWriter $writer
+	 * @param \Latte\MacroNode $node
+	 * @param \Latte\PhpWriter $writer
 	 */
 	public function macroFormEnd(MacroNode $node, PhpWriter $writer)
 	{
-		return $writer->write('Nette\Latte\Macros\FormMacros::renderFormEnd($_form)');
+		return $writer->write('Nette\Bridges\FormsLatte\FormMacros::renderFormEnd($_form)');
 	}
 
 
 
 	/**
-	 * @param \Nette\Latte\MacroNode $node
-	 * @param \Nette\Latte\PhpWriter $writer
-	 * @throws \Nette\Latte\CompileException
+	 * @param \Latte\MacroNode $node
+	 * @param \Latte\PhpWriter $writer
+	 * @throws \Latte\CompileException
 	 */
 	public function macroPair(MacroNode $node, PhpWriter $writer)
 	{
@@ -133,9 +134,9 @@ class FormMacros extends Latte\Macros\MacroSet
 
 
 	/**
-	 * @param \Nette\Latte\MacroNode $node
-	 * @param \Nette\Latte\PhpWriter $writer
-	 * @throws \Nette\Latte\CompileException
+	 * @param \Latte\MacroNode $node
+	 * @param \Latte\PhpWriter $writer
+	 * @throws \Latte\CompileException
 	 */
 	public function macroGroup(MacroNode $node, PhpWriter $writer)
 	{
@@ -150,9 +151,9 @@ class FormMacros extends Latte\Macros\MacroSet
 
 
 	/**
-	 * @param \Nette\Latte\MacroNode $node
-	 * @param \Nette\Latte\PhpWriter $writer
-	 * @throws \Nette\Latte\CompileException
+	 * @param \Latte\MacroNode $node
+	 * @param \Latte\PhpWriter $writer
+	 * @throws \Latte\CompileException
 	 */
 	public function macroContainer(MacroNode $node, PhpWriter $writer)
 	{
@@ -205,7 +206,7 @@ class FormMacros extends Latte\Macros\MacroSet
 			$form->render('begin', $args);
 
 		} else {
-			Nette\Latte\Macros\FormMacros::renderFormBegin($form, $args);
+			NetteFormMacros::renderFormBegin($form, $args);
 		}
 	}
 

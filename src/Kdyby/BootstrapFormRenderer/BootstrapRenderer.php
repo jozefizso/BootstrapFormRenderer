@@ -11,9 +11,9 @@
 namespace Kdyby\BootstrapFormRenderer;
 
 use Nette;
+use Nette\Bridges\FormsLatte\FormMacros;
 use Nette\Forms\Controls;
 use Nette\Iterators\Filter;
-use Nette\Latte\Macros\FormMacros;
 use Nette\Templating\FileTemplate;
 use Nette\Utils\Html;
 
