@@ -120,10 +120,9 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 		}
 
 		$this->template->setFile(__DIR__ . '/@form.latte');
-		$this->template->setParameters(
-			array_fill_keys(array('control', '_control', 'presenter', '_presenter'), NULL) +
-			array('_form' => $this->form, 'form' => $this->form, 'renderer' => $this)
-		);
+		$this->template->_form = $this->form;
+		$this->template->form = $this->form;
+		$this->template->renderer = $this;
 
 		if ($mode === NULL) {
 			if ($args) {
