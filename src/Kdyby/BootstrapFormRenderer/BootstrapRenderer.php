@@ -91,8 +91,10 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 			} else {
 				$this->template = new FileTemplate();
 				$engine = new Engine();
-				FormMacros::install($engine->getCompiler());
-				\Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
+				$engine->onCompile[] = function (Engine $engine) {
+					FormMacros::install($engine->getCompiler());
+					\Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
+				};
 				$this->template->registerFilter($engine);
 			}
 		}
