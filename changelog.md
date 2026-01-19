@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.2.0-preview
+## v2.2.0
 
 This release targets Nette Framework 2.2, Latte 2.2 and requires PHP 5.6+.
 The Bootstrap v2.3.2 is the reference version for markup and test fixtures.
