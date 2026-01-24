@@ -33,7 +33,7 @@
                 {if $iterator->first}{='<div class="form-actions">'|noescape}{/if}
                 {input $renderer->getControlName($controlItem)}
                 {if !$renderer->isSubmitButton($iterator->nextValue)}{="</div>"|noescape}{/if}
-                {?continue}
+                {php continue}
             {/if}
 			{var $attrs = ['input' => [], 'label' => []]}
 
