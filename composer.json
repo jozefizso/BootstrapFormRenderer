@@ -21,23 +21,23 @@
 	},
 	"require": {
 		"php": ">=5.6",
-		"latte/latte": "~2.3.0",
-		"nette/application": "~2.3.0",
-		"nette/forms": "~2.3.0",
-		"nette/utils": "~2.3.0"
+		"latte/latte": "~2.4.0",
+		"nette/application": "~2.4.0",
+		"nette/forms": "~2.4.0",
+		"nette/utils": "~2.4.0"
 	},
 	"suggest": {
 		"nette/di": "Required to register the renderer via DI extension.",
 		"nette/bootstrap": "Required to register the renderer via DI extension."
 	},
 	"require-dev": {
-		"nette/bootstrap": "~2.3.0",
-		"nette/di": "~2.3.0",
-		"nette/http": "~2.3.0",
-		"nette/mail": "~2.3.0",
-		"nette/robot-loader": "~2.3.0",
+		"nette/bootstrap": "~2.4.0",
+		"nette/di": "~2.4.0",
+		"nette/http": "~2.4.0",
+		"nette/mail": "~2.4.0",
+		"nette/robot-loader": "~2.4.0",
 		"nette/safe-stream": "~2.3.0",
-		"tracy/tracy": "~2.3.0",
+		"tracy/tracy": "~2.4.0",
 		"nette/tester": "~2.0.2",
 		"php-parallel-lint/php-parallel-lint": "~1.4.0"
 	},
