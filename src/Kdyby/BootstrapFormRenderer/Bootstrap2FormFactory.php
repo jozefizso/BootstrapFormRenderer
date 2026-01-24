@@ -6,6 +6,7 @@
 namespace Kdyby\BootstrapFormRenderer;
 
 use Nette;
+use Nette\Forms\Form;
 
 /**
  * Factory for creating Nette forms preconfigured with Bootstrap 2 renderer.
@@ -32,18 +33,20 @@ use Nette;
 class Bootstrap2FormFactory
 {
 	/**
-	 * Creates a new Bootstrap2Form instance with Bootstrap 2 renderer already configured.
+	 * Creates a new Form instance with Bootstrap 2 renderer already configured.
 	 *
-	 * This method creates a {@see Bootstrap2Form} which automatically uses the
+	 * This method creates a {@see Form} which automatically uses the
 	 * {@see BootstrapRenderer}. The form is ready to use with Bootstrap 2 CSS
 	 * classes and markup.
 	 *
 	 * @param \Nette\ComponentModel\IContainer $parent Optional parent component
 	 * @param string $name Optional component name
-	 * @return Bootstrap2Form Form instance configured with Bootstrap 2 renderer
+	 * @return Form Form instance configured with Bootstrap 2 renderer
 	 */
 	public function create($parent = NULL, $name = NULL)
 	{
-		return new Bootstrap2Form($parent, $name);
+		$form = new Form($name);
+		$form->setRenderer(new BootstrapRenderer());
+		return $form;
 	}
 }
