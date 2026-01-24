@@ -16,7 +16,7 @@ use Latte\CompileException;
 use Latte\MacroNode;
 use Latte\PhpWriter;
 use Nette;
-use Nette\Bridges\FormsLatte\FormMacros as NetteFormMacros;
+use Nette\Bridges\FormsLatte\Runtime;
 use Nette\Forms\Form;
 
 
@@ -111,7 +111,7 @@ class FormMacros extends Latte\Macros\MacroSet
 	 */
 	public function macroFormEnd(MacroNode $node, PhpWriter $writer)
 	{
-		return $writer->write('Nette\Bridges\FormsLatte\FormMacros::renderFormEnd($_form)');
+		return $writer->write('echo Nette\\Bridges\\FormsLatte\\Runtime::renderFormEnd($_form)');
 	}
 
 
@@ -206,7 +206,7 @@ class FormMacros extends Latte\Macros\MacroSet
 			$form->render('begin', $args);
 
 		} else {
-			NetteFormMacros::renderFormBegin($form, $args);
+			echo Runtime::renderFormBegin($form, $args);
 		}
 	}
 

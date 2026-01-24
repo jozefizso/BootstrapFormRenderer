@@ -15,6 +15,7 @@ use Nette;
 use Nette\Application\UI\ITemplate;
 use Nette\Bridges\ApplicationLatte\Template;
 use Nette\Bridges\FormsLatte\FormMacros;
+use Nette\Bridges\FormsLatte\Runtime;
 use Nette\Forms\Controls;
 use Nette\Utils\Html;
 
@@ -138,10 +139,10 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			$this->template->render();
 
 		} elseif ($mode === 'begin') {
-			FormMacros::renderFormBegin($this->form, (array)$args);
+			echo Runtime::renderFormBegin($this->form, (array) $args);
 
 		} elseif ($mode === 'end') {
-			FormMacros::renderFormEnd($this->form);
+			echo Runtime::renderFormEnd($this->form);
 
 		} else {
 
