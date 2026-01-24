@@ -16,7 +16,6 @@ use Nette\Application\UI\ITemplate;
 use Nette\Bridges\ApplicationLatte\Template;
 use Nette\Bridges\FormsLatte\FormMacros;
 use Nette\Forms\Controls;
-use Nette\Iterators\Filter;
 use Nette\Utils\Html;
 
 
@@ -295,8 +294,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	public function findControls(Nette\Forms\Container $container = NULL, $buttons = NULL)
 	{
 		$container = $container ? : $this->form;
-		return new Filter($container->getControls(), function ($control) use ($buttons) {
-			$control = $control instanceof Filter ? $control->current() : $control;
+		return new \CallbackFilterIterator($container->getControls(), function ($control) use ($buttons) {
 			$isButton = $control instanceof Controls\Button || $control instanceof Nette\Forms\ISubmitterControl;
 			return !$control->getOption('rendered')
 				&& !$control instanceof Controls\HiddenField
