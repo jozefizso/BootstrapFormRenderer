@@ -30,8 +30,9 @@ use Nette\Utils\Html;
  * @author Pavel Ptacek
  * @author Filip Procházka
  */
-class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRenderer
+class BootstrapRenderer implements Nette\Forms\IFormRenderer
 {
+	use \Nette\SmartObject;
 
 	public static $checkboxListClasses = array(
 		'Nextras\Forms\Controls\MultiOptionList',
