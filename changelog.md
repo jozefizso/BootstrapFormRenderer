@@ -20,6 +20,7 @@ nette:
 ### Breaking Changes
 * **Breaking**: `BootstrapRenderer` requires individual runtime dependencies. This is a potential breaking change.
 * **Breaking**: `BootstrapRenderer` no longer calls `$template->setTranslator($form->getTranslator())`. If you relied on this for `{_...}` / `|translate` in Latte templates, configure Latte translation in your application instead. Form translations still work via `$form->setTranslator($translator)`.
+* **Breaking**: `BootstrapRenderer` and `Bootstrap2FormFactory` classes no longer extend from `Nette\Object` base class. This is a potential breaking change.
 
 ### Changes
 * BootstrapFormRenderer extensions will register into Latte 2.2 engine factory

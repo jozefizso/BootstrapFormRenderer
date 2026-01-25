@@ -29,7 +29,7 @@ use Nette\Utils\Html;
  * @author Pavel Ptacek
  * @author Filip Procházka
  */
-class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRenderer
+class BootstrapRenderer implements Nette\Forms\IFormRenderer
 {
 
 	public static $checkboxListClasses = array(
