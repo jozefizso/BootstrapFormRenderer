@@ -98,13 +98,6 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			}
 		}
 
-		// Prevent Nette UI macros from treating internal renderer templates as presenter views.
-		// Otherwise templates like `@form.latte` may auto-extend the presenter's layout and fail on missing blocks.
-		$this->template->control = NULL;
-		$this->template->_control = NULL;
-		$this->template->presenter = NULL;
-		$this->template->_presenter = NULL;
-
 		if ($this->form !== $form) {
 			$this->form = $form;
 
