@@ -29,60 +29,60 @@
 
         {else}
             {block #controls}
-            {foreach $controls as $control}
-            {if $renderer->isSubmitButton($control)}
+            {foreach $controls as $controlItem}
+            {if $renderer->isSubmitButton($controlItem)}
                 {if $iterator->first}{='<div class="form-actions">'|noescape}{/if}
-                {$control->getControl()}
+                {$controlItem->getControl()}
                 {if !$renderer->isSubmitButton($iterator->nextValue)}{="</div>"|noescape}{/if}
                 {php continue}
             {/if}
 			{var $attrs = ['input' => [], 'label' => []]}
 
             {block #control}
-            <div{$control->getOption('pairContainer')->attributes()|noescape} n:tag-if="$control->getOption('pairContainer')">
+            <div{$controlItem->getOption('pairContainer')->attributes()|noescape} n:tag-if="$controlItem->getOption('pairContainer')">
                 {var
-                    $name = $renderer->getControlName($control),
-                    $description = $renderer->getControlDescription($control),
-                    $error = $renderer->getControlError($control)
+                    $name = $renderer->getControlName($controlItem),
+                    $description = $renderer->getControlDescription($controlItem),
+                    $error = $renderer->getControlError($controlItem)
                 }
 
-                {if $controlTemplate = $renderer->getControlTemplate($control)}
+                {if $controlTemplate = $renderer->getControlTemplate($controlItem)}
                     {include "$controlTemplate", name => $name, description => $description, error => $error, form => $form, _form => $form, attrs => $attrs}
 
-                {elseif $renderer->isSubmitButton($control)}
+                {elseif $renderer->isSubmitButton($controlItem)}
 
-                    {$renderer::mergeAttrs($control->getControl(), $attrs['input'])}
+                    {$renderer::mergeAttrs($controlItem->getControl(), $attrs['input'])}
 
-                {elseif $renderer->isButton($control)}
-
-                    <div class="controls">
-						{$renderer::mergeAttrs($control->getControl(), $attrs['input'])}{$error}{$description}
-                    </div>
-
-                {elseif $renderer->isCheckbox($control)}
-
-						{var $label = $renderer::mergeAttrs($control->getLabel(), $attrs['label'])}
-                    <div class="controls" n:tag-if="!$renderer->controlHasClass($control, 'inline')">
-                        {$label->startTag()|noescape}{$renderer::mergeAttrs($control->getControl(), $attrs['input'])}{$renderer->getLabelBody($control)}{$label->endTag()|noescape}{$error}{$description}
-                    </div>
-
-                {elseif $renderer->isRadioList($control)}
-
-                    {$renderer::mergeAttrs($control->getLabel()->addClass("control-label"), $attrs['label'])}
+                {elseif $renderer->isButton($controlItem)}
 
                     <div class="controls">
-                        {foreach $renderer->getRadioListItems($control) as $item}
+						{$renderer::mergeAttrs($controlItem->getControl(), $attrs['input'])}{$error}{$description}
+                    </div>
+
+                {elseif $renderer->isCheckbox($controlItem)}
+
+						{var $label = $renderer::mergeAttrs($controlItem->getLabel(), $attrs['label'])}
+                    <div class="controls" n:tag-if="!$renderer->controlHasClass($controlItem, 'inline')">
+                        {$label->startTag()|noescape}{$renderer::mergeAttrs($controlItem->getControl(), $attrs['input'])}{$renderer->getLabelBody($controlItem)}{$label->endTag()|noescape}{$error}{$description}
+                    </div>
+
+                {elseif $renderer->isRadioList($controlItem)}
+
+                    {$renderer::mergeAttrs($controlItem->getLabel()->addClass("control-label"), $attrs['label'])}
+
+                    <div class="controls">
+                        {foreach $renderer->getRadioListItems($controlItem) as $item}
 
                             {$renderer::mergeAttrs($item->html, $attrs['input'])}
                         {/foreach}{$error}{$description}
                     </div>
 
-                {elseif $renderer->isCheckboxList($control)}
+                {elseif $renderer->isCheckboxList($controlItem)}
 
-                    {$renderer::mergeAttrs($control->getLabel()->addClass("control-label"), $attrs['label'])}
+                    {$renderer::mergeAttrs($controlItem->getLabel()->addClass("control-label"), $attrs['label'])}
 
                     <div class="controls">
-                        {foreach $renderer->getCheckboxListItems($control) as $item}
+                        {foreach $renderer->getCheckboxListItems($controlItem) as $item}
 
                             {$renderer::mergeAttrs($item->html, $attrs['input'])}
                         {/foreach}{$error}{$description}
@@ -90,12 +90,12 @@
 
                 {else}
 
-                    {$renderer::mergeAttrs($control->getLabel(), $attrs['label'])}
+                    {$renderer::mergeAttrs($controlItem->getLabel(), $attrs['label'])}
 
                     <div class="controls">
-                        {var $prepend = $control->getOption('input-prepend'), $append = $control->getOption('input-append')}
+                        {var $prepend = $controlItem->getOption('input-prepend'), $append = $controlItem->getOption('input-append')}
                         <div n:class="$prepend? input-prepend, $append? input-append" n:tag-if="$prepend || $append">
-                            {$prepend}{$renderer::mergeAttrs($control->getControl(), $attrs['input'])}{$append}
+                            {$prepend}{$renderer::mergeAttrs($controlItem->getControl(), $attrs['input'])}{$append}
                         </div>
                         {$error}{$description}
                     </div>
