@@ -47,7 +47,7 @@
                 }
 
                 {if $controlTemplate = $renderer->getControlTemplate($controlItem)}
-                    {include "$controlTemplate", name => $name, description => $description, error => $error, form => $form, _form => $form, attrs => $attrs}
+                    {include "$controlTemplate", name => $name, description => $description, error => $error, control => $controlItem, form => $form, _form => $form, attrs => $attrs}
 
                 {elseif $renderer->isSubmitButton($controlItem)}
 
