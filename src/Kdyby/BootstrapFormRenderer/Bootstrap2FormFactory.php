@@ -29,7 +29,7 @@ use Nette;
  * }
  * </code>
  */
-class Bootstrap2FormFactory extends Nette\Object
+class Bootstrap2FormFactory
 {
 	/**
 	 * Creates a new Bootstrap2Form instance with Bootstrap 2 renderer already configured.
