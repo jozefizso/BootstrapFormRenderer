@@ -274,7 +274,7 @@ class BootstrapRenderer extends Nette\Object implements Nette\Forms\IFormRendere
 			}
 		}
 
-		foreach ($this->form->groups as $group) {
+		foreach ($this->form->getGroups() as $group) {
 			if (!in_array($group, $visitedGroups, TRUE) && ($group = $this->processGroup($group))) {
 				$formGroups[] = $group;
 			}
