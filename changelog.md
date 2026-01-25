@@ -18,6 +18,7 @@ nette:
 ```
 
 ### Breaking Changes
+* **Breaking**: `BootstrapRenderer` requires individual runtime dependencies. This is a potential breaking change.
 * **Breaking**: `BootstrapRenderer` no longer calls `$template->setTranslator($form->getTranslator())`. If you relied on this for `{_...}` / `|translate` in Latte templates, configure Latte translation in your application instead. Form translations still work via `$form->setTranslator($translator)`.
 
 ### Changes
