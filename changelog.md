@@ -1,9 +1,13 @@
 # Changelog
 
-## v2.3.0-preview
+## v2.3.0
 
 This release targets Nette Framework 2.3, Latte 2.3 and requires PHP 5.6+.
 The Bootstrap v2.3.2 is the reference version for markup and test fixtures.
+
+### Changes
+
+- **Nette 2.3 Forms Rendering**: submit buttons are rendered differently compared to Nette 2.2 forms. The `id` attribute might not be always present.
 
 
 ## v2.2.0
