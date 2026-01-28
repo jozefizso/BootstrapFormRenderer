@@ -14,7 +14,9 @@ use Latte\Engine;
 use Nette;
 use Nette\Application\UI\ITemplate;
 use Nette\Bridges\ApplicationLatte\Template;
+use Nette\Bridges\ApplicationLatte\UIMacros;
 use Nette\Bridges\FormsLatte\FormMacros;
+use Nette\Bridges\FormsLatte\Runtime as FormsLatteRuntime;
 use Nette\Forms\Controls;
 use Nette\Utils\Html;
 
@@ -61,6 +63,12 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 */
 	private $template;
 
+	/** @var \Nette\Application\UI\Presenter|null */
+	private $templatePresenter;
+
+	/** @var bool */
+	private $templateHasUIMacros = false;
+
 
 
 	/**
@@ -83,27 +91,44 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 */
 	public function render(Nette\Forms\Form $form, $mode = NULL, $args = NULL)
 	{
-		if ($this->template === NULL) {
-			if ($presenter = $form->lookup('Nette\Application\UI\Presenter', FALSE)) {
-				/** @var \Nette\Application\UI\Presenter $presenter */
-				$this->template = clone $presenter->getTemplate();
+		/** @var \Nette\Application\UI\Presenter|null $presenter */
+		$presenter = $form->lookup('Nette\Application\UI\Presenter', FALSE);
 
-			} else {
-				$engine = new Engine();
-				$engine->onCompile[] = function (Engine $engine) {
-					FormMacros::install($engine->getCompiler());
-					\Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
-				};
-				$this->template = new Template($engine);
+		// Use a dedicated Latte engine for internal renderer templates.
+		// Cloning presenter template would bring in UI runtime providers where uiControl is Presenter, which triggers
+		// auto-layout for templates with blocks (our internal templates use blocks heavily).
+		if (
+			$this->template === NULL
+			|| $this->templatePresenter !== $presenter
+			|| ($presenter && !$this->templateHasUIMacros)
+		) {
+			$engine = new Engine();
+			$engine->onCompile[] = function (Engine $engine) use ($presenter) {
+				FormMacros::install($engine->getCompiler());
+				\Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
+
+				if ($presenter) {
+					UIMacros::install($engine->getCompiler());
+				}
+			};
+
+			if ($presenter) {
+				$engine->addProvider('uiPresenter', $presenter);
+				$engine->addProvider('uiControl', new UiControlProxy($presenter));
+				$engine->addProvider('uiNonce', NULL);
 			}
+
+			$this->template = new Template($engine);
+			$this->templatePresenter = $presenter;
+			$this->templateHasUIMacros = (bool) $presenter;
 		}
 
-		// Prevent Nette UI macros from treating internal renderer templates as presenter views.
-		// Otherwise templates like `@form.latte` may auto-extend the presenter's layout and fail on missing blocks.
-		$this->template->control = NULL;
-		$this->template->_control = NULL;
-		$this->template->presenter = NULL;
-		$this->template->_presenter = NULL;
+		// Provide conventional Nette template variables for included user templates (e.g. control templates using {form name}).
+		// This is independent from Latte providers used by UI macros.
+		$this->template->control = $presenter;
+		$this->template->_control = $presenter;
+		$this->template->presenter = $presenter;
+		$this->template->_presenter = $presenter;
 
 		if ($this->form !== $form) {
 			$this->form = $form;
@@ -125,6 +150,11 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			}
 		}
 
+		// Nette form macros ({input}, {label}, n:name, ...) rely on $this->global->formsStack.
+		// Our internal templates render inputs without going through Nette's {form} macro, so pre-seed the stack.
+		// (This also prevents warnings like: end() expects parameter 1 to be array, null given.)
+		$this->template->getLatte()->addProvider('formsStack', [$this->form]);
+
 		$this->template->setFile(__DIR__ . '/@form.latte');
 		$this->template->_form = $this->form;
 		$this->template->form = $this->form;
@@ -134,13 +164,13 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			if ($args) {
 				$this->form->getElementPrototype()->addAttributes($args);
 			}
-			$this->template->render();
+			return $this->captureTemplateRender();
 
 		} elseif ($mode === 'begin') {
-			FormMacros::renderFormBegin($this->form, (array)$args);
+			return FormsLatteRuntime::renderFormBegin($this->form, (array) $args);
 
 		} elseif ($mode === 'end') {
-			FormMacros::renderFormEnd($this->form);
+			return FormsLatteRuntime::renderFormEnd($this->form);
 
 		} else {
 
@@ -157,7 +187,39 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			$this->template->setFile(__DIR__ . '/@parts.latte');
 			$this->template->mode = $mode;
 			$this->template->attrs = (array) $attrs;
+			return $this->captureTemplateRender();
+		}
+	}
+
+	/**
+	 * Renders the current template to string.
+	 * @return string
+	 */
+	private function captureTemplateRender()
+	{
+		$previousHandler = null;
+		$previousHandler = set_error_handler(function () use (&$previousHandler) {
+			$args = func_get_args();
+			$severity = isset($args[0]) ? $args[0] : null;
+
+			// Latte 2.4 triggers E_USER_DEPRECATED for legacy macros like `{? ...}`.
+			// Older projects may still have such templates used as form control templates.
+			if ($severity === E_USER_DEPRECATED) {
+				return true;
+			}
+
+			if ($previousHandler) {
+				return call_user_func_array($previousHandler, $args);
+			}
+			return false;
+		});
+
+		try {
+			ob_start();
 			$this->template->render();
+			return ob_get_clean();
+		} finally {
+			restore_error_handler();
 		}
 	}
 
