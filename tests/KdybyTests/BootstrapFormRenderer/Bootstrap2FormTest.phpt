@@ -17,6 +17,7 @@ use Tester\Assert;
 use Tester\TestCase;
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/TestHelpers.php';
 
 
 /**
@@ -24,6 +25,7 @@ require_once __DIR__ . '/../bootstrap.php';
  */
 class Bootstrap2FormTest extends TestCase
 {
+	use BootstrapFormRendererTestHelpers;
 
 	/**
 	 * Test that Bootstrap2Form can be instantiated
@@ -51,14 +53,7 @@ class Bootstrap2FormTest extends TestCase
 	public function testFormHasBootstrapRenderer()
 	{
 		$form = new Bootstrap2Form();
-
-		// Get the form's renderer through reflection
-		$reflection = new \ReflectionClass('Nette\Forms\Form');
-		$property = $reflection->getProperty('renderer');
-		$property->setAccessible(TRUE);
-		$renderer = $property->getValue($form);
-
-		Assert::type('Kdyby\BootstrapFormRenderer\BootstrapRenderer', $renderer);
+		$this->assertFormUsesBootstrapRenderer($form);
 	}
 
 
@@ -87,16 +82,10 @@ class Bootstrap2FormTest extends TestCase
 		$form->addText('email', 'Email');
 		$form->addSubmit('send', 'Submit');
 
-		// Render the form
-		ob_start();
-		$form->render();
-		$output = ob_get_clean();
-
-		// Check for Bootstrap 2 CSS classes
-		Assert::contains('form-horizontal', $output);
-		Assert::contains('control-group', $output);
-		Assert::contains('control-label', $output);
-		Assert::contains('controls', $output);
+		$output = $this->captureOutput(function () use ($form) {
+			$form->render();
+		});
+		$this->assertBootstrap2MarkupPresent($output);
 	}
 
 
@@ -134,17 +123,12 @@ class Bootstrap2FormTest extends TestCase
 		$newRenderer = new \Nette\Forms\Rendering\DefaultFormRenderer();
 		$form->setRenderer($newRenderer);
 
-		// Get the form's renderer through reflection
-		$reflection = new \ReflectionClass('Nette\Forms\Form');
-		$property = $reflection->getProperty('renderer');
-		$property->setAccessible(TRUE);
-		$renderer = $property->getValue($form);
-
+		$renderer = $this->getFormRenderer($form);
 		Assert::type('Nette\Forms\Rendering\DefaultFormRenderer', $renderer);
 		Assert::notSame('Kdyby\BootstrapFormRenderer\BootstrapRenderer', get_class($renderer));
 	}
 
-	}
+}
 
 
 class PresenterMock extends \Nette\Application\UI\Presenter

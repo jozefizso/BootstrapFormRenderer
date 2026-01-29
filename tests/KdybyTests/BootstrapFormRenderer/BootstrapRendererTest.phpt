@@ -13,50 +13,23 @@ namespace KdybyTests\FormRenderer;
 use Kdyby;
 use Kdyby\BootstrapFormRenderer;
 use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
-use Kdyby\BootstrapFormRenderer\DI\RendererExtension;
 use Nette;
-use Nette\Configurator;
 use Nette\Forms\Form;
 use Nette\Utils\Html;
 use Nette\Utils\Strings;
 use Tester\Assert;
-use Tester\TestCase;
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/TestHelpers.php';
 
 
 
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
-class BootstrapRendererTest extends TestCase
+class BootstrapRendererTest extends BootstrapContainerTestCase
 {
-
-	/**
-	 * @var \Nette\DI\Container
-	 */
-	protected $container;
-
-
-
-	public function setUp()
-	{
-		$config = new Configurator();
-		$config->setTempDirectory(TEMP_DIR);
-		$config->addParameters(array('container' => array('class' => 'SystemContainer_' . md5(TEMP_DIR))));
-		// Nette CacheExtension (2.3.x) uses SQLiteJournal by default, which requires pdo_sqlite.
-		// Test runner uses `php -n`, so pdo_sqlite may be unavailable depending on runtime config.
-		// Override journal to FileJournal to make tests deterministic across PHP installations.
-		$config->onCompile[] = function ($config, $compiler) {
-			$builder = $compiler->getContainerBuilder();
-			if (method_exists($builder, 'hasDefinition') && $builder->hasDefinition('cache.journal')) {
-				$builder->getDefinition('cache.journal')
-					->setFactory('Nette\Caching\Storages\FileJournal', array(TEMP_DIR . '/cache'));
-			}
-		};
-		RendererExtension::register($config);
-		$this->container = $config->createContainer();
-	}
+	// @see BootstrapContainerTestCase::setUp()
 
 
 
@@ -472,10 +445,10 @@ class BootstrapRendererTest extends TestCase
 			->setRequired('Please enter your name')
 			->addRule($form::MIN_LENGTH, 'Name must be at least %d characters', 3);
 
-		$form->addText('email', 'Email Address')
-			->setType('email')
-			->setRequired('Please enter your email')
-			->addRule($form::EMAIL, 'Please enter a valid email address');
+			$form->addText('email', 'Email Address')
+				->setType('email')
+				->setRequired('Please enter your email')
+				->addRule($form::EMAIL, 'Please enter a valid email address');
 
 			$form->addText('phone', 'Phone Number')
 				->setRequired(FALSE)
@@ -706,14 +679,9 @@ class BootstrapRendererTest extends TestCase
 			$latte->addProvider('formsStack', array($params['_form']));
 		}
 
-		// render template
-		ob_start();
-		try {
+		$rendered = $this->captureOutput(function () use ($template) {
 			$template->render();
-		} catch (\Exception $e) {
-			ob_end_clean();
-			throw $e;
-		}
+		});
 
 		$strip = function ($s) {
 			return Strings::replace($s, '#(</textarea|</pre|</script|^).*?(?=<textarea|<pre|<script|\z)#si', function ($m) {
@@ -721,7 +689,7 @@ class BootstrapRendererTest extends TestCase
 			});
 		};
 
-		$output = $strip(Strings::normalize(ob_get_clean()));
+		$output = $strip(Strings::normalize($rendered));
 		$expected = $strip(Strings::normalize(file_get_contents($expectedOutput)));
 		Assert::match($expected, $output);
 	}
@@ -761,11 +729,11 @@ class ArraySessionStorage implements \SessionHandlerInterface
 	/**
 	 * @var array
 	 */
-	private $session;
+	private $storage;
 
 
 
-	public function __construct(Nette\Http\Session $session = NULL)
+	public function __construct(Nette\Http\Session $session)
 	{
 		$session->setOptions(array('cookie_disabled' => TRUE));
 	}
@@ -774,7 +742,7 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 	public function open($savePath, $sessionName)
 	{
-		$this->session = array();
+		$this->storage = array();
 		return true;
 	}
 
@@ -782,7 +750,7 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 	public function close()
 	{
-		$this->session = array();
+		$this->storage = array();
 		return true;
 	}
 
@@ -790,14 +758,14 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 	public function read($id)
 	{
-		return isset($this->session[$id]) ? $this->session[$id] : '';
+		return isset($this->storage[$id]) ? $this->storage[$id] : '';
 	}
 
 
 
 	public function write($id, $data)
 	{
-		$this->session[$id] = $data;
+		$this->storage[$id] = $data;
 		return true;
 	}
 
@@ -805,7 +773,7 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 	public function destroy($id)
 	{
-		unset($this->session[$id]);
+		unset($this->storage[$id]);
 		return true;
 	}
 

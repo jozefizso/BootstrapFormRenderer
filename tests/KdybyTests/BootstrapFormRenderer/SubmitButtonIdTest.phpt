@@ -19,10 +19,12 @@ use Tester\Assert;
 use Tester\TestCase;
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/TestHelpers.php';
 
 
 class SubmitButtonIdTest extends TestCase
 {
+	use BootstrapFormRendererTestHelpers;
 
 	public function testAnonymousFormWithButtonAndSubmit()
 	{
@@ -86,9 +88,9 @@ class SubmitButtonIdTest extends TestCase
 	private function warmupRenderer(Form $form)
 	{
 		// Ensure BootstrapRenderer prepares controls before we read their HTML.
-		ob_start();
-		$form->render();
-		ob_end_clean();
+		$this->captureOutput(function () use ($form) {
+			$form->render();
+		});
 	}
 
 
@@ -104,15 +106,9 @@ class SubmitButtonIdTest extends TestCase
 			->setFile($latteFile)
 			->setParameters(array('form' => $form));
 
-		ob_start();
-		try {
+		$actual = Strings::normalize($this->captureOutput(function () use ($template) {
 			$template->render();
-		} catch (\Exception $e) {
-			ob_end_clean();
-			throw $e;
-		}
-
-		$actual = Strings::normalize(ob_get_clean());
+		}));
 		$expected = Strings::normalize(file_get_contents($expectedOutput));
 		Assert::same($expected, $actual);
 	}
@@ -134,6 +130,4 @@ class ControlMock extends Nette\Application\UI\Control
 {
 }
 
-
-$testCase = new SubmitButtonIdTest();
-$testCase->run();
+run(new SubmitButtonIdTest());
