@@ -98,7 +98,7 @@ class FormMacros extends Latte\Macros\MacroSet
 			throw new CompileException("Cannot render {{$node->name}} inside an existing <form> element.");
 		}
 		$node->tokenizer->reset();
-		$node->isEmpty = in_array($word, $inlineParts, TRUE);
+		$node->empty = in_array($word, $inlineParts, TRUE);
 
 		return $writer->write('$form = $_form = ' . get_called_class() . '::renderFormPart(%node.word, %node.array, get_defined_vars())');
 	}
