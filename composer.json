@@ -21,10 +21,10 @@
 	},
 	"require": {
 		"php": ">=5.6",
-		"latte/latte": "~2.4.0",
-		"nette/application": "~2.4.0",
-		"nette/forms": "~2.4.0",
-		"nette/utils": "~2.4.0"
+		"latte/latte": "^2.4",
+		"nette/application": "^2.4",
+		"nette/forms": "^2.4",
+		"nette/utils": "^2.4"
 	},
 	"suggest": {
 		"nette/di": "Required to register the renderer via DI extension.",
