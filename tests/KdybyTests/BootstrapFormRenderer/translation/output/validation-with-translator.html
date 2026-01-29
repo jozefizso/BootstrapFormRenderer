@@ -22,20 +22,20 @@
     <p class="help-inline">Zadajte prosím platnú e-mailovú adresu</p>
   </div>
 </div>
-<div id="frm-foo-phone-pair" class="control-group error">
-  <label class="control-label" for="frm-foo-phone">Telefónne číslo</label>
-  <div class="controls">
-    <input type="text" name="phone" id="frm-foo-phone" data-nette-rules='[{"op":":pattern","msg":"Telefón musí byť vo formáte XXX-XXX-XXXX","arg":"[0-9]{3}-[0-9]{3}-[0-9]{4}"}]' pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" value="123">
-    <p class="help-inline">Telefón musí byť vo formáte XXX-XXX-XXXX</p>
-  </div>
-</div>
-<div id="frm-foo-age-pair" class="control-group error">
-  <label class="control-label" for="frm-foo-age">Vek</label>
-  <div class="controls">
-    <input type="text" name="age" id="frm-foo-age" data-nette-rules='[{"op":":integer","msg":"Vek musí byť číslo"},{"op":":range","msg":"Vek musí byť medzi 18 a 100","arg":[18,100]}]' value="150">
-    <p class="help-inline">Vek musí byť medzi 18 a 100</p>
-  </div>
-</div>
+	<div id="frm-foo-phone-pair" class="control-group error">
+	  <label class="control-label" for="frm-foo-phone">Telefónne číslo</label>
+	  <div class="controls">
+	    <input type="text" name="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" id="frm-foo-phone" data-nette-rules='[{"op":"optional"},{"op":":pattern","msg":"Telefón musí byť vo formáte XXX-XXX-XXXX","arg":"[0-9]{3}-[0-9]{3}-[0-9]{4}"}]' value="123">
+	    <p class="help-inline">Telefón musí byť vo formáte XXX-XXX-XXXX</p>
+	  </div>
+	</div>
+	<div id="frm-foo-age-pair" class="control-group error">
+	  <label class="control-label" for="frm-foo-age">Vek</label>
+	  <div class="controls">
+	    <input type="number" name="age" min="18" max="100" id="frm-foo-age" data-nette-rules='[{"op":"optional"},{"op":":integer","msg":"Vek musí byť číslo"},{"op":":range","msg":"Vek musí byť medzi 18 a 100","arg":[18,100]}]' value="150">
+	    <p class="help-inline">Vek musí byť medzi 18 a 100</p>
+	  </div>
+	</div>
 <div id="frm-foo-message-pair" class="control-group required error">
   <label class="required control-label" for="frm-foo-message">Správa</label>
   <div class="controls">

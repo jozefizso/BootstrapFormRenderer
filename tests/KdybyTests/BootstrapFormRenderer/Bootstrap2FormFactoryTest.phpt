@@ -156,7 +156,9 @@ class Bootstrap2FormFactoryTest extends TestCase
 	public function testFormRendersWithBootstrapMarkup()
 	{
 		$factory = new Bootstrap2FormFactory();
-		$form = $factory->create();
+		$presenter = new PresenterMock();
+		$form = $factory->create($presenter, 'foo');
+		$form->setAction('');
 
 		$form->addText('email', 'Email');
 		$form->addSubmit('send', 'Submit');
@@ -199,5 +201,8 @@ class Bootstrap2FormFactoryTest extends TestCase
 	}
 }
 
+class PresenterMock extends \Nette\Application\UI\Presenter
+{
+}
 
 run(new Bootstrap2FormFactoryTest());

@@ -15,8 +15,8 @@ use Kdyby\BootstrapFormRenderer;
 use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
 use Kdyby\BootstrapFormRenderer\DI\RendererExtension;
 use Nette;
-use Nette\Application\UI\Form;
 use Nette\Configurator;
+use Nette\Forms\Form;
 use Nette\Utils\Html;
 use Nette\Utils\Strings;
 use Tester\Assert;
@@ -61,7 +61,7 @@ class BootstrapRendererTest extends TestCase
 
 
 	/**
-	 * @return \Nette\Application\UI\Form
+	 * @return \Nette\Forms\Form
 	 */
 	private function dataCreateRichForm()
 	{
@@ -69,7 +69,7 @@ class BootstrapRendererTest extends TestCase
 		$form->addError("General failure!");
 
 		$grouped = $form->addContainer('grouped');
-		$grouped->currentGroup = $form->addGroup('Skupina', FALSE);
+		$grouped->setCurrentGroup($form->addGroup('Skupina', FALSE));
 		$grouped->addText('name', 'Jméno')->getLabelPrototype()->addClass('test');
 		$grouped->addText('email', 'Email')->setType('email');
 		$grouped->addSelect('sex', 'Pohlaví', array(1 => 'Muž', 2 => 'Žena'));
@@ -80,7 +80,7 @@ class BootstrapRendererTest extends TestCase
 		$grouped->addSubmit('poke2', 'Ještě Šťouchnout')->setAttribute('class', 'btn-success');
 
 		$other = $form->addContainer('other');
-		$other->currentGroup = $form->addGroup('Other', FALSE);
+		$other->setCurrentGroup($form->addGroup('Other', FALSE));
 		$other->addRadioList('sexy', 'Sexy', array(1 => 'Ano', 2 => 'Ne'));
 		$other->addPassword('heslo', 'Heslo')->addError('chybka!');
 		$other->addSubmit('pass', "Nastavit heslo")->setAttribute('class', 'btn-warning');
@@ -477,12 +477,14 @@ class BootstrapRendererTest extends TestCase
 			->setRequired('Please enter your email')
 			->addRule($form::EMAIL, 'Please enter a valid email address');
 
-		$form->addText('phone', 'Phone Number')
-			->addRule($form::PATTERN, 'Phone must be in format XXX-XXX-XXXX', '[0-9]{3}-[0-9]{3}-[0-9]{4}');
+			$form->addText('phone', 'Phone Number')
+				->setRequired(FALSE)
+				->addRule($form::PATTERN, 'Phone must be in format XXX-XXX-XXXX', '[0-9]{3}-[0-9]{3}-[0-9]{4}');
 
-		$form->addText('age', 'Age')
-			->addRule($form::INTEGER, 'Age must be a number')
-			->addRule($form::RANGE, 'Age must be between %d and %d', array(18, 100));
+			$form->addText('age', 'Age')
+				->setRequired(FALSE)
+				->addRule($form::INTEGER, 'Age must be a number')
+				->addRule($form::RANGE, 'Age must be between %d and %d', array(18, 100));
 
 		$form->addTextArea('message', 'Message')
 			->setRequired('Please enter your message')
@@ -646,7 +648,7 @@ class BootstrapRendererTest extends TestCase
 	/**
 	 * @param $latteFile
 	 * @param $expectedOutput
-	 * @param \Nette\Application\UI\Form $form
+	 * @param \Nette\Forms\Form $form
 	 * @throws \Exception
 	 */
 	private function assertFormTemplateOutput($latteFile, $expectedOutput, Form $form)
@@ -688,6 +690,21 @@ class BootstrapRendererTest extends TestCase
 	private function assertTemplateOutput(array $params, $latteFile, $expectedOutput)
 	{
 		$template = $this->createTemplate()->setFile($latteFile)->setParameters($params);
+		$latte = $template->getLatte();
+
+		// Ensure `{form foo}` resolves from the provided control component tree.
+		if (isset($params['_control']) && is_object($params['_control'])) {
+			$latte->addProvider('uiControl', $params['_control']);
+		} elseif (isset($params['control']) && is_object($params['control'])) {
+			$latte->addProvider('uiControl', $params['control']);
+		}
+
+		// Ensure `{input ...}` works even when template uses manual `$form->render('begin')` without `{form ...}`.
+		if (isset($params['form']) && $params['form'] instanceof \Nette\Forms\Form) {
+			$latte->addProvider('formsStack', array($params['form']));
+		} elseif (isset($params['_form']) && $params['_form'] instanceof \Nette\Forms\Form) {
+			$latte->addProvider('formsStack', array($params['_form']));
+		}
 
 		// render template
 		ob_start();

@@ -10,7 +10,8 @@
 namespace KdybyTests\FormRenderer;
 
 use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
-use Nette\Application\UI\Form;
+use Nette\Forms\Form;
+use Nette\Utils\Strings;
 use Tester\Assert;
 use Tester\TestCase;
 
@@ -32,13 +33,13 @@ class BootstrapRendererFallbackTest extends TestCase
 
 		ob_start();
 		$form->render();
-		$actual = ob_get_clean();
+			$actual = ob_get_clean();
 
-		$expected = file_get_contents(__DIR__ . '/fallback/output/basic.html');
-		Assert::same($expected, $actual);
+			$expected = file_get_contents(__DIR__ . '/fallback/output/basic.html');
+			Assert::same(Strings::normalize($expected), Strings::normalize($actual));
+		}
+
 	}
-
-}
 
 
 $testCase = new BootstrapRendererFallbackTest();

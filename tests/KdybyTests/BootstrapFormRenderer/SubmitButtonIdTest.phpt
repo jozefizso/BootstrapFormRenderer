@@ -12,8 +12,8 @@ namespace KdybyTests\FormRenderer;
 use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
 use Latte\Engine;
 use Nette;
-use Nette\Application\UI\Form;
 use Nette\Bridges\ApplicationLatte\Template;
+use Nette\Forms\Form;
 use Nette\Utils\Strings;
 use Tester\Assert;
 use Tester\TestCase;
@@ -80,7 +80,7 @@ class SubmitButtonIdTest extends TestCase
 
 
 	/**
-	 * @param \Nette\Application\UI\Form $form
+	 * @param \Nette\Forms\Form $form
 	 * @return void
 	 */
 	private function warmupRenderer(Form $form)
@@ -93,7 +93,7 @@ class SubmitButtonIdTest extends TestCase
 
 
 	/**
-	 * @param \Nette\Application\UI\Form $form
+	 * @param \Nette\Forms\Form $form
 	 * @param string $latteFile
 	 * @param string $expectedOutput
 	 * @return void
@@ -137,4 +137,3 @@ class ControlMock extends Nette\Application\UI\Control
 
 $testCase = new SubmitButtonIdTest();
 $testCase->run();
-
