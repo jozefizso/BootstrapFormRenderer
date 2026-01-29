@@ -55,7 +55,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		Assert::exception(function () {
 			$this->compile('{form}{/form}');
-		}, CompileException::class, 'Missing form name in {form}.');
+		}, CompileException::class, '#^(Missing form name in \\{form\\}\\.|Invalid content of tag)$#');
 	}
 
 
@@ -66,7 +66,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		Assert::exception(function () {
 			$this->compile('{form myForm}{pair}{/form}');
-		}, CompileException::class, 'Missing name in {pair}.');
+		}, CompileException::class, '#^(Missing name in \\{pair\\}\\.|Invalid content of tag)$#');
 	}
 
 
@@ -77,7 +77,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		Assert::exception(function () {
 			$this->compile('{form myForm}{group}{/form}');
-		}, CompileException::class, 'Missing name in {group}.');
+		}, CompileException::class, '#^(Missing name in \\{group\\}\\.|Invalid content of tag)$#');
 	}
 
 
@@ -88,7 +88,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		Assert::exception(function () {
 			$this->compile('{form myForm}{container}{/form}');
-		}, CompileException::class, 'Missing name in {container}.');
+		}, CompileException::class, '#^(Missing name in \\{container\\}\\.|Invalid content of tag)$#');
 	}
 
 

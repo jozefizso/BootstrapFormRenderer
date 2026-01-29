@@ -39,7 +39,14 @@ class BootstrapRendererFallbackTest extends TestCase
 		});
 
 		$expected = file_get_contents(__DIR__ . '/fallback/output/basic.html');
-		Assert::same(Strings::normalize($expected), Strings::normalize($actual));
+		$normalize = function ($s) {
+			$s = Strings::normalize($s);
+			// Latte versions may differ in insignificant blank lines.
+			$s = preg_replace("#\\n[ \\t]*\\n([ \\t]*<!--)#", "\n$1", $s);
+			$s = preg_replace("#\\n{3,}#", "\n\n", $s);
+			return trim($s);
+		};
+		Assert::same($normalize($expected), $normalize($actual));
 	}
 }
 
