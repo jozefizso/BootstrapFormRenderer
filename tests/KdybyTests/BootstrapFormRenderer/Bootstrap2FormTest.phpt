@@ -81,7 +81,9 @@ class Bootstrap2FormTest extends TestCase
 	 */
 	public function testFormRendersWithBootstrapMarkup()
 	{
-		$form = new Bootstrap2Form();
+		$presenter = new PresenterMock();
+		$form = new Bootstrap2Form($presenter, 'foo');
+		$form->setAction('');
 		$form->addText('email', 'Email');
 		$form->addSubmit('send', 'Submit');
 
@@ -142,6 +144,11 @@ class Bootstrap2FormTest extends TestCase
 		Assert::notSame('Kdyby\BootstrapFormRenderer\BootstrapRenderer', get_class($renderer));
 	}
 
+	}
+
+
+class PresenterMock extends \Nette\Application\UI\Presenter
+{
 }
 
 
