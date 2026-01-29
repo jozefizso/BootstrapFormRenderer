@@ -13,46 +13,17 @@
 namespace KdybyTests\FormRenderer;
 
 use Kdyby\BootstrapFormRenderer\Bootstrap2FormFactory;
-use Kdyby\BootstrapFormRenderer\DI\RendererExtension;
-use Nette\Configurator;
 use Tester\Assert;
-use Tester\TestCase;
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/TestHelpers.php';
 
 
 /**
  * Tests for Bootstrap2FormFactory.
  */
-class Bootstrap2FormFactoryTest extends TestCase
+class Bootstrap2FormFactoryTest extends BootstrapContainerTestCase
 {
-
-	/**
-	 * @var \Nette\DI\Container
-	 */
-	protected $container;
-
-
-	public function setUp()
-	{
-		$config = new Configurator();
-		$config->setTempDirectory(TEMP_DIR);
-		$config->addParameters(array('container' => array('class' => 'SystemContainer_' . md5(TEMP_DIR))));
-		// Nette CacheExtension (2.3.x) uses SQLiteJournal by default, which requires pdo_sqlite.
-		// Test runner uses `php -n`, so pdo_sqlite may be unavailable depending on runtime config.
-		// Override journal to FileJournal to make tests deterministic across PHP installations.
-		$config->onCompile[] = function ($config, $compiler) {
-			$builder = $compiler->getContainerBuilder();
-			if (method_exists($builder, 'hasDefinition') && $builder->hasDefinition('cache.journal')) {
-				$builder->getDefinition('cache.journal')
-					->setFactory('Nette\Caching\Storages\FileJournal', array(TEMP_DIR . '/cache'));
-			}
-		};
-		RendererExtension::register($config);
-		$this->container = $config->createContainer();
-	}
-
-
 	/**
 	 * Test that Bootstrap2FormFactory can be instantiated directly
 	 */
@@ -83,14 +54,7 @@ class Bootstrap2FormFactoryTest extends TestCase
 		$factory = new Bootstrap2FormFactory();
 		$form = $factory->create();
 
-		// Get the form's renderer through reflection since there's no getter
-		// In Nette 2.1, the renderer property is in the parent Form class
-		$reflection = new \ReflectionClass('Nette\Forms\Form');
-		$property = $reflection->getProperty('renderer');
-		$property->setAccessible(TRUE);
-		$renderer = $property->getValue($form);
-
-		Assert::type('Kdyby\BootstrapFormRenderer\BootstrapRenderer', $renderer);
+		$this->assertFormUsesBootstrapRenderer($form);
 	}
 
 
@@ -139,14 +103,7 @@ class Bootstrap2FormFactoryTest extends TestCase
 		$factory = $this->container->getByType('Kdyby\BootstrapFormRenderer\Bootstrap2FormFactory');
 		$form = $factory->create();
 
-		// Get the form's renderer through reflection
-		// In Nette 2.1, the renderer property is in the parent Form class
-		$reflection = new \ReflectionClass('Nette\Forms\Form');
-		$property = $reflection->getProperty('renderer');
-		$property->setAccessible(TRUE);
-		$renderer = $property->getValue($form);
-
-		Assert::type('Kdyby\BootstrapFormRenderer\BootstrapRenderer', $renderer);
+		$this->assertFormUsesBootstrapRenderer($form);
 	}
 
 
@@ -163,16 +120,10 @@ class Bootstrap2FormFactoryTest extends TestCase
 		$form->addText('email', 'Email');
 		$form->addSubmit('send', 'Submit');
 
-		// Render the form
-		ob_start();
-		$form->render();
-		$output = ob_get_clean();
-
-		// Check for Bootstrap 2 CSS classes
-		Assert::contains('form-horizontal', $output);
-		Assert::contains('control-group', $output);
-		Assert::contains('control-label', $output);
-		Assert::contains('controls', $output);
+		$output = $this->captureOutput(function () use ($form) {
+			$form->render();
+		});
+		$this->assertBootstrap2MarkupPresent($output);
 	}
 
 
