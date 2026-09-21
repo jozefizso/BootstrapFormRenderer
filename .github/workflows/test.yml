@@ -26,6 +26,7 @@ jobs:
       with:
         php-version: ${{ matrix.php-version }}
         coverage: none
+        tools: composer:v2.2
 
     - name: Diagnose pdo_sqlite extension
       run: |
