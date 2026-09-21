@@ -38,7 +38,7 @@
 		"nette/robot-loader": "~2.4.0",
 		"nette/safe-stream": "~2.3.0",
 		"tracy/tracy": "~2.4.0",
-		"nette/tester": "~2.0.2",
+		"nette/tester": ">=2.0 <2.4",
 		"php-parallel-lint/php-parallel-lint": "~1.4.0"
 	},
 	"autoload": {
