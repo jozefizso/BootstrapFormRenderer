@@ -24,8 +24,8 @@ and layout structure that Bootstrap requires.
 
 ## Requirements
 
-- PHP 5.6, 7.0 or 7.1
-- [Nette Framework](https://github.com/nette/nette) 2.3
+- PHP 5.6, 7.1, 7.2, 7.4 and 8.0
+- [Nette Framework](https://github.com/nette/nette) 2.4
 
 
 ## Getting Started
