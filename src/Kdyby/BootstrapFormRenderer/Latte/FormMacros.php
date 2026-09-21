@@ -100,7 +100,7 @@ class FormMacros extends Latte\Macros\MacroSet
 		$node->tokenizer->reset();
 		$node->empty = in_array($word, $inlineParts, TRUE);
 
-		return $writer->write('$form = $_form = ' . get_called_class() . '::renderFormPart(%node.word, %node.array, get_defined_vars())');
+		return $writer->write('$form = $_form = ' . ($node->empty ? '' : '$this->global->formsStack[] = ') . get_called_class() . '::renderFormPart(%node.word, %node.array, get_defined_vars())');
 	}
 
 
@@ -111,7 +111,7 @@ class FormMacros extends Latte\Macros\MacroSet
 	 */
 	public function macroFormEnd(MacroNode $node, PhpWriter $writer)
 	{
-		return $writer->write('echo Nette\Bridges\FormsLatte\Runtime::renderFormEnd($_form)');
+		return $writer->write('echo Nette\Bridges\FormsLatte\Runtime::renderFormEnd(array_pop($this->global->formsStack))');
 	}
 
 
