@@ -28,6 +28,10 @@ jobs:
         coverage: none
         tools: composer:v2.2
 
+    - name: Remove JSON extension configuration for PHP 8
+      if: matrix.php-version == '8.0'
+      run: sed -i '/^extension=json\.so$/d' ./tests/php-tests.ini
+
     - name: Diagnose pdo_sqlite extension
       run: |
         php --version
