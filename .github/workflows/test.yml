@@ -27,6 +27,13 @@ jobs:
         php-version: ${{ matrix.php-version }}
         coverage: none
 
+    - name: Diagnose pdo_sqlite extension
+      run: |
+        php --version
+        php --ini
+        php -r 'printf("default: pdo=%s sqlite=%s drivers=%s\n", extension_loaded("PDO") ? "yes" : "no", extension_loaded("pdo_sqlite") ? "yes" : "no", json_encode(PDO::getAvailableDrivers()));'
+        php -n -c ./tests/php-tests.ini -r 'printf("tester: pdo=%s sqlite=%s drivers=%s\n", extension_loaded("PDO") ? "yes" : "no", extension_loaded("pdo_sqlite") ? "yes" : "no", json_encode(PDO::getAvailableDrivers()));'
+
     - name: Install dependencies
       run: composer install --no-interaction --prefer-source --dev
 
