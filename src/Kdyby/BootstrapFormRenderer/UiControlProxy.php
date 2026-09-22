@@ -22,7 +22,7 @@ use Nette\Application\UI\Presenter;
  * We keep `link` / `{control ...}` support by delegating to the presenter, while
  * avoiding the `instanceof Presenter` check.
  */
-class UiControlProxy
+class UiControlProxy implements \ArrayAccess
 {
 	/** @var Presenter */
 	private $presenter;
@@ -43,6 +43,30 @@ class UiControlProxy
 	public function getComponent($name, $throw = true)
 	{
 		return $this->presenter->getComponent($name, $throw);
+	}
+
+
+	public function offsetExists($offset)
+	{
+		return $this->presenter->offsetExists($offset);
+	}
+
+
+	public function offsetGet($offset)
+	{
+		return $this->presenter->offsetGet($offset);
+	}
+
+
+	public function offsetSet($offset, $value)
+	{
+		$this->presenter->offsetSet($offset, $value);
+	}
+
+
+	public function offsetUnset($offset)
+	{
+		$this->presenter->offsetUnset($offset);
 	}
 
 
