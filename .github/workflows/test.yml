@@ -7,24 +7,32 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
+        os: ['ubuntu-22.04', 'ubuntu-24.04']
         php-version: ['5.6', '7.0', '7.1']
 
-    name: PHP ${{ matrix.php-version }}
+    name: ${{ matrix.os }} / PHP ${{ matrix.php-version }}
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Setup PHP ${{ matrix.php-version }}
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php-version }}
         coverage: none
+
+    - name: Diagnose pdo_sqlite extension
+      run: |
+        php --version
+        php --ini
+        php -r 'printf("default: pdo=%s sqlite=%s drivers=%s\n", extension_loaded("PDO") ? "yes" : "no", extension_loaded("pdo_sqlite") ? "yes" : "no", json_encode(PDO::getAvailableDrivers()));'
+        php -n -c ./tests/php-tests.ini -r 'printf("tester: pdo=%s sqlite=%s drivers=%s\n", extension_loaded("PDO") ? "yes" : "no", extension_loaded("pdo_sqlite") ? "yes" : "no", json_encode(PDO::getAvailableDrivers()));'
 
     - name: Install dependencies
       run: composer install --no-interaction --prefer-source --dev
@@ -43,7 +51,7 @@ jobs:
       run: for i in $(find ./tests -name \*.actual); do echo "--- $i"; cat $i; echo; echo; done
 
     - name: Publish test results
-      uses: dorny/test-reporter@v2.5.0
+      uses: dorny/test-reporter@v3.0.0
       if: always()
       with:
         name: Test Results (PHP ${{ matrix.php-version }})
