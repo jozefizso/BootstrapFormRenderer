@@ -179,6 +179,14 @@ The simplest way to render a complete form with all Bootstrap styling:
 {control contactForm}
 ```
 
+In PHP, casting the form to a string returns the complete HTML. Calling
+`$form->render()` writes the same HTML to the output stream:
+
+```php
+$html = (string) $form;
+$form->render();
+```
+
 ### Partial Form Rendering
 
 For more control over the form layout, you can render individual parts:
