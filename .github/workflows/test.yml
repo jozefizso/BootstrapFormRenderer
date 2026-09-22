@@ -7,14 +7,15 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
+        os: ['ubuntu-22.04', 'ubuntu-24.04']
         php-version: ['5.6', '7.0', '7.1']
 
-    name: PHP ${{ matrix.php-version }}
+    name: ${{ matrix.os }} / PHP ${{ matrix.php-version }}
 
     steps:
     - name: Checkout code
