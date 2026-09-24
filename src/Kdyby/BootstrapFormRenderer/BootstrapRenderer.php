@@ -12,9 +12,9 @@ namespace Kdyby\BootstrapFormRenderer;
 
 use Latte\Engine;
 use Nette;
-use Nette\Application\UI\ITemplate;
 use Nette\Bridges\ApplicationLatte\Template;
 use Nette\Bridges\FormsLatte\FormMacros;
+use Nette\Bridges\FormsLatte\Runtime as FormsLatteRuntime;
 use Nette\Forms\Controls;
 use Nette\Utils\Html;
 
@@ -57,16 +57,16 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	private $form;
 
 	/**
-	 * @var \Nette\Application\UI\ITemplate|\stdClass
+	 * @var \Nette\Bridges\ApplicationLatte\Template
 	 */
 	private $template;
 
 
 
 	/**
-	 * @param \Nette\Application\UI\ITemplate $template
+	 * @param \Nette\Bridges\ApplicationLatte\Template $template
 	 */
-	public function __construct(ITemplate $template = NULL)
+	public function __construct(Template $template = NULL)
 	{
 		$this->template = $template;
 	}
@@ -79,7 +79,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param \Nette\Forms\Form $form
 	 * @param string $mode
 	 * @param array $args
-	 * @return void
+	 * @return string
 	 */
 	public function render(Nette\Forms\Form $form, $mode = NULL, $args = NULL)
 	{
@@ -134,13 +134,13 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			if ($args) {
 				$this->form->getElementPrototype()->addAttributes($args);
 			}
-			$this->template->render();
+			return (string) $this->template;
 
 		} elseif ($mode === 'begin') {
-			FormMacros::renderFormBegin($this->form, (array)$args);
+			return FormsLatteRuntime::renderFormBegin($this->form, (array) $args);
 
 		} elseif ($mode === 'end') {
-			FormMacros::renderFormEnd($this->form);
+			return FormsLatteRuntime::renderFormEnd($this->form);
 
 		} else {
 
@@ -157,7 +157,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			$this->template->setFile(__DIR__ . '/@parts.latte');
 			$this->template->mode = $mode;
 			$this->template->attrs = (array) $attrs;
-			$this->template->render();
+			return (string) $this->template;
 		}
 	}
 

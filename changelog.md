@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.3.1
+
+This release targets Nette Framework 2.3, Latte 2.3 and requires PHP 5.6+.
+The Bootstrap v2.3.2 is the reference version for markup and test fixtures.
+
+### Changes
+
+- **IFormRenderer implementation**: `BootstrapRenderer::render()` now returns generated HTML as string value, as required by `IFormRenderer`.
+  The library now requires the `ApplicationLatte\Template` object to correctly render forms.
+  _This is a breaking change._
+
+
 ## v2.3.0
 
 This release targets Nette Framework 2.3, Latte 2.3 and requires PHP 5.6+.
