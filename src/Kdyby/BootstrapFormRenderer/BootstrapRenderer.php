@@ -13,6 +13,7 @@ namespace Kdyby\BootstrapFormRenderer;
 use Latte\Engine;
 use Nette;
 use Nette\Bridges\ApplicationLatte\Template;
+use Nette\Bridges\ApplicationLatte\UIMacros;
 use Nette\Bridges\FormsLatte\FormMacros;
 use Nette\Bridges\FormsLatte\Runtime as FormsLatteRuntime;
 use Nette\Forms\Controls;
@@ -61,6 +62,11 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 */
 	private $template;
 
+	/** @var \Nette\Application\UI\Presenter|null */
+	private $templatePresenter;
+	/** @var bool */
+	private $templateInjected;
+
 
 
 	/**
@@ -69,6 +75,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	public function __construct(Template $template = NULL)
 	{
 		$this->template = $template;
+		$this->templateInjected = $template !== NULL;
 	}
 
 
@@ -83,27 +90,82 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 */
 	public function render(Nette\Forms\Form $form, $mode = NULL, $args = NULL)
 	{
-		if ($this->template === NULL) {
-			if ($presenter = $form->lookup('Nette\Application\UI\Presenter', FALSE)) {
-				/** @var \Nette\Application\UI\Presenter $presenter */
-				$this->template = clone $presenter->getTemplate();
+		/** @var \Nette\Application\UI\Presenter|null $presenter */
+		$presenter = $form->lookup('Nette\Application\UI\Presenter', FALSE);
+
+		// Keep application Latte configuration for custom group and control templates.
+		if ($this->template === NULL || (!$this->templateInjected && $this->templatePresenter !== $presenter)) {
+			$template = NULL;
+			if ($presenter) {
+				try {
+					$presenterTemplate = $presenter->getTemplate();
+					$engine = clone $presenterTemplate->getLatte();
+					$template = clone $presenterTemplate;
+					$setLatte = \Closure::bind(function (Engine $engine) {
+						$this->latte = $engine;
+					}, $template, 'Nette\Bridges\ApplicationLatte\Template');
+					$setLatte($engine);
+
+				} catch (Nette\InvalidStateException $e) {
+					if ($e->getMessage() !== 'Service TemplateFactory has not been set.') {
+						throw $e;
+					}
+					$engine = $this->createLatteEngine(TRUE);
+				}
 
 			} else {
-				$engine = new Engine();
-				$engine->onCompile[] = function (Engine $engine) {
-					FormMacros::install($engine->getCompiler());
-					\Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
-				};
-				$this->template = new Template($engine);
+				$engine = $this->createLatteEngine(FALSE);
 			}
+
+			$this->template = $template ?: new Template($engine);
+			$this->templatePresenter = $presenter;
 		}
 
-		// Prevent Nette UI macros from treating internal renderer templates as presenter views.
-		// Otherwise templates like `@form.latte` may auto-extend the presenter's layout and fail on missing blocks.
-		$this->template->control = NULL;
-		$this->template->_control = NULL;
-		$this->template->presenter = NULL;
-		$this->template->_presenter = NULL;
+		// Keep an injected control scope when it belongs to the current presenter.
+		// The internal templates opt out of auto-layout, so a presenter needs no proxy.
+		$latte = $this->template->getLatte();
+		$providers = $latte->getProviders();
+		if ($presenter) {
+			$uiControl = $presenter;
+			$nonce = array_key_exists('uiNonce', $providers) ? $providers['uiNonce'] : NULL;
+			try {
+				$presenterProviders = $presenter->getTemplate()->getLatte()->getProviders();
+				if (array_key_exists('uiNonce', $presenterProviders)) {
+					$nonce = $presenterProviders['uiNonce'];
+				}
+
+			} catch (Nette\InvalidStateException $e) {
+				if ($e->getMessage() !== 'Service TemplateFactory has not been set.') {
+					throw $e;
+				}
+			}
+
+			if (
+				$this->templateInjected
+				&& isset($providers['uiPresenter']) && $providers['uiPresenter'] === $presenter
+				&& isset($providers['uiControl']) && !$providers['uiControl'] instanceof Nette\Application\UI\Presenter
+			) {
+				$uiControl = $providers['uiControl'];
+			}
+
+			$latte->addProvider('uiControl', $uiControl);
+			$latte->addProvider('uiPresenter', $presenter);
+			$latte->addProvider('uiNonce', $nonce);
+
+		} elseif (!$this->templateInjected) {
+			$latte->addProvider('uiControl', NULL);
+			$latte->addProvider('uiPresenter', NULL);
+			$latte->addProvider('uiNonce', NULL);
+		}
+
+
+
+		// Provide conventional Nette template variables for included user templates (e.g. control templates using {form name}).
+		// This is independent from Latte providers used by UI macros.
+		$this->template->control = $presenter;
+		$this->template->_control = $presenter;
+		$this->template->presenter = $presenter;
+		$this->template->_presenter = $presenter;
 
 		if ($this->form !== $form) {
 			$this->form = $form;
@@ -125,6 +187,9 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			}
 		}
 
+
+		unset($this->template->mode);
+
 		$this->template->setFile(__DIR__ . '/@form.latte');
 		$this->template->_form = $this->form;
 		$this->template->form = $this->form;
@@ -143,6 +208,8 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			return FormsLatteRuntime::renderFormEnd($this->form);
 
 		} else {
+			// Partial templates use form macros without an enclosing {form} block.
+			$this->template->getLatte()->addProvider('formsStack', [$this->form]);
 
 			$attrs = array('input' => array(), 'label' => array());
 			foreach ((array) $args as $key => $val) {
@@ -159,6 +226,22 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			$this->template->attrs = (array) $attrs;
 			return (string) $this->template;
 		}
+	}
+	/**
+	 * @param bool $withUIMacros
+	 * @return Engine
+	 */
+	private function createLatteEngine($withUIMacros)
+	{
+		$engine = new Engine();
+		$engine->onCompile[] = function (Engine $engine) use ($withUIMacros) {
+			FormMacros::install($engine->getCompiler());
+			\Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
+			if ($withUIMacros) {
+				UIMacros::install($engine->getCompiler());
+			}
+		};
+		return $engine;
 	}
 
 
@@ -535,29 +618,12 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	{
 		$items = array();
 		foreach ($control->items as $key => $value) {
-			if (method_exists($control, 'getControlPart')) {
-				$el = $control->getControlPart($key);
-				$items[$key] = $check = (object) array(
-					'input'   => $el,
-					'label'   => $cap = $control->getLabelPart($key),
-					'caption' => $cap->getText(),
-				);
-			} else {
-				$el = $control->getControl($key);
-				if (is_string($el)) {
-					$items[$key] = $check = (object) array(
-						'input'   => Html::el()->setHtml($el),
-						'label'   => Html::el(),
-						'caption' => $value,
-					);
-				} else {
-					$items[$key] = $check = (object) array(
-						'input'   => $el[0],
-						'label'   => $el[1],
-						'caption' => $el[1]->getText(),
-					);
-				}
-			}
+			$el = $control->getControlPart($key);
+			$items[$key] = $check = (object) array(
+				'input'   => $el,
+				'label'   => $cap = $control->getLabelPart($key),
+				'caption' => $cap->getText(),
+			);
 			$check->html = clone $check->label;
 			$check->html->addClass('checkbox');
 			$display = $control->getOption('display', 'inline');

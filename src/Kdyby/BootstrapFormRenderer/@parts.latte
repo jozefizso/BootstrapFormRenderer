@@ -5,6 +5,8 @@
  *
  * For the full copyright and license information, please view the file license.md that was distributed with this source code.
  *}
+{layout none}
+
 
 {includeblock "@form.latte"}
 
@@ -24,7 +26,7 @@
     {include #controls, renderer => $renderer, controls => $renderer->findControls($mode)}
 
 {elseif $mode instanceof \Nette\Forms\ControlGroup}
-    {if $mode->controls}
+    {if $mode->getControls()}
         {include #group, renderer => $renderer, group => $renderer->processGroup($mode)}
     {/if}
 
