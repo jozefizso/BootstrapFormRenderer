@@ -89,32 +89,6 @@ abstract class BootstrapContainerTestCase extends \Tester\TestCase
 
 		RendererExtension::register($config);
 
-		if (PHP_VERSION_ID < 80000) {
-			return $config->createContainer();
-		}
-
-		// Nette Utils 2.4 does not recognize PHP 8 qualified-name tokens.
-		// Its use-statement cache can therefore miss a class and emit this warning.
-		$previousHandler = NULL;
-		$previousHandler = set_error_handler(function ($severity, $message, $file, $line, $context = NULL) use (&$previousHandler) {
-			$reflectionFile = '/vendor/nette/utils/src/Utils/Reflection.php';
-			if (
-				$severity === E_WARNING
-				&& strpos($message, 'Undefined array key ') === 0
-				&& substr(str_replace('\\', '/', $file), -strlen($reflectionFile)) === $reflectionFile
-			) {
-				return TRUE;
-			}
-
-			return $previousHandler
-				? call_user_func($previousHandler, $severity, $message, $file, $line, $context)
-				: FALSE;
-		});
-
-		try {
-			return $config->createContainer();
-		} finally {
-			restore_error_handler();
-		}
+		return $config->createContainer();
 	}
 }

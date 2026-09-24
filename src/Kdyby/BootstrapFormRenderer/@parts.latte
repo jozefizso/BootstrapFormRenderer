@@ -8,7 +8,7 @@
 {layout none}
 
 
-{includeblock "@form.latte"}
+{import "@form.latte"}
 
 {if $mode === "errors"}
     {include #errors, renderer => $renderer}

@@ -26,7 +26,17 @@ and layout structure that Bootstrap requires.
 
 - PHP 5.6, 7.1, 7.2, 7.4 and 8.0
 - [Nette Framework](https://github.com/nette/nette) 2.4
+- Latte 2.4 through 2.11; PHP 8.0 applications require PHP-compatible Nette patch releases
 
+The integration suite tests both ends of the supported dependency matrix:
+
+| PHP | Lowest Latte / Application / Forms / Utils | Highest tested Latte / Application / Forms / Utils |
+|-----|--------------------------------------------|----------------------------------------------------|
+| 5.6 | 2.4.0 / 2.4.0 / 2.4.0 / 2.4.0 | 2.4.x / 2.4.17 / 2.4.11 / 2.5.x |
+| 7.1 | 2.4.1 / 2.4.1 / 2.4.0 / 2.4.0 | 2.11.x / 2.4.17 / 2.4.11 / 2.5.x |
+| 7.2 | 2.4.1 / 2.4.1 / 2.4.0 / 2.4.0 | 2.11.x / 2.4.17 / 2.4.11 / 2.5.x |
+| 7.4 | 2.4.1 / 2.4.1 / 2.4.0 / 2.4.0 | 2.11.x / 2.4.17 / 2.4.11 / 2.5.x |
+| 8.0 | 2.4.9 / 2.4.17 / 2.4.11 / 2.5.5 | 2.11.x / 2.4.17 / 2.4.11 / 2.5.x |
 
 ## Getting Started
 

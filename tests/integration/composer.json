@@ -1,0 +1,28 @@
+{
+	"name": "jozefizso/bootstrap-form-renderer-integration",
+	"description": "Compatibility application for BootstrapFormRenderer dependency matrices",
+	"type": "project",
+	"license": "BSD-3-Clause",
+	"repositories": [
+		{
+			"type": "path",
+			"url": "../..",
+			"options": {
+				"symlink": true,
+				"versions": {
+					"jozefizso/bootstrap-form-renderer": "dev-main"
+				}
+			}
+		}
+	],
+	"require": {
+		"php": ">=5.6 <8.1",
+		"jozefizso/bootstrap-form-renderer": "dev-main",
+		"latte/latte": "^2.4.0",
+		"nette/application": "~2.4.0",
+		"nette/forms": "~2.4.0",
+		"nette/utils": "^2.4.0"
+	},
+	"minimum-stability": "dev",
+	"prefer-stable": true
+}

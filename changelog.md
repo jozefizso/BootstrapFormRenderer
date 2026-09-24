@@ -2,10 +2,13 @@
 
 ## v2.4.0
 
-This release targets Nette Framework 2.4 and Latte 2.4 on PHP 5.6 through 8.0.
+This release targets Nette Framework 2.4 and Latte 2.x on PHP 5.6 through 8.0.
 
 ### Changes
 
+- Allows Latte 2.4 through 2.11 and Nette Utils 2.4 or 2.5.5+.
+- Uses Latte's `{import}` macro, avoiding the `{includeblock}` deprecation in Latte 2.11.
+- Tests the lowest runtime-compatible and highest available 2.x dependency sets on every supported PHP runtime.
 - Uses Nette 2.4 form runtime helpers, control-group accessors, renderer accessors, and list-control part APIs.
 - Keeps application Latte filters, providers, template parameters, and initialized template subclass state in custom group and control templates.
 - Uses Latte's native `{layout none}` directive for internal renderer templates instead of a custom presenter proxy.
