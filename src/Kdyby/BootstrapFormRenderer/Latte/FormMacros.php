@@ -16,7 +16,7 @@ use Latte\CompileException;
 use Latte\MacroNode;
 use Latte\PhpWriter;
 use Nette;
-use Nette\Bridges\FormsLatte\FormMacros as NetteFormMacros;
+use Nette\Bridges\FormsLatte\Runtime as FormsLatteRuntime;
 use Nette\Forms\Form;
 
 
@@ -98,9 +98,9 @@ class FormMacros extends Latte\Macros\MacroSet
 			throw new CompileException("Cannot render {{$node->name}} inside an existing <form> element.");
 		}
 		$node->tokenizer->reset();
-		$node->isEmpty = in_array($word, $inlineParts, TRUE);
+		$node->empty = in_array($word, $inlineParts, TRUE);
 
-		return $writer->write('$form = $_form = ' . get_called_class() . '::renderFormPart(%node.word, %node.array, get_defined_vars())');
+		return $writer->write('$form = $_form = ' . ($node->empty ? '' : '$this->global->formsStack[] = ') . get_called_class() . '::renderFormPart(%node.word, %node.array, get_defined_vars())');
 	}
 
 
@@ -111,7 +111,7 @@ class FormMacros extends Latte\Macros\MacroSet
 	 */
 	public function macroFormEnd(MacroNode $node, PhpWriter $writer)
 	{
-		return $writer->write('Nette\Bridges\FormsLatte\FormMacros::renderFormEnd($_form)');
+		return $writer->write('echo Nette\Bridges\FormsLatte\Runtime::renderFormEnd(array_pop($this->global->formsStack))');
 	}
 
 
@@ -206,7 +206,7 @@ class FormMacros extends Latte\Macros\MacroSet
 			$form->render('begin', $args);
 
 		} else {
-			NetteFormMacros::renderFormBegin($form, $args);
+			echo FormsLatteRuntime::renderFormBegin($form, $args);
 		}
 	}
 
