@@ -13,55 +13,28 @@ namespace KdybyTests\FormRenderer;
 use Kdyby;
 use Kdyby\BootstrapFormRenderer;
 use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
-use Kdyby\BootstrapFormRenderer\DI\RendererExtension;
 use Nette;
-use Nette\Application\UI\Form;
-use Nette\Configurator;
+use Nette\Forms\Form;
 use Nette\Utils\Html;
 use Nette\Utils\Strings;
 use Tester\Assert;
-use Tester\TestCase;
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/TestHelpers.php';
 
 
 
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
-class BootstrapRendererTest extends TestCase
+class BootstrapRendererTest extends BootstrapContainerTestCase
 {
-
-	/**
-	 * @var \Nette\DI\Container
-	 */
-	protected $container;
-
-
-
-	public function setUp()
-	{
-		$config = new Configurator();
-		$config->setTempDirectory(TEMP_DIR);
-		$config->addParameters(array('container' => array('class' => 'SystemContainer_' . md5(TEMP_DIR))));
-		// Nette CacheExtension (2.3.x) uses SQLiteJournal by default, which requires pdo_sqlite.
-		// Test runner uses `php -n`, so pdo_sqlite may be unavailable depending on runtime config.
-		// Override journal to FileJournal to make tests deterministic across PHP installations.
-		$config->onCompile[] = function ($config, $compiler) {
-			$builder = $compiler->getContainerBuilder();
-			if (method_exists($builder, 'hasDefinition') && $builder->hasDefinition('cache.journal')) {
-				$builder->getDefinition('cache.journal')
-					->setFactory('Nette\Caching\Storages\FileJournal', array(TEMP_DIR . '/cache'));
-			}
-		};
-		RendererExtension::register($config);
-		$this->container = $config->createContainer();
-	}
+	// @see BootstrapContainerTestCase::setUp()
 
 
 
 	/**
-	 * @return \Nette\Application\UI\Form
+	 * @return \Nette\Forms\Form
 	 */
 	private function dataCreateRichForm()
 	{
@@ -69,7 +42,7 @@ class BootstrapRendererTest extends TestCase
 		$form->addError("General failure!");
 
 		$grouped = $form->addContainer('grouped');
-		$grouped->currentGroup = $form->addGroup('Skupina', FALSE);
+		$grouped->setCurrentGroup($form->addGroup('Skupina', FALSE));
 		$grouped->addText('name', 'Jméno')->getLabelPrototype()->addClass('test');
 		$grouped->addText('email', 'Email')->setType('email');
 		$grouped->addSelect('sex', 'Pohlaví', array(1 => 'Muž', 2 => 'Žena'));
@@ -80,7 +53,7 @@ class BootstrapRendererTest extends TestCase
 		$grouped->addSubmit('poke2', 'Ještě Šťouchnout')->setAttribute('class', 'btn-success');
 
 		$other = $form->addContainer('other');
-		$other->currentGroup = $form->addGroup('Other', FALSE);
+		$other->setCurrentGroup($form->addGroup('Other', FALSE));
 		$other->addRadioList('sexy', 'Sexy', array(1 => 'Ano', 2 => 'Ne'));
 		$other->addPassword('heslo', 'Heslo')->addError('chybka!');
 		$other->addSubmit('pass', "Nastavit heslo")->setAttribute('class', 'btn-warning');
@@ -472,17 +445,19 @@ class BootstrapRendererTest extends TestCase
 			->setRequired('Please enter your name')
 			->addRule($form::MIN_LENGTH, 'Name must be at least %d characters', 3);
 
-		$form->addText('email', 'Email Address')
-			->setType('email')
-			->setRequired('Please enter your email')
-			->addRule($form::EMAIL, 'Please enter a valid email address');
+			$form->addText('email', 'Email Address')
+				->setType('email')
+				->setRequired('Please enter your email')
+				->addRule($form::EMAIL, 'Please enter a valid email address');
 
-		$form->addText('phone', 'Phone Number')
-			->addRule($form::PATTERN, 'Phone must be in format XXX-XXX-XXXX', '[0-9]{3}-[0-9]{3}-[0-9]{4}');
+			$form->addText('phone', 'Phone Number')
+				->setRequired(FALSE)
+				->addRule($form::PATTERN, 'Phone must be in format XXX-XXX-XXXX', '[0-9]{3}-[0-9]{3}-[0-9]{4}');
 
-		$form->addText('age', 'Age')
-			->addRule($form::INTEGER, 'Age must be a number')
-			->addRule($form::RANGE, 'Age must be between %d and %d', array(18, 100));
+			$form->addText('age', 'Age')
+				->setRequired(FALSE)
+				->addRule($form::INTEGER, 'Age must be a number')
+				->addRule($form::RANGE, 'Age must be between %d and %d', array(18, 100));
 
 		$form->addTextArea('message', 'Message')
 			->setRequired('Please enter your message')
@@ -646,7 +621,7 @@ class BootstrapRendererTest extends TestCase
 	/**
 	 * @param $latteFile
 	 * @param $expectedOutput
-	 * @param \Nette\Application\UI\Form $form
+	 * @param \Nette\Forms\Form $form
 	 * @throws \Exception
 	 */
 	private function assertFormTemplateOutput($latteFile, $expectedOutput, Form $form)
@@ -688,15 +663,25 @@ class BootstrapRendererTest extends TestCase
 	private function assertTemplateOutput(array $params, $latteFile, $expectedOutput)
 	{
 		$template = $this->createTemplate()->setFile($latteFile)->setParameters($params);
+		$latte = $template->getLatte();
 
-		// render template
-		ob_start();
-		try {
-			$template->render();
-		} catch (\Exception $e) {
-			ob_end_clean();
-			throw $e;
+		// Ensure `{form foo}` resolves from the provided control component tree.
+		if (isset($params['_control']) && is_object($params['_control'])) {
+			$latte->addProvider('uiControl', $params['_control']);
+		} elseif (isset($params['control']) && is_object($params['control'])) {
+			$latte->addProvider('uiControl', $params['control']);
 		}
+
+		// Ensure `{input ...}` works even when template uses manual `$form->render('begin')` without `{form ...}`.
+		if (isset($params['form']) && $params['form'] instanceof \Nette\Forms\Form) {
+			$latte->addProvider('formsStack', array($params['form']));
+		} elseif (isset($params['_form']) && $params['_form'] instanceof \Nette\Forms\Form) {
+			$latte->addProvider('formsStack', array($params['_form']));
+		}
+
+		$rendered = $this->captureOutput(function () use ($template) {
+			$template->render();
+		});
 
 		$strip = function ($s) {
 			return Strings::replace($s, '#(</textarea|</pre|</script|^).*?(?=<textarea|<pre|<script|\z)#si', function ($m) {
@@ -704,7 +689,7 @@ class BootstrapRendererTest extends TestCase
 			});
 		};
 
-		$output = $strip(Strings::normalize(ob_get_clean()));
+		$output = $strip(Strings::normalize($rendered));
 		$expected = $strip(Strings::normalize(file_get_contents($expectedOutput)));
 		Assert::match($expected, $output);
 	}
@@ -725,14 +710,6 @@ class BootstrapRendererTest extends TestCase
 
 
 /**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class ControlMock extends Nette\Application\UI\Control
-{
-
-}
-
-/**
  * Třída existuje, aby se vůbec neukládala session, tam kde není potřeba.
  * Například v API, nebo v Cronu se různě sahá na session, i když se reálně mezi requesty nepřenáší.
  *
@@ -744,11 +721,11 @@ class ArraySessionStorage implements \SessionHandlerInterface
 	/**
 	 * @var array
 	 */
-	private $session;
+	private $storage;
 
 
 
-	public function __construct(Nette\Http\Session $session = NULL)
+	public function __construct(Nette\Http\Session $session)
 	{
 		$session->setOptions(array('cookie_disabled' => TRUE));
 	}
@@ -757,7 +734,7 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 	public function open($savePath, $sessionName)
 	{
-		$this->session = array();
+		$this->storage = array();
 		return true;
 	}
 
@@ -765,7 +742,7 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 	public function close()
 	{
-		$this->session = array();
+		$this->storage = array();
 		return true;
 	}
 
@@ -773,14 +750,14 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 	public function read($id)
 	{
-		return isset($this->session[$id]) ? $this->session[$id] : '';
+		return isset($this->storage[$id]) ? $this->storage[$id] : '';
 	}
 
 
 
 	public function write($id, $data)
 	{
-		$this->session[$id] = $data;
+		$this->storage[$id] = $data;
 		return true;
 	}
 
@@ -788,7 +765,7 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 	public function destroy($id)
 	{
-		unset($this->session[$id]);
+		unset($this->storage[$id]);
 		return true;
 	}
 

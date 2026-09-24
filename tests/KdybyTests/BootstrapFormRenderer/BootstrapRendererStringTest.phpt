@@ -57,6 +57,41 @@ class BootstrapRendererStringTest extends TestCase
 		// Assert
 		Assert::same(StringRenderingTemplate::HTML, $expectedFormHtml);
 	}
+
+	public function testInjectedTemplateIsKeptForPresenterForm()
+	{
+		$presenter = new RendererStringPresenter();
+		$form = new \Nette\Application\UI\Form($presenter, 'form');
+		$engine = new Engine();
+		$engine->addProvider('uiControl', $presenter);
+		$engine->addProvider('uiNonce', 'injected-nonce');
+		$renderer = new BootstrapRenderer(new StringRenderingTemplate($engine));
+
+		Assert::same(StringRenderingTemplate::HTML, $renderer->render($form));
+		$providers = $engine->getProviders();
+		Assert::same($presenter, $providers['uiControl']);
+		Assert::same($presenter, $providers['uiPresenter']);
+		Assert::same('injected-nonce', $providers['uiNonce']);
+	}
+
+	public function testPresenterTemplateSubclassIsKept()
+	{
+		$presenter = new RendererStringPresenter();
+		$form = new \Nette\Application\UI\Form($presenter, 'form');
+		$renderer = new BootstrapRenderer();
+
+		Assert::same('presenter-template-state', $renderer->render($form));
+	}
+}
+
+
+
+class RendererStringPresenter extends \Nette\Application\UI\Presenter
+{
+	protected function createTemplate()
+	{
+		return new StringRenderingTemplate(new Engine(), 'presenter-template-state');
+	}
 }
 
 
@@ -65,10 +100,20 @@ class StringRenderingTemplate extends Template
 {
 	const HTML = '<form>template output</form>';
 
+	/** @var string */
+	private $html;
+
+
+	public function __construct(Engine $engine, $html = self::HTML)
+	{
+		parent::__construct($engine);
+		$this->html = $html;
+	}
+
 
 	public function __toString()
 	{
-		return self::HTML;
+		return $this->html;
 	}
 }
 
