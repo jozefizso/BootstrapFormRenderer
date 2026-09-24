@@ -12,6 +12,9 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') {
 	echo 'Install Nette Tester using `composer update --dev`';
 	exit(1);
 }
+if (!defined('JSON_UNESCAPED_UNICODE')) {
+	define('JSON_UNESCAPED_UNICODE', 256);
+}
 
 // configure environment
 Tester\Environment::setup();
