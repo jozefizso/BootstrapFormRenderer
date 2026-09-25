@@ -24,21 +24,16 @@ and layout structure that Bootstrap requires.
 
 ## Requirements
 
-- PHP 7.1 through 8.3
-- [Nette Framework](https://github.com/nette/nette) 3.0 or 3.1
-- Latte 2.6 through 2.11 (Nette Application 3.1 requires Latte 2.7.1+)
+- PHP 8.1 through 8.5
+- [Nette Framework](https://github.com/nette/nette) 3.2
+- Latte 3.0.18 or newer (Latte 2 is not supported; for Latte 2 use v3.0.x of this library with Nette 3.0 or 3.1)
 
 The integration suite tests both ends of the supported dependency matrix:
 
 | PHP | Dependency set | Latte / Application / Forms / Utils |
 |-----|----------------|-------------------------------------|
-| 7.1 | lowest | 2.6.0 / 3.0.8 / 3.0.7 / 3.1.0 |
-| 7.2 | highest Nette 3.1 | 2.11.x / 3.1.x / 3.1.x / 3.2.x or 4.0.x |
-| 7.4 | highest Nette 3.0 | 2.11.x / 3.0.x / 3.0.x / 3.2.x |
-| 8.0 | highest Nette 3.0 | 2.11.x / 3.0.x / 3.0.x / 3.2.x |
-| 8.1 | highest Nette 3.1 | 2.11.x / 3.1.x / 3.1.x / 3.2.x or 4.0.x |
-| 8.2 | highest Nette 3.1 | 2.11.x / 3.1.x / 3.1.x / 3.2.x or 4.0.x |
-| 8.3 | highest Nette 3.1 | 2.11.x / 3.1.x / 3.1.x / 3.2.x or 4.0.x |
+| 8.1 | lowest | 3.0.18 / 3.2.0 / 3.2.0 / 4.0.4 |
+| 8.1 – 8.5 | highest Nette 3.2 | 3.1.x / 3.2.x / 3.2.x / 4.x |
 
 ## Getting Started
 
@@ -52,7 +47,8 @@ composer require jozefizso/bootstrap-form-renderer
 
 | Version  | Branch      | PHP      | compatible | Nette series  |
 |----------|-------------|----------|------------|---------------|
-| `^3.0.0` | `main`      | `>= 7.1` | `8.3`      | Nette 3.0, 3.1 |
+| `^3.2.0` | `main`      | `>= 8.1` | `8.5`      | Nette 3.2, Latte 3 |
+| `^3.0.0` | tag `v3.0.0` | `>= 7.1` | `8.3`      | Nette 3.0, 3.1 |
 | `^2.4.0` | `nette-2.4` | `>= 5.6` | `8.0`      | Nette 2.4     |
 | `^2.3.0` | `nette-2.3` | `>= 5.6` | `7.1`      | Nette 2.3     |
 | `^2.2.0` | `nette-2.2` | `>= 5.6` | `7.0`      | Nette 2.2     |
@@ -74,16 +70,23 @@ extensions:
 ```
 
 The extension will register the `Bootstrap2FormFactory` to create Bootstrap styled forms
-and the Latte macro extensions like  `{form body}`, `{pair}`, `{group}` and `{container}`.
+and the Latte 3 extension with the tags `{form body}`, `{pair}`, `{group}` and `{container}`.
 
-#### Alternative: Register Latte macros via Nette config
+#### Alternative: Register the Latte extension via Nette config
 
-Use configuration files to register only the Latte macros extensions:
+Use configuration files to register only the Latte extension:
 
 ```neon
 latte:
-    macros:
-        - Kdyby\BootstrapFormRenderer\Latte\FormMacros
+    extensions:
+        - Kdyby\BootstrapFormRenderer\Latte\FormsExtension
+```
+
+On a plain Latte engine, add it after the Nette forms extension, whose `{form}` tag it overrides:
+
+```php
+$latte->addExtension(new Nette\Bridges\FormsLatte\FormsExtension);
+$latte->addExtension(new Kdyby\BootstrapFormRenderer\Latte\FormsExtension);
 ```
 
 #### Alternative: programmatic bootstrap
@@ -177,7 +180,7 @@ protected function createComponentContactForm()
 
 ### Step 3: Render Your Form in Templates
 
-Now you can use the special macros in your Latte templates to render the form. See the examples below for various rendering options.
+Now you can use the special tags in your Latte templates to render the form. See the examples below for various rendering options.
 
 
 ## Form Rendering Examples
@@ -216,7 +219,7 @@ This is equivalent to:
 {form contactForm}{/form}
 ```
 
-Both render only the begin and end tags, following standard Latte 2.2 semantics. Use this when you want to manually render form content or integrate with other components.
+Both render only the begin and end tags (plus unrendered hidden fields). Use this when you want to manually render form content or integrate with other components.
 
 #### Opening Tag with Custom Content
 
@@ -375,15 +378,21 @@ BootstrapFormRenderer works seamlessly with Nette 2.2's built-in translation sys
 
 `{form name}` resolves the form as a component of the current control:
 
-- **`uiControl` Latte provider** - Registered by Nette 3 application templates (`$control` in the template); used for form lookup
-- **`$_control`** - Fallback for templates rendered without a `uiControl` provider, e.g. a plain Latte engine
-- **`$_form`** - The current form inside `{form}...{/form}` blocks
+- **`uiControl` Latte provider** - Registered by Nette application templates (`$control` in the template); used for form lookup
+- **`$form`** - The current form inside `{form}...{/form}` blocks
+
+`{form $form}` also accepts a `Nette\Forms\Form` instance directly.
 
 ### Template Requirements
 
 Presenter and control templates created by Nette's `TemplateFactory` need no configuration.
-When rendering a template on a plain Latte engine, pass the owning component as `_control`,
-or register it with `$latte->addProvider('uiControl', $control)`.
+When rendering a template on a plain Latte engine, register the owning component with
+`$latte->addProvider('uiControl', $control)`; the `$_control` template variable is no longer used.
+
+### Custom group and control templates
+
+Templates set with the `template` option of a group or control should be absolute paths (for example `__DIR__ . '/control.latte'`).
+Latte 3 resolves other names, including stream-wrapper URLs such as `mock://…`, relative to the renderer's internal template.
 
 
 ## License

@@ -1,5 +1,34 @@
 # Changelog
 
+## v3.2.0
+
+This release targets Nette Framework 3.2 with Latte 3.0.18+ on PHP 8.1 through 8.5.
+
+_Note: Projects that must stay on Latte 2 engine, must use the BootstrapRenderer v3.0.x, which supports Nette 3.0 and 3.1 with Latte 2.x.
+
+### Breaking changes
+
+- Requires PHP >= 8.1, `latte/latte` `^3.0.18`, `nette/application` and `nette/forms` `~3.2.0`, `nette/utils` `^4.0.4` and `nette/component-model` `^3.1`. Latte 2 is not supported.
+- `Kdyby\BootstrapFormRenderer\Latte\FormMacros` is removed. It is replaced by the Latte 3 extension `Kdyby\BootstrapFormRenderer\Latte\FormsExtension` (tags `{form}`, `{pair}`, `{group}`, `{container}`), which must be added after `Nette\Bridges\FormsLatte\FormsExtension`. Replace `latte: macros:` configuration with `latte: extensions:`.
+- `{form name}` resolves the form from `$this->global->uiControl` only; the `$_control` template variable is no longer used, and the renderer no longer assigns `$_control`, `$_presenter` or `$_form`. `{form}` still accepts a `Form` instance.
+- Compile errors keep their text, but Latte 3 drops the trailing period and appends the position, e.g. `Missing form name in {form} (on line 1 at column 1)`.
+- Native types on the public API: `BootstrapRenderer::render(Form $form, string|object|null $mode = NULL, ?array $args = NULL): string`, `findErrors(): array`, `findGroups(): array`, `findControls(?Container $container = NULL, ?bool $buttons = NULL): \Iterator`, `processGroup(): ?\stdClass`, `isSubmitButton(?Control $control = NULL): bool` and the other helpers.
+- Uses the non-`I` Nette APIs: `Nette\Forms\FormRenderer`, `Control`, `SubmitterControl`; `RendererExtension::register()` takes `Nette\Bootstrap\Configurator`.
+- Custom group/control templates are included with Latte 3 rules: stream-wrapper paths such as `mock://…` are resolved relative to the internal template; use absolute file paths.
+
+### Changes
+
+- `BootstrapRenderer::render()` no longer rewrites the readonly `Template::$latte` (an `Error` on nette/application 3.2). With a presenter it clones the owning control's template, whose engine already carries the `uiControl`/`uiPresenter`/`uiNonce` providers, and adds the Latte extensions if missing; it no longer adds providers to that shared engine. When the presenter has no template factory, `getTemplate()` fails and the renderer falls back to a private engine wrapped in `DefaultTemplate`. That engine gets `UIExtension` for the form's control, so custom templates keep `{link}`, `{control}`, `{snippet}` and the `uiControl` lookup.
+- `RendererExtension` adds the extension to the Latte factory in `beforeCompile()` and, for nette/application 3.2.0, which adds the core forms extension in `TemplateFactory::createTemplate()`, again through `TemplateFactory::$onCreate`.
+- Internal templates are ported to Latte 3: top-level `{define}` blocks (`form`, `errors`, `body`, `group`, `controls`, `control`) instead of blocks nested in `{foreach}`, `{continueIf true}`, `{include block, key: val}`, and `{include $template}` for custom templates.
+- Partial rendering (`$form->render('body')` etc.) pushes the form onto the forms stack through the internal `{bootstrapFormContext}` tag instead of overriding the `formsStack` provider. Unlike the core `{formContext}`, it keeps controls rendered earlier (e.g. with `{input}`) marked as rendered.
+- `declare(strict_types=1)` in all sources; deprecated `getOption(..., $default)` calls replaced by `??`.
+- CI tests PHP 8.1–8.5 and the lowest (Latte 3.0.18, application/forms 3.2.0, utils 4.0.4) and highest Nette 3.2 dependency sets. The integration smoke test also renders `{form}` on a plain Latte 3 engine.
+
+### Regenerated test fixtures
+
+- `fallback/basic`: whitespace-only blank-line differences produced by Latte 3.
+
 ## v3.0.0 — Nette 3.0/3.1, Latte 2.6+, PHP 7.1–8.3
 
 This release targets Nette Framework 3.0 and 3.1 with Latte 2.6 through 2.11 on PHP 7.1 through 8.3.
