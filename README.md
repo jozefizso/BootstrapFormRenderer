@@ -373,21 +373,17 @@ BootstrapFormRenderer works seamlessly with Nette 2.2's built-in translation sys
 
 ## Latte Variable Conventions
 
-BootstrapFormRenderer aligns with Latte 2.2 standard runtime variable conventions:
+`{form name}` resolves the form as a component of the current control:
 
-- **`$_control`** - The current component/presenter context (required for form lookup)
+- **`uiControl` Latte provider** - Registered by Nette 3 application templates (`$control` in the template); used for form lookup
+- **`$_control`** - Fallback for templates rendered without a `uiControl` provider, e.g. a plain Latte engine
 - **`$_form`** - The current form inside `{form}...{/form}` blocks
-
-These variables are automatically provided by Nette 2.2 presenter templates.
 
 ### Template Requirements
 
-When rendering forms in your templates:
-- Ensure templates are rendered within a Nette presenter context
-- The `$_control` variable must be available for the `{form name}` macro to resolve forms
-- Inside `{form}...{/form}` blocks, `$_form` provides access to the current form
-
-This is automatically handled in standard Nette 2.2 presenter templates and requires no additional configuration.
+Presenter and control templates created by Nette's `TemplateFactory` need no configuration.
+When rendering a template on a plain Latte engine, pass the owning component as `_control`,
+or register it with `$latte->addProvider('uiControl', $control)`.
 
 
 ## License

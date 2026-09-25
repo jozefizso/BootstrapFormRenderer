@@ -17,7 +17,7 @@ This release targets Nette Framework 3.0 and 3.1 with Latte 2.6 through 2.11 on 
 - The fallback template outside a presenter is `Nette\Bridges\ApplicationLatte\DefaultTemplate` when available, avoiding PHP 8.2 dynamic-property deprecations on Nette 3.1.
 - Internal templates check `$mode === NULL` instead of `isset($mode)`; the renderer always assigns `mode`.
 - Group containers render through `Html::setName('')`, required by the typed Nette 3 `Html` API.
-- `{form}` resolves forms through `$_control` only for string names.
+- `{form name}` resolves the form through the `uiControl` Latte provider that Nette 3 application templates register; Nette 3 no longer defines `$_control`, which remains a fallback for plain Latte engines. Only string names are looked up.
 - Removes Nette 2.x-era code comments, the `nette/safe-stream` dev dependency and test polyfills (`JSON_UNESCAPED_UNICODE`, `id()`, the global `Assert` alias).
 - CI tests PHP 7.1–8.3 and the lowest and highest Nette 3.0 and 3.1 dependency sets.
 
