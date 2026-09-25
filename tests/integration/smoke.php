@@ -66,6 +66,15 @@ if (strpos($partial, '<form') !== false) {
 $string = (string) createIntegrationForm();
 assertIntegrationContains('form-horizontal', $string);
 
+$latte = new Latte\Engine();
+$latte->setLoader(new Latte\Loaders\StringLoader());
+$latte->addExtension(new Nette\Bridges\FormsLatte\FormsExtension());
+$latte->addExtension(new Kdyby\BootstrapFormRenderer\Latte\FormsExtension());
+$template = $latte->renderToString('{form $form}{form body}{/form}', array('form' => createIntegrationForm()));
+assertIntegrationContains('class="form-horizontal"', $template);
+assertIntegrationContains('control-group required', $template);
+assertIntegrationContains('</form>', $template);
+
 $packages = array(
 	'php' => PHP_VERSION,
 	'latte/latte' => InstalledVersions::getPrettyVersion('latte/latte'),
