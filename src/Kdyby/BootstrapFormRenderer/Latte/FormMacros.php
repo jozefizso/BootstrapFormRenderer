@@ -90,7 +90,7 @@ class FormMacros extends Latte\Macros\MacroSet
 			throw new CompileException('Did you mean <form n:name=...> ?');
 		}
 		$word = $node->tokenizer->fetchWord();
-		if ($word === FALSE) {
+		if ($word === FALSE || $word === NULL) {
 			throw new CompileException("Missing form name in {{$node->name}}.");
 		}
 		$inlineParts = array('errors', 'body', 'controls', 'buttons');
@@ -124,7 +124,7 @@ class FormMacros extends Latte\Macros\MacroSet
 	public function macroPair(MacroNode $node, PhpWriter $writer)
 	{
 		$name = $node->tokenizer->fetchWord();
-		if ($name === FALSE) {
+		if ($name === FALSE || $name === NULL) {
 			throw new CompileException("Missing name in {{$node->name}}.");
 		}
 		$node->tokenizer->reset();
@@ -141,7 +141,7 @@ class FormMacros extends Latte\Macros\MacroSet
 	public function macroGroup(MacroNode $node, PhpWriter $writer)
 	{
 		$name = $node->tokenizer->fetchWord();
-		if ($name === FALSE) {
+		if ($name === FALSE || $name === NULL) {
 			throw new CompileException("Missing name in {{$node->name}}.");
 		}
 		$node->tokenizer->reset();
@@ -158,7 +158,7 @@ class FormMacros extends Latte\Macros\MacroSet
 	public function macroContainer(MacroNode $node, PhpWriter $writer)
 	{
 		$name = $node->tokenizer->fetchWord();
-		if ($name === FALSE) {
+		if ($name === FALSE || $name === NULL) {
 			throw new CompileException("Missing name in {{$node->name}}.");
 		}
 		$node->tokenizer->reset();
