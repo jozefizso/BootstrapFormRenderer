@@ -677,15 +677,15 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 
 	/**
 	 * @param \Nette\Utils\Html $el
-	 * @return bool
+	 * @return string
 	 */
-	private static function getClasses(Html $el)
+	private static function getClasses(Html $el): string
 	{
 		if (is_array($el->class)) {
 			$classes = array_filter(array_merge(array_keys($el->class), $el->class), 'is_string');
 			return implode(' ', $classes);
 		}
-		return $el->class;
+		return (string) $el->class;
 	}
 
 }
