@@ -120,6 +120,6 @@
 {/form}
 {/define}
 
-{if !isset($mode)}
+{if $mode === NULL}
     {include #form, form => $form, renderer => $renderer}
 {/if}

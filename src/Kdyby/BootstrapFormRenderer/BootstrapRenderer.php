@@ -12,6 +12,7 @@ namespace Kdyby\BootstrapFormRenderer;
 
 use Latte\Engine;
 use Nette;
+use Nette\Bridges\ApplicationLatte\DefaultTemplate;
 use Nette\Bridges\ApplicationLatte\Template;
 use Nette\Bridges\ApplicationLatte\UIMacros;
 use Nette\Bridges\FormsLatte\FormMacros;
@@ -120,7 +121,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 				$engine = $this->createLatteEngine(FALSE);
 			}
 
-			$this->template = $template ?: new Template($engine);
+			$this->template = $template ?: (class_exists(DefaultTemplate::class) ? new DefaultTemplate($engine) : new Template($engine));
 			$this->templatePresenter = $presenter;
 		}
 
@@ -191,7 +192,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 		}
 
 
-		unset($this->template->mode);
+		$this->template->mode = NULL;
 
 		$this->template->setFile(__DIR__ . '/@form.latte');
 		$this->template->_form = $this->form;
