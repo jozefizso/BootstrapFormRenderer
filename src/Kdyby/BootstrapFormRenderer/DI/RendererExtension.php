@@ -13,8 +13,9 @@ declare(strict_types=1);
 namespace Kdyby\BootstrapFormRenderer\DI;
 
 use Kdyby;
-use Nette\DI\Compiler;
 use Nette;
+use Nette\DI\Compiler;
+use Nette\DI\Definitions\Statement;
 
 /**
  * @author Filip Procházka <filip@prochazka.su>
@@ -34,14 +35,23 @@ class RendererExtension extends Nette\DI\CompilerExtension
 	{
 		$builder = $this->getContainerBuilder();
 
-		// LatteExtension already installs UI and form macros; our {form} overrides must be installed last.
+		// LatteExtension already adds the core FormsExtension; our {form} tags must be added after it.
 		$latteFactory = $builder->getByType(Nette\Bridges\ApplicationLatte\LatteFactory::class);
 		if ($latteFactory === NULL) {
 			throw new Nette\InvalidStateException('BootstrapFormRenderer requires nette/application LatteExtension to be registered.');
 		}
 
-		$builder->getDefinition($latteFactory)->getResultDefinition()
-			->addSetup('?->onCompile[] = function ($engine) { Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler()); }', array('@self'));
+		/** @var Nette\DI\Definitions\FactoryDefinition $definition */
+		$definition = $builder->getDefinition($latteFactory);
+		$definition->getResultDefinition()
+			->addSetup('addExtension', [new Statement(Kdyby\BootstrapFormRenderer\Latte\FormsExtension::class)]);
+
+		// Early nette/application 3.2 releases (e.g. 3.2.0) add the core FormsExtension in TemplateFactory::createTemplate(), after the setup above.
+		$templateFactory = $builder->getByType(Nette\Application\UI\TemplateFactory::class);
+		if ($templateFactory !== NULL) {
+			$builder->getDefinition($templateFactory)
+				->addSetup('?->onCreate[] = function (Nette\Bridges\ApplicationLatte\Template $template): void { Kdyby\BootstrapFormRenderer\Latte\FormsExtension::install($template->getLatte()); }', ['@self']);
+		}
 	}
 
 

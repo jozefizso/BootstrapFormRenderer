@@ -4,20 +4,20 @@
 // SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0 OR GPL-3.0
 
 /**
- * Test: Kdyby\BootstrapFormRenderer\Latte\FormMacros - compile-time validation.
+ * Test: Kdyby\BootstrapFormRenderer\Latte\FormsExtension - compile-time validation.
  *
- * @testCase KdybyTests\BootstrapFormRenderer\FormMacrosValidationTest
+ * @testCase KdybyTests\BootstrapFormRenderer\FormsExtensionValidationTest
  * @package Kdyby\BootstrapFormRenderer
  */
 
 namespace KdybyTests\FormRenderer;
 
-use Kdyby\BootstrapFormRenderer\Latte\FormMacros;
+use Kdyby\BootstrapFormRenderer\Latte\FormsExtension;
 use Latte\CompileException;
 use Latte\Engine;
 use Latte\Loaders\StringLoader;
-use Nette\Bridges\ApplicationLatte\UIMacros;
-use Nette\Bridges\FormsLatte\FormMacros as NetteFormMacros;
+use Nette\Bridges\ApplicationLatte\UIExtension;
+use Nette\Bridges\FormsLatte\FormsExtension as NetteFormsExtension;
 use Tester\Assert;
 use Tester\TestCase;
 
@@ -25,9 +25,9 @@ require_once __DIR__ . '/../bootstrap.php';
 
 
 /**
- * Tests for FormMacros compile-time validation.
+ * Tests for FormsExtension compile-time validation.
  */
-class FormMacrosValidationTest extends TestCase
+class FormsExtensionValidationTest extends TestCase
 {
 
 	/**
@@ -38,12 +38,26 @@ class FormMacrosValidationTest extends TestCase
 	{
 		$engine = new Engine();
 		$engine->setLoader(new StringLoader());
-		$engine->onCompile[] = function (Engine $engine) {
-			UIMacros::install($engine->getCompiler());
-			NetteFormMacros::install($engine->getCompiler());
-			FormMacros::install($engine->getCompiler());
-		};
+		$engine->addExtension(new UIExtension(NULL));
+		$engine->addExtension(new NetteFormsExtension());
+		$engine->addExtension(new FormsExtension());
 		return $engine->compile($template);
+	}
+
+
+
+	/**
+	 * install() must leave the Bootstrap {form} tag in effect when it has to add the core extension.
+	 */
+	public function testInstallKeepsBootstrapFormTagAfterAddingCoreExtension()
+	{
+		$engine = new Engine();
+		$engine->setLoader(new StringLoader());
+		$engine->addExtension(new FormsExtension());
+		FormsExtension::install($engine);
+
+		$compiled = $engine->compile('{form myForm}{/form}');
+		Assert::contains('Kdyby\\BootstrapFormRenderer\\Latte\\Runtime::resolveForm', $compiled);
 	}
 
 
@@ -55,7 +69,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		Assert::exception(function () {
 			$this->compile('{form}{/form}');
-		}, CompileException::class, 'Missing form name in {form}.');
+		}, CompileException::class, 'Missing form name in {form}%a%');
 	}
 
 
@@ -66,7 +80,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		Assert::exception(function () {
 			$this->compile('{form myForm}{pair}{/form}');
-		}, CompileException::class, 'Missing name in {pair}.');
+		}, CompileException::class, 'Missing name in {pair}%a%');
 	}
 
 
@@ -77,7 +91,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		Assert::exception(function () {
 			$this->compile('{form myForm}{group}{/form}');
-		}, CompileException::class, 'Missing name in {group}.');
+		}, CompileException::class, 'Missing name in {group}%a%');
 	}
 
 
@@ -88,7 +102,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		Assert::exception(function () {
 			$this->compile('{form myForm}{container}{/form}');
-		}, CompileException::class, 'Missing name in {container}.');
+		}, CompileException::class, 'Missing name in {container}%a%');
 	}
 
 
@@ -99,7 +113,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		Assert::exception(function () {
 			$this->compile('<form n:form="myForm"></form>');
-		}, CompileException::class, 'Did you mean <form n:name=...> ?');
+		}, CompileException::class, 'Did you mean <form n:name=...> ?%a%');
 	}
 
 
@@ -110,7 +124,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		$compiled = $this->compile('<form n:name="myForm">{form body}</form>');
 		Assert::type('string', $compiled);
-		Assert::contains('renderFormPart', $compiled);
+		Assert::contains("end(\$this->global->formsStack)->render('body', [])", $compiled);
 	}
 
 
@@ -121,7 +135,7 @@ class FormMacrosValidationTest extends TestCase
 	{
 		Assert::exception(function () {
 			$this->compile('<form>{form myForm}{/form}</form>');
-		}, CompileException::class, 'Cannot render {form} inside an existing <form> element.');
+		}, CompileException::class, 'Cannot render {form} inside an existing <form> element%a%');
 	}
 
 
@@ -132,11 +146,13 @@ class FormMacrosValidationTest extends TestCase
 	{
 		$compiled = $this->compile('<form n:name="myForm">{form errors}{form controls}{form buttons}</form>');
 		Assert::type('string', $compiled);
-		Assert::contains('renderFormPart', $compiled);
+		Assert::contains("end(\$this->global->formsStack)->render('errors', [])", $compiled);
+		Assert::contains("end(\$this->global->formsStack)->render('controls', [])", $compiled);
+		Assert::contains("end(\$this->global->formsStack)->render('buttons', [])", $compiled);
 	}
 
 }
 
 
-$testCase = new FormMacrosValidationTest();
+$testCase = new FormsExtensionValidationTest();
 $testCase->run();
