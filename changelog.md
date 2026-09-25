@@ -1,5 +1,35 @@
 # Changelog
 
+## v3.0.0 — Nette 3.0/3.1, Latte 2.6+, PHP 7.1–8.3
+
+This release targets Nette Framework 3.0 and 3.1 with Latte 2.6 through 2.11 on PHP 7.1 through 8.3.
+
+### BC breaks
+
+- Drops PHP < 7.1 and Nette 2.x. Requires `nette/application` and `nette/forms` `^3.0.8`/`^3.0.7` below 3.2, `nette/utils` `^3.1 || ~4.0.0`, `nette/component-model` `^3.0` and `latte/latte` `^2.6`.
+- `BootstrapRenderer::render()` declares the `string` return type required by `Nette\Forms\IFormRenderer`.
+- `BootstrapRenderer::mergeAttrs()` signature is `mergeAttrs(?Html $_this, array $attrs)`; `$_this` is no longer optional.
+- `Bootstrap2Form::__construct()` and `Bootstrap2FormFactory::create()` take `?IContainer $parent = NULL, ?string $name = NULL` like `Nette\Application\UI\Form`; `create()` returns `Bootstrap2Form`.
+- `RendererExtension` installs only the `Kdyby\BootstrapFormRenderer\Latte\FormMacros` on the Latte factory found by type in `beforeCompile()`; Nette's `LatteExtension` installs the UI and form macros. Containers without `LatteExtension` fail with `Nette\InvalidStateException`.
+
+### Changes
+
+- The fallback template outside a presenter is `Nette\Bridges\ApplicationLatte\DefaultTemplate` when available, avoiding PHP 8.2 dynamic-property deprecations on Nette 3.1.
+- Internal templates check `$mode === NULL` instead of `isset($mode)`; the renderer always assigns `mode`.
+- Group containers render through `Html::setName('')`, required by the typed Nette 3 `Html` API.
+- `{form}` resolves forms through `$_control` only for string names.
+- Removes Nette 2.x-era code comments, the `nette/safe-stream` dev dependency and test polyfills (`JSON_UNESCAPED_UNICODE`, `id()`, the global `Assert` alias).
+- CI tests PHP 7.1–8.3 and the lowest and highest Nette 3.0 and 3.1 dependency sets.
+
+### Regenerated test fixtures
+
+- `edge`, `fallback` and `form-styling` outputs: nette/forms 3.0.8+ no longer renders the `<!--[if IE]><input type=IEbug …><![endif]-->` input before `</form>`; tests strip it from nette/forms 3.0.7 output.
+- All outputs for forms attached to a test control: a named `Nette\Forms\Form` prefixes control ids with its name in Nette 3 (`frm-foo-foo-email` instead of `frm-foo-email`).
+- `basic`, `components`, `errors-at-inputs` and `individual/image` outputs: upload controls render Nette 3's `:fileSize` rule in `data-nette-rules`.
+- `translation/validation-with-translator`: Nette 3 no longer emits the `{"op":"optional"}` rule.
+- `fallback/basic`: whitespace-only blank line before `</form>`.
+
+
 ## v2.4.0
 
 This release targets Nette Framework 2.4 and Latte 2.x on PHP 5.6 through 8.0.
