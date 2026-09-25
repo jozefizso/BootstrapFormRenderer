@@ -16,8 +16,8 @@ use Latte\Engine;
 use Nette;
 use Nette\Bridges\ApplicationLatte\DefaultTemplate;
 use Nette\Bridges\ApplicationLatte\Template;
-use Nette\Bridges\ApplicationLatte\UIMacros;
-use Nette\Bridges\FormsLatte\FormMacros;
+use Nette\Bridges\ApplicationLatte\UIExtension;
+use Kdyby\BootstrapFormRenderer\Latte\FormsExtension as BootstrapFormsExtension;
 use Nette\Bridges\FormsLatte\Runtime as FormsLatteRuntime;
 use Nette\Forms\Controls;
 use Nette\Utils\Html;
@@ -65,8 +65,8 @@ class BootstrapRenderer implements Nette\Forms\FormRenderer
 	 */
 	private $template;
 
-	/** @var \Nette\Application\UI\Presenter|null */
-	private $templatePresenter;
+	/** @var \Nette\Application\UI\Control|null */
+	private $templateControl;
 	/** @var bool */
 	private $templateInjected;
 
@@ -86,99 +86,51 @@ class BootstrapRenderer implements Nette\Forms\FormRenderer
 	/**
 	 * Render the templates
 	 *
-	 * @param \Nette\Forms\Form $form
-	 * @param string $mode
-	 * @param array $args
-	 * @return string
+	 * @param string|\Nette\Forms\Container|\Nette\Forms\ControlGroup|\Nette\Forms\Control|null $mode
+	 *   NULL for the whole form, 'begin', 'end', 'errors', 'body', 'controls', 'buttons', or a form part
 	 */
-	public function render(Nette\Forms\Form $form, $mode = NULL, $args = NULL): string
+	public function render(Nette\Forms\Form $form, string|object|null $mode = NULL, ?array $args = NULL): string
 	{
 		/** @var \Nette\Application\UI\Presenter|null $presenter */
-		$presenter = $form->lookup('Nette\Application\UI\Presenter', FALSE);
+		$presenter = $form->lookup(Nette\Application\UI\Presenter::class, FALSE);
 		// A form owned by a child control must resolve sibling forms through that control.
 		/** @var \Nette\Application\UI\Control|null $control */
-		$control = $presenter ? $form->lookup('Nette\Application\UI\Control', FALSE) : NULL;
+		$control = $presenter ? $form->lookup(Nette\Application\UI\Control::class, FALSE) : NULL;
 
 		// Keep application Latte configuration for custom group and control templates.
-		if ($this->template === NULL || (!$this->templateInjected && $this->templatePresenter !== $presenter)) {
+		if ($this->template === NULL || (!$this->templateInjected && $this->templateControl !== $control)) {
 			$template = NULL;
-			if ($presenter) {
+			if ($control) {
 				try {
-					$presenterTemplate = $presenter->getTemplate();
-					$engine = clone $presenterTemplate->getLatte();
-					$template = clone $presenterTemplate;
-					$setLatte = \Closure::bind(function (Engine $engine) {
-						$this->latte = $engine;
-					}, $template, 'Nette\Bridges\ApplicationLatte\Template');
-					$setLatte($engine);
+					// The clone shares the control's engine, which carries its uiControl/uiPresenter/uiNonce providers.
+					$template = clone $control->getTemplate();
 
 				} catch (Nette\InvalidStateException $e) {
+					// Only a missing template factory selects the fallback; other template setup errors must surface.
 					if ($e->getMessage() !== 'Service TemplateFactory has not been set.') {
 						throw $e;
 					}
-					$engine = $this->createLatteEngine(TRUE);
 				}
-
-			} else {
-				$engine = $this->createLatteEngine(FALSE);
 			}
 
-			$this->template = $template ?: (class_exists(DefaultTemplate::class) ? new DefaultTemplate($engine) : new Template($engine));
-			$this->templatePresenter = $presenter;
+			$this->template = $template ?: new DefaultTemplate($this->createLatteEngine($control));
+			$this->templateControl = $control;
 		}
 
-		// Keep an injected control scope when it belongs to the current presenter.
-		// The internal templates opt out of auto-layout, so a presenter needs no proxy.
-		$latte = $this->template->getLatte();
-		$providers = $latte->getProviders();
-		if ($presenter) {
-			$uiControl = $control;
-			$nonce = array_key_exists('uiNonce', $providers) ? $providers['uiNonce'] : NULL;
-			try {
-				$presenterProviders = $presenter->getTemplate()->getLatte()->getProviders();
-				if (array_key_exists('uiNonce', $presenterProviders)) {
-					$nonce = $presenterProviders['uiNonce'];
-				}
+		BootstrapFormsExtension::install($this->template->getLatte());
 
-			} catch (Nette\InvalidStateException $e) {
-				if ($e->getMessage() !== 'Service TemplateFactory has not been set.') {
-					throw $e;
-				}
-			}
-
-			if (
-				$this->templateInjected
-				&& isset($providers['uiPresenter']) && $providers['uiPresenter'] === $presenter
-				&& isset($providers['uiControl']) && !$providers['uiControl'] instanceof Nette\Application\UI\Presenter
-			) {
-				$uiControl = $providers['uiControl'];
-			}
-
-			$latte->addProvider('uiControl', $uiControl);
-			$latte->addProvider('uiPresenter', $presenter);
-			$latte->addProvider('uiNonce', $nonce);
-
-		} elseif (!$this->templateInjected) {
-			$latte->addProvider('uiControl', NULL);
-			$latte->addProvider('uiPresenter', NULL);
-			$latte->addProvider('uiNonce', NULL);
+		// Provide conventional Nette template variables for included user templates.
+		if ($control) {
+			$this->template->control = $control;
+			$this->template->presenter = $presenter;
 		}
-
-
-
-		// Provide conventional Nette template variables for included user templates (e.g. control templates using {form name}).
-		// This is independent from Latte providers used by UI macros.
-		$this->template->control = $control;
-		$this->template->_control = $control;
-		$this->template->presenter = $presenter;
-		$this->template->_presenter = $presenter;
 
 		if ($this->form !== $form) {
 			$this->form = $form;
 
-			// controls placeholders & classes
-			foreach ($this->form->getControls() as $control) {
-				$this->prepareControl($control);
+			// controls placeholders & classes
+			foreach ($this->form->getControls() as $formControl) {
+				$this->prepareControl($formControl);
 			}
 
 			$formEl = $form->getElementPrototype();
@@ -187,9 +139,8 @@ class BootstrapRenderer implements Nette\Forms\FormRenderer
 			}
 
 		} elseif ($mode === 'begin') {
-			foreach ($this->form->getControls() as $control) {
-				/** @var \Nette\Forms\Controls\BaseControl $control */
-				$control->setOption('rendered', FALSE);
+			foreach ($this->form->getControls() as $formControl) {
+				$formControl->setOption('rendered', FALSE);
 			}
 		}
 
@@ -197,7 +148,6 @@ class BootstrapRenderer implements Nette\Forms\FormRenderer
 		$this->template->mode = NULL;
 
 		$this->template->setFile(__DIR__ . '/@form.latte');
-		$this->template->_form = $this->form;
 		$this->template->form = $this->form;
 		$this->template->renderer = $this;
 
@@ -208,45 +158,39 @@ class BootstrapRenderer implements Nette\Forms\FormRenderer
 			return (string) $this->template;
 
 		} elseif ($mode === 'begin') {
-			return (string) FormsLatteRuntime::renderFormBegin($this->form, (array) $args);
+			return FormsLatteRuntime::renderFormBegin($this->form, (array) $args);
 
 		} elseif ($mode === 'end') {
-			return (string) FormsLatteRuntime::renderFormEnd($this->form);
+			return FormsLatteRuntime::renderFormEnd($this->form);
 
 		} else {
-			// Partial templates use form macros without an enclosing {form} block.
-			$this->template->getLatte()->addProvider('formsStack', [$this->form]);
-
 			$attrs = array('input' => array(), 'label' => array());
 			foreach ((array) $args as $key => $val) {
-				if (stripos($key, 'input-') === 0) {
+				if (stripos((string) $key, 'input-') === 0) {
 					$attrs['input'][substr($key, 6)] = $val;
 
-				} elseif (stripos($key, 'label-') === 0) {
+				} elseif (stripos((string) $key, 'label-') === 0) {
 					$attrs['label'][substr($key, 6)] = $val;
 				}
 			}
 
 			$this->template->setFile(__DIR__ . '/@parts.latte');
 			$this->template->mode = $mode;
-			$this->template->attrs = (array) $attrs;
+			$this->template->attrs = $attrs;
 			return (string) $this->template;
 		}
 	}
-	/**
-	 * @param bool $withUIMacros
-	 * @return Engine
-	 */
-	private function createLatteEngine($withUIMacros)
+
+
+
+	private function createLatteEngine(?Nette\Application\UI\Control $control): Engine
 	{
+		// Custom templates keep the application tags ({link}, {control}, n:href) and the control's providers,
+		// which {form name} uses for the lookup.
 		$engine = new Engine();
-		$engine->onCompile[] = function (Engine $engine) use ($withUIMacros) {
-			FormMacros::install($engine->getCompiler());
-			\Kdyby\BootstrapFormRenderer\Latte\FormMacros::install($engine->getCompiler());
-			if ($withUIMacros) {
-				UIMacros::install($engine->getCompiler());
-			}
-		};
+		if ($control) {
+			$engine->addExtension(new UIExtension($control));
+		}
 		return $engine;
 	}
 

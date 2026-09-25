@@ -28,6 +28,19 @@ trait BootstrapFormRendererTestHelpers
 
 
 	/**
+	 * Latte 3 resolves included templates relative to the including file unless the path is absolute,
+	 * so stream-wrapper mocks cannot be used as group/control templates.
+	 */
+	protected function createTemplateFile(string $latte): string
+	{
+		static $counter = 0;
+		$file = TEMP_DIR . '/template-' . (++$counter) . '.latte';
+		file_put_contents($file, $latte);
+		return $file;
+	}
+
+
+	/**
 	 * nette/forms 3.0.7 (and 2.x) appends an IE-only hidden input to </form>; newer releases do not.
 	 *
 	 * @param string $html
@@ -63,8 +76,15 @@ trait BootstrapFormRendererTestHelpers
 }
 
 
+/**
+ * Presenter without a template factory; HTTP services are injected like in an application.
+ */
 class PresenterMock extends \Nette\Application\UI\Presenter
 {
+	public function __construct()
+	{
+		$this->injectPrimary(new \Nette\Http\Request(new \Nette\Http\UrlScript('http://localhost/')), new \Nette\Http\Response());
+	}
 }
 
 

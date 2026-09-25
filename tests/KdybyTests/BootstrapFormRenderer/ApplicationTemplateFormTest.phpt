@@ -20,8 +20,8 @@ require_once __DIR__ . '/TestHelpers.php';
 
 
 /**
- * Application templates expose the owning control only through the uiControl
- * provider and $control; Nette 3 no longer defines $_control.
+ * Application templates expose the owning control through the uiControl provider,
+ * which {form name} uses for the lookup.
  */
 class ApplicationTemplateFormTest extends BootstrapContainerTestCase
 {

@@ -13,7 +13,6 @@ use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
 use Nette\Application\UI\Control;
 use Nette\Application\UI\Form;
 use Tester\Assert;
-use Tester\FileMock;
 use Tester\TestCase;
 
 require_once __DIR__ . '/../bootstrap.php';
@@ -41,7 +40,7 @@ class ChildControlFormTest extends TestCase
 		$sibling->addHidden('token', 'sibling-token');
 
 		$main->addText('name', 'Name')
-			->setOption('template', FileMock::create('{form sibling}{/form}', 'latte'));
+			->setOption('template', $this->createTemplateFile('{form sibling}{/form}'));
 
 		return array($main, $sibling);
 	}
@@ -83,16 +82,31 @@ class ChildControlFormTest extends TestCase
 		$child = new ControlMock();
 		$presenter->addComponent($child, 'box');
 		list($main) = $this->createForms($child);
-		$main['name']->setOption('template', FileMock::create(
-			'{get_class($this->global->uiControl)}|{get_class($presenter)}',
-			'latte'
+		$main['name']->setOption('template', $this->createTemplateFile(
+			'{get_class($presenter)}'
 		));
 
 		$html = $this->captureOutput(function () use ($main) {
 			$main->render('body');
 		});
 
-		Assert::contains('KdybyTests\FormRenderer\ControlMock|KdybyTests\FormRenderer\PresenterMock', $html);
+		Assert::contains('KdybyTests\FormRenderer\PresenterMock', $html);
+	}
+
+
+	public function testFallbackTemplateSupportsApplicationTags()
+	{
+		$presenter = new PresenterMock();
+		$child = new ControlMock();
+		$presenter->addComponent($child, 'box');
+		list($main) = $this->createForms($child);
+		$main['name']->setOption('template', $this->createTemplateFile('{snippet note}ok{/snippet}'));
+
+		$html = $this->captureOutput(function () use ($main) {
+			$main->render('body');
+		});
+
+		Assert::contains('<div id="snippet-box-note">ok</div>', $html);
 	}
 }
 

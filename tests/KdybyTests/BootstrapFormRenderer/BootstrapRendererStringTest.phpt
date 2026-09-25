@@ -68,10 +68,11 @@ class BootstrapRendererStringTest extends TestCase
 		$renderer = new BootstrapRenderer(new StringRenderingTemplate($engine));
 
 		Assert::same(StringRenderingTemplate::HTML, $renderer->render($form));
+		// The injected engine is used as-is; its providers are not rewritten.
 		$providers = $engine->getProviders();
 		Assert::same($presenter, $providers['uiControl']);
-		Assert::same($presenter, $providers['uiPresenter']);
 		Assert::same('injected-nonce', $providers['uiNonce']);
+		Assert::false(isset($providers['uiPresenter']));
 	}
 
 	public function testPresenterTemplateSubclassIsKept()
@@ -82,6 +83,17 @@ class BootstrapRendererStringTest extends TestCase
 
 		Assert::same('presenter-template-state', $renderer->render($form));
 	}
+
+	public function testTemplateSetupErrorIsNotHiddenByFallback()
+	{
+		$presenter = new FailingTemplatePresenter();
+		$form = new \Nette\Application\UI\Form($presenter, 'form');
+		$renderer = new BootstrapRenderer();
+
+		Assert::exception(function () use ($renderer, $form) {
+			$renderer->render($form);
+		}, \Nette\InvalidStateException::class, 'Template setup failed.');
+	}
 }
 
 
@@ -91,6 +103,16 @@ class RendererStringPresenter extends \Nette\Application\UI\Presenter
 	protected function createTemplate(?string $class = NULL): \Nette\Application\UI\Template
 	{
 		return new StringRenderingTemplate(new Engine(), 'presenter-template-state');
+	}
+}
+
+
+
+class FailingTemplatePresenter extends \Nette\Application\UI\Presenter
+{
+	protected function createTemplate(?string $class = NULL): \Nette\Application\UI\Template
+	{
+		throw new \Nette\InvalidStateException('Template setup failed.');
 	}
 }
 
