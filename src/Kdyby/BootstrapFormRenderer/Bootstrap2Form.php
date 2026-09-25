@@ -3,6 +3,8 @@
 // Licensed under terms in license.md file.
 // SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0 OR GPL-3.0
 
+declare(strict_types=1);
+
 namespace Kdyby\BootstrapFormRenderer;
 
 use Nette;
