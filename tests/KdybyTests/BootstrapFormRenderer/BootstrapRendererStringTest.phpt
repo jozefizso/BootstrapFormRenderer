@@ -20,9 +20,9 @@ require_once __DIR__ . '/../bootstrap.php';
 
 
 /**
- * Regression test for the IFormRenderer return-value contract.
+ * Regression test for the FormRenderer return-value contract.
  *
- * Nette calls IFormRenderer::render() when a form is converted to a string.
+ * Nette calls FormRenderer::render() when a form is converted to a string.
  * BootstrapRenderer must use the Latte template's string-conversion API so the
  * generated HTML is returned without leaking output to the response.
  */
@@ -88,7 +88,7 @@ class BootstrapRendererStringTest extends TestCase
 
 class RendererStringPresenter extends \Nette\Application\UI\Presenter
 {
-	protected function createTemplate(): \Nette\Application\UI\ITemplate
+	protected function createTemplate(?string $class = NULL): \Nette\Application\UI\Template
 	{
 		return new StringRenderingTemplate(new Engine(), 'presenter-template-state');
 	}

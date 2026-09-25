@@ -31,8 +31,8 @@ class ApplicationTemplateFormTest extends BootstrapContainerTestCase
 	 */
 	private function renderControlTemplate(Control $control, $latte)
 	{
-		/** @var \Nette\Application\UI\ITemplateFactory $templateFactory */
-		$templateFactory = $this->container->getByType('Nette\Application\UI\ITemplateFactory');
+		/** @var \Nette\Application\UI\TemplateFactory $templateFactory */
+		$templateFactory = $this->container->getByType('Nette\Application\UI\TemplateFactory');
 		$template = $templateFactory->createTemplate($control);
 		$template->setFile(FileMock::create($latte, 'latte'));
 

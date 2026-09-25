@@ -8,6 +8,8 @@
  * For the full copyright and license information, please view the file license.md that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Kdyby\BootstrapFormRenderer;
 
 use Latte\Engine;
@@ -31,7 +33,7 @@ use Nette\Utils\Html;
  * @author Pavel Ptacek
  * @author Filip Procházka
  */
-class BootstrapRenderer implements Nette\Forms\IFormRenderer
+class BootstrapRenderer implements Nette\Forms\FormRenderer
 {
 
 	public static $checkboxListClasses = array(
@@ -253,7 +255,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	/**
 	 * @param \Nette\Forms\Controls\BaseControl $control
 	 */
-	private function prepareControl(Controls\BaseControl $control)
+	private function prepareControl(Controls\BaseControl $control): void
 	{
 		$control->setOption('rendered', FALSE);
 
@@ -273,7 +275,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			$control->setOption('input-prepend', '@');
 		}
 
-		if ($control instanceof Nette\Forms\ISubmitterControl) {
+		if ($control instanceof Nette\Forms\SubmitterControl) {
 			$el->addClass('btn');
 
 		} else {
@@ -292,7 +294,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			$control->setOption('pairContainer', $pair = Html::el('div'));
 			$pair->id = $control->htmlId . '-pair';
 			$pair->addClass('control-group');
-			if ($control->getOption('required', FALSE)) {
+			if ($control->getOption('required')) {
 				$pair->addClass('required');
 			}
 			if ($control->errors) {
@@ -318,7 +320,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	/**
 	 * @return array
 	 */
-	public function findErrors()
+	public function findErrors(): array
 	{
 		// When errorsAtInputs = TRUE (default), show only form-level errors in alerts
 		// Control errors will be shown inline next to the inputs
@@ -340,7 +342,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @throws \RuntimeException
 	 * @return object[]
 	 */
-	public function findGroups()
+	public function findGroups(): array
 	{
 		$formGroups = $visitedGroups = array();
 		foreach ($this->priorGroups as $i => $group) {
@@ -373,11 +375,11 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param boolean $buttons
 	 * @return \Iterator
 	 */
-	public function findControls(?Nette\Forms\Container $container = NULL, $buttons = NULL)
+	public function findControls(?Nette\Forms\Container $container = NULL, ?bool $buttons = NULL): \Iterator
 	{
 		$container = $container ? : $this->form;
 		return new \CallbackFilterIterator($container->getControls(), function ($control) use ($buttons) {
-			$isButton = $control instanceof Controls\Button || $control instanceof Nette\Forms\ISubmitterControl;
+			$isButton = $control instanceof Controls\Button || $control instanceof Nette\Forms\SubmitterControl;
 			return !$control->getOption('rendered')
 				&& !$control instanceof Controls\HiddenField
 				&& (($buttons === TRUE && $isButton) || ($buttons === FALSE && !$isButton) || $buttons === NULL);
@@ -389,9 +391,9 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	/**
 	 * @internal
 	 * @param \Nette\Forms\ControlGroup $group
-	 * @return object
+	 * @return \stdClass|null
 	 */
-	public function processGroup(Nette\Forms\ControlGroup $group)
+	public function processGroup(Nette\Forms\ControlGroup $group): ?\stdClass
 	{
 		if (!$group->getOption('visual') || !$group->getControls()) {
 			return NULL;
@@ -419,7 +421,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			return NULL; // do not render empty groups
 		}
 
-		$groupAttrs = $group->getOption('container', Html::el())->setName('');
+		$groupAttrs = ($group->getOption('container') ?? Html::el())->setName('');
 		/** @var Html $groupAttrs */
 		$groupAttrs->attrs += array_diff_key($group->getOptions(), array_fill_keys(array(
 			'container', 'label', 'description', 'visual', 'template', // these are not attributes
@@ -441,7 +443,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param \Nette\Forms\Controls\BaseControl $control
 	 * @return string
 	 */
-	public static function getControlName(Controls\BaseControl $control)
+	public static function getControlName(Controls\BaseControl $control): string
 	{
 		return $control->lookupPath('Nette\Forms\Form');
 	}
@@ -453,7 +455,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param \Nette\Forms\Controls\BaseControl $control
 	 * @return \Nette\Utils\Html
 	 */
-	public static function getControlDescription(Controls\BaseControl $control)
+	public static function getControlDescription(Controls\BaseControl $control): Html
 	{
 		if (!$desc = $control->getOption('description')) {
 			return Html::el();
@@ -476,7 +478,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param \Nette\Forms\Controls\BaseControl $control
 	 * @return \Nette\Utils\Html
 	 */
-	public function getControlError(Controls\BaseControl $control)
+	public function getControlError(Controls\BaseControl $control): Html
 	{
 		if (!($errors = $control->getErrors()) || !$this->errorsAtInputs) {
 			return Html::el();
@@ -493,9 +495,9 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	/**
 	 * @internal
 	 * @param \Nette\Forms\Controls\BaseControl $control
-	 * @return string
+	 * @return string|null
 	 */
-	public static function getControlTemplate(Controls\BaseControl $control)
+	public static function getControlTemplate(Controls\BaseControl $control): ?string
 	{
 		return $control->getOption('template');
 	}
@@ -504,10 +506,10 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 
 	/**
 	 * @internal
-	 * @param \Nette\Forms\IControl $control
+	 * @param \Nette\Forms\Control $control
 	 * @return bool
 	 */
-	public static function isButton(Nette\Forms\IControl $control)
+	public static function isButton(Nette\Forms\Control $control): bool
 	{
 		return $control instanceof Controls\Button;
 	}
@@ -516,22 +518,22 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 
 	/**
 	 * @internal
-	 * @param \Nette\Forms\IControl $control
+	 * @param \Nette\Forms\Control $control
 	 * @return bool
 	 */
-	public static function isSubmitButton(?Nette\Forms\IControl $control = NULL)
+	public static function isSubmitButton(?Nette\Forms\Control $control = NULL): bool
 	{
-		return $control instanceof Nette\Forms\ISubmitterControl;
+		return $control instanceof Nette\Forms\SubmitterControl;
 	}
 
 
 
 	/**
 	 * @internal
-	 * @param \Nette\Forms\IControl $control
+	 * @param \Nette\Forms\Control $control
 	 * @return bool
 	 */
-	public static function isCheckbox(Nette\Forms\IControl $control)
+	public static function isCheckbox(Nette\Forms\Control $control): bool
 	{
 		return $control instanceof Controls\Checkbox;
 	}
@@ -540,10 +542,10 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 
 	/**
 	 * @internal
-	 * @param \Nette\Forms\IControl $control
+	 * @param \Nette\Forms\Control $control
 	 * @return bool
 	 */
-	public static function isRadioList(Nette\Forms\IControl $control)
+	public static function isRadioList(Nette\Forms\Control $control): bool
 	{
 		return $control instanceof Controls\RadioList;
 	}
@@ -552,10 +554,10 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 
 	/**
 	 * @internal
-	 * @param \Nette\Forms\IControl $control
+	 * @param \Nette\Forms\Control $control
 	 * @return bool
 	 */
-	public static function isCheckboxList(Nette\Forms\IControl $control)
+	public static function isCheckboxList(Nette\Forms\Control $control): bool
 	{
 		foreach (static::$checkboxListClasses as $class) {
 			if (class_exists($class, FALSE) && $control instanceof $class) {
@@ -571,9 +573,9 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	/**
 	 * @internal
 	 * @param \Nette\Forms\Controls\RadioList $control
-	 * @return bool
+	 * @return object[]
 	 */
-	public static function getRadioListItems(Controls\RadioList $control)
+	public static function getRadioListItems(Controls\RadioList $control): array
 	{
 		$items = array();
 		foreach ($control->items as $key => $value) {
@@ -607,9 +609,9 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @internal
 	 * @param \Nette\Forms\Controls\BaseControl $control
 	 * @throws \Nette\InvalidArgumentException
-	 * @return bool
+	 * @return object[]
 	 */
-	public static function getCheckboxListItems(Controls\BaseControl $control)
+	public static function getCheckboxListItems(Controls\BaseControl $control): array
 	{
 		$items = array();
 		foreach ($control->items as $key => $value) {
@@ -621,7 +623,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			);
 			$check->html = clone $check->label;
 			$check->html->addClass('checkbox');
-			$display = $control->getOption('display', 'inline');
+			$display = $control->getOption('display') ?? 'inline';
 			if ($display == 'inline') {
 				$check->html->addClass($display);
 			}
@@ -637,7 +639,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param \Nette\Forms\Controls\BaseControl $control
 	 * @return \Nette\Utils\Html
 	 */
-	public static function getLabelBody(Controls\BaseControl $control)
+	public static function getLabelBody(Controls\BaseControl $control): Html|string|null
 	{
 		$label = $control->getLabel();
 		return $label;
@@ -650,7 +652,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param string $class
 	 * @return bool
 	 */
-	public static function controlHasClass(Controls\BaseControl $control, $class)
+	public static function controlHasClass(Controls\BaseControl $control, string $class): bool
 	{
 		$classes = explode(' ', self::getClasses($control->controlPrototype));
 		return in_array($class, $classes, TRUE);
@@ -663,7 +665,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param array $attrs
 	 * @return \Nette\Utils\Html
 	 */
-	public static function mergeAttrs(?Html $_this, array $attrs)
+	public static function mergeAttrs(?Html $_this, array $attrs): Html
 	{
 		if ($_this === NULL) {
 			return Html::el();

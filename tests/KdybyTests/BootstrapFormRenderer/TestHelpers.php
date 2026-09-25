@@ -3,7 +3,7 @@
 namespace KdybyTests\FormRenderer;
 
 use Kdyby\BootstrapFormRenderer\DI\RendererExtension;
-use Nette\Configurator;
+use Nette\Bootstrap\Configurator;
 use Nette\Forms\Form;
 use Tester\Assert;
 

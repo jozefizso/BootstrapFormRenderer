@@ -709,8 +709,8 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 	 */
 	private function createTemplate()
 	{
-		/** @var \Nette\Application\UI\ITemplateFactory $templateFactory */
-		$templateFactory = $this->container->getByType('Nette\Application\UI\ITemplateFactory');
+		/** @var \Nette\Application\UI\TemplateFactory $templateFactory */
+		$templateFactory = $this->container->getByType('Nette\Application\UI\TemplateFactory');
 		return $templateFactory->createTemplate(new ControlMock());
 	}
 

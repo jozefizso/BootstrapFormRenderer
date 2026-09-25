@@ -8,6 +8,8 @@
  * For the full copyright and license information, please view the file license.txt that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Kdyby\BootstrapFormRenderer\DI;
 
 use Kdyby;
@@ -20,7 +22,7 @@ use Nette;
 class RendererExtension extends Nette\DI\CompilerExtension
 {
 
-	public function loadConfiguration()
+	public function loadConfiguration(): void
 	{
 		$this->getContainerBuilder()->addDefinition($this->prefix('bootstrap2FormFactory'))
 			->setType(Kdyby\BootstrapFormRenderer\Bootstrap2FormFactory::class);
@@ -28,12 +30,12 @@ class RendererExtension extends Nette\DI\CompilerExtension
 
 
 
-	public function beforeCompile()
+	public function beforeCompile(): void
 	{
 		$builder = $this->getContainerBuilder();
 
 		// LatteExtension already installs UI and form macros; our {form} overrides must be installed last.
-		$latteFactory = $builder->getByType(Nette\Bridges\ApplicationLatte\ILatteFactory::class);
+		$latteFactory = $builder->getByType(Nette\Bridges\ApplicationLatte\LatteFactory::class);
 		if ($latteFactory === NULL) {
 			throw new Nette\InvalidStateException('BootstrapFormRenderer requires nette/application LatteExtension to be registered.');
 		}
@@ -44,12 +46,9 @@ class RendererExtension extends Nette\DI\CompilerExtension
 
 
 
-	/**
-	 * @param \Nette\Configurator $config
-	 */
-	public static function register(Nette\Configurator $config)
+	public static function register(Nette\Bootstrap\Configurator $config): void
 	{
-		$config->onCompile[] = function (Nette\Configurator $config, Compiler $compiler) {
+		$config->onCompile[] = function (Nette\Bootstrap\Configurator $config, Compiler $compiler): void {
 			$compiler->addExtension('twBootstrapRenderer', new RendererExtension());
 		};
 	}
