@@ -212,6 +212,10 @@ class FormMacros extends Latte\Macros\MacroSet
 			$form->render('begin', $args);
 
 		} else {
+			// nette/forms 3.1 moved fireRenderEvents() out of renderFormBegin() into initializeForm().
+			if (method_exists(FormsLatteRuntime::class, 'initializeForm')) {
+				FormsLatteRuntime::initializeForm($form);
+			}
 			echo FormsLatteRuntime::renderFormBegin($form, $args);
 		}
 	}

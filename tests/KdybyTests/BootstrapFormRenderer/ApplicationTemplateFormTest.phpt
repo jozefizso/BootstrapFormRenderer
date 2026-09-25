@@ -55,6 +55,25 @@ class ApplicationTemplateFormTest extends BootstrapContainerTestCase
 		Assert::match('<form action="/signin" method="post" class="form-signin">%A%name="name"%A%</form>%A?%', $html);
 	}
 
+
+	public function testNamedDefaultRendererFormFiresRenderEvents()
+	{
+		$control = new ControlMock();
+		$control->addComponent($form = new Form(), 'filter');
+		$form->setAction('/');
+		$form->setMethod('get');
+		$form->addText('search', 'Search');
+		$rendered = FALSE;
+		$form->onRender[] = function (Form $form) use (&$rendered) {
+			$rendered = TRUE;
+			$form->addHidden('do', 'grid-filter-submit');
+		};
+
+		$html = $this->renderControlTemplate($control, '{form filter}{input search}{/form}');
+
+		Assert::true($rendered);
+		Assert::match('<form action="/" method="get">%A%name="search"%A%<input type="hidden" name="do" value="grid-filter-submit">%A?%</form>%A?%', $html);
+	}
 }
 
 
