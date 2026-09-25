@@ -88,7 +88,7 @@ class BootstrapRendererStringTest extends TestCase
 
 class RendererStringPresenter extends \Nette\Application\UI\Presenter
 {
-	protected function createTemplate()
+	protected function createTemplate(): \Nette\Application\UI\ITemplate
 	{
 		return new StringRenderingTemplate(new Engine(), 'presenter-template-state');
 	}
@@ -96,6 +96,7 @@ class RendererStringPresenter extends \Nette\Application\UI\Presenter
 
 
 
+#[\AllowDynamicProperties]
 class StringRenderingTemplate extends Template
 {
 	const HTML = '<form>template output</form>';
@@ -111,7 +112,7 @@ class StringRenderingTemplate extends Template
 	}
 
 
-	public function __toString()
+	public function __toString(): string
 	{
 		return $this->html;
 	}

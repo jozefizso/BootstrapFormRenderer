@@ -6,11 +6,11 @@
 <body>
 <div class="container">
 	<form action="" method="post" enctype="multipart/form-data" class="form-horizontal">
-		<div id="frm-foo-image-pair" class="control-group">
-			<label class="control-label" for="frm-foo-image">Image</label>
+		<div id="frm-foo-foo-image-pair" class="control-group">
+			<label class="control-label" for="frm-foo-foo-image">Image</label>
 
 			<div class="controls">
-				<input type="file" name="image" id="frm-foo-image">
+				<input type="file" name="image" id="frm-foo-foo-image" data-nette-rules='[{"op":":fileSize","msg":"The size of the uploaded file can be up to 2097152 bytes.","arg":2097152}]'>
 			</div>
 		</div>
 	</form>
