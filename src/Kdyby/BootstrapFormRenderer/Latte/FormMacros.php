@@ -180,7 +180,7 @@ class FormMacros extends Latte\Macros\MacroSet
 			self::renderFormBegin($mode, $args);
 			return $mode;
 
-		} elseif (isset($scope['_control']) && ($form = $scope['_control']->getComponent($mode, FALSE)) instanceof Form) {
+		} elseif (is_string($mode) && isset($scope['_control']) && ($form = $scope['_control']->getComponent($mode, FALSE)) instanceof Form) {
 			self::renderFormBegin($form, $args);
 			return $form;
 

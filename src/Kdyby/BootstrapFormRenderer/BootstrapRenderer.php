@@ -72,7 +72,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	/**
 	 * @param \Nette\Bridges\ApplicationLatte\Template $template
 	 */
-	public function __construct(Template $template = NULL)
+	public function __construct(?Template $template = NULL)
 	{
 		$this->template = $template;
 		$this->templateInjected = $template !== NULL;
@@ -88,7 +88,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param array $args
 	 * @return string
 	 */
-	public function render(Nette\Forms\Form $form, $mode = NULL, $args = NULL)
+	public function render(Nette\Forms\Form $form, $mode = NULL, $args = NULL): string
 	{
 		/** @var \Nette\Application\UI\Presenter|null $presenter */
 		$presenter = $form->lookup('Nette\Application\UI\Presenter', FALSE);
@@ -205,10 +205,10 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			return (string) $this->template;
 
 		} elseif ($mode === 'begin') {
-			return FormsLatteRuntime::renderFormBegin($this->form, (array) $args);
+			return (string) FormsLatteRuntime::renderFormBegin($this->form, (array) $args);
 
 		} elseif ($mode === 'end') {
-			return FormsLatteRuntime::renderFormEnd($this->form);
+			return (string) FormsLatteRuntime::renderFormEnd($this->form);
 
 		} else {
 			// Partial templates use form macros without an enclosing {form} block.
@@ -376,7 +376,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param boolean $buttons
 	 * @return \Iterator
 	 */
-	public function findControls(Nette\Forms\Container $container = NULL, $buttons = NULL)
+	public function findControls(?Nette\Forms\Container $container = NULL, $buttons = NULL)
 	{
 		$container = $container ? : $this->form;
 		return new \CallbackFilterIterator($container->getControls(), function ($control) use ($buttons) {
@@ -422,7 +422,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			return NULL; // do not render empty groups
 		}
 
-		$groupAttrs = $group->getOption('container', Html::el())->setName(NULL);
+		$groupAttrs = $group->getOption('container', Html::el())->setName('');
 		/** @var Html $groupAttrs */
 		$groupAttrs->attrs += array_diff_key($group->getOptions(), array_fill_keys(array(
 			'container', 'label', 'description', 'visual', 'template', // these are not attributes
@@ -463,7 +463,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 		}
 
 		// If we have translator, translate!
-		if (!$desc instanceof Html && ($translator = $control->form->getTranslator())) {
+		if (!$desc instanceof Html && ($translator = $control->getForm()->getTranslator())) {
 			$desc = $translator->translate($desc); // wtf?
 		}
 
@@ -527,7 +527,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param \Nette\Forms\IControl $control
 	 * @return bool
 	 */
-	public static function isSubmitButton(Nette\Forms\IControl $control = NULL)
+	public static function isSubmitButton(?Nette\Forms\IControl $control = NULL)
 	{
 		return $control instanceof Nette\Forms\ISubmitterControl;
 	}
@@ -671,7 +671,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param array $attrs
 	 * @return \Nette\Utils\Html
 	 */
-	public static function mergeAttrs(Html $_this = NULL, array $attrs)
+	public static function mergeAttrs(?Html $_this, array $attrs)
 	{
 		if ($_this === NULL) {
 			return Html::el();
