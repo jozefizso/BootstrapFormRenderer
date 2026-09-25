@@ -1,5 +1,21 @@
 # Changelog
 
+## v2.4.0
+
+This release targets Nette Framework 2.4 and Latte 2.4 on PHP 5.6 through 8.0.
+
+### Changes
+
+- Uses Nette 2.4 form runtime helpers, control-group accessors, renderer accessors, and list-control part APIs.
+- Keeps application Latte filters, providers, template parameters, and initialized template subclass state in custom group and control templates.
+- Uses Latte's native `{layout none}` directive for internal renderer templates instead of a custom presenter proxy.
+- Tests all supported PHP runtimes without hiding warnings from renderer code.
+
+### Fixes
+
+- Resolves `{form name}` in custom group and control templates through the control that owns the rendered form, so sibling forms of a child control are found instead of being rendered as a mode of the current form.
+
+
 ## v2.3.1
 
 This release targets Nette Framework 2.3, Latte 2.3 and requires PHP 5.6+.

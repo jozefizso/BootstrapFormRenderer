@@ -4,7 +4,7 @@
 	"description": "Nette forms renderer with bootstrap",
 	"keywords": ["nette", "kdyby", "forms", "bootstrap"],
 	"homepage": "https://github.com/jozefizso/BootstrapFormRenderer",
-	"license": ["BSD-3-Clause", "GPL-2.0", "GPL-3.0"],
+	"license": ["BSD-3-Clause", "GPL-2.0-only", "GPL-3.0-only"],
 	"authors": [
 		{
 			"name": "Filip Procházka",
