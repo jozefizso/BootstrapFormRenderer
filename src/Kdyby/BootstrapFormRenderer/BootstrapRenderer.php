@@ -174,6 +174,7 @@ class BootstrapRenderer implements Nette\Forms\FormRenderer
 				}
 			}
 
+			// @parts.latte opens {bootstrapFormContext $form} so {input} resolves without printing <form>.
 			$this->template->setFile(__DIR__ . '/@parts.latte');
 			$this->template->mode = $mode;
 			$this->template->attrs = $attrs;

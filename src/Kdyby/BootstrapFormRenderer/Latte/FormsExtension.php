@@ -45,6 +45,7 @@ final class FormsExtension extends Latte\Extension
 			'pair' => Nodes\PairNode::create(...),
 			'container' => Nodes\PairNode::create(...),
 			'group' => Nodes\GroupNode::create(...),
+			'bootstrapFormContext' => Nodes\FormContextNode::create(...),
 		];
 	}
 

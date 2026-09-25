@@ -10,27 +10,29 @@
 
 {import "@form.latte"}
 
+{bootstrapFormContext $form}
 {if $mode === "errors"}
-    {include #errors, renderer => $renderer}
+    {include errors, renderer: $renderer}
 
 {elseif $mode === "body"}
-    {include #body, renderer => $renderer}
+    {include body, renderer: $renderer}
 
 {elseif $mode === "controls"}
-    {include #controls, controls => $renderer->findControls(NULL, FALSE)}
+    {include controls, controls: $renderer->findControls(NULL, FALSE)}
 
 {elseif $mode === "buttons"}
-    {include #controls, controls => $renderer->findControls(NULL, TRUE)}
+    {include controls, controls: $renderer->findControls(NULL, TRUE)}
 
 {elseif $mode instanceof \Nette\Forms\Container}
-    {include #controls, renderer => $renderer, controls => $renderer->findControls($mode)}
+    {include controls, renderer: $renderer, controls: $renderer->findControls($mode)}
 
 {elseif $mode instanceof \Nette\Forms\ControlGroup}
     {if $mode->getControls()}
-        {include #group, renderer => $renderer, group => $renderer->processGroup($mode)}
+        {include group, renderer: $renderer, group: $renderer->processGroup($mode)}
     {/if}
 
-{elseif $mode instanceof \Nette\Forms\IControl}
-    {include #control, renderer => $renderer, control => $mode, attrs => $attrs}
+{elseif $mode instanceof \Nette\Forms\Control}
+    {include control, renderer: $renderer, control: $mode, attrs: $attrs}
 
 {/if}
+{/bootstrapFormContext}
