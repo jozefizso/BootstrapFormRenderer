@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-22.04', 'ubuntu-24.04']
-        php-version: ['5.6', '7.0', '7.1']
+        php-version: ['5.6', '7.1', '7.2', '7.4', '8.0']
 
     name: ${{ matrix.os }} / PHP ${{ matrix.php-version }}
 
@@ -26,6 +26,11 @@ jobs:
       with:
         php-version: ${{ matrix.php-version }}
         coverage: none
+        tools: composer:v2.2
+
+    - name: Remove JSON extension configuration for PHP 8
+      if: matrix.php-version == '8.0'
+      run: sed -i '/^extension=json\.so$/d' ./tests/php-tests.ini
 
     - name: Diagnose pdo_sqlite extension
       run: |
@@ -34,8 +39,8 @@ jobs:
         php -r 'printf("default: pdo=%s sqlite=%s drivers=%s\n", extension_loaded("PDO") ? "yes" : "no", extension_loaded("pdo_sqlite") ? "yes" : "no", json_encode(PDO::getAvailableDrivers()));'
         php -n -c ./tests/php-tests.ini -r 'printf("tester: pdo=%s sqlite=%s drivers=%s\n", extension_loaded("PDO") ? "yes" : "no", extension_loaded("pdo_sqlite") ? "yes" : "no", json_encode(PDO::getAvailableDrivers()));'
 
-    - name: Install dependencies
-      run: composer install --no-interaction --prefer-source --dev
+    - name: Resolve runtime-compatible dependencies
+      run: composer update --no-interaction --prefer-source
 
     - name: Run parallel-lint
       run: composer lint
@@ -57,3 +62,97 @@ jobs:
         name: Test Results (PHP ${{ matrix.php-version }})
         path: ./test-results.xml
         reporter: tester-junit
+
+  integration:
+    runs-on: ubuntu-22.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - php-version: '5.6'
+          dependency-set: lowest
+          latte: '2.4.0'
+          application: '2.4.0'
+          forms: '2.4.0'
+          utils: '2.4.0'
+        - php-version: '5.6'
+          dependency-set: highest
+          latte: '^2.4.0'
+          application: '~2.4.0'
+          forms: '~2.4.0'
+          utils: '^2.4.0'
+        - php-version: '7.1'
+          dependency-set: lowest
+          latte: '2.4.1'
+          application: '2.4.1'
+          forms: '2.4.0'
+          utils: '2.4.0'
+        - php-version: '7.1'
+          dependency-set: highest
+          latte: '^2.4.0'
+          application: '~2.4.0'
+          forms: '~2.4.0'
+          utils: '^2.4.0'
+        - php-version: '7.2'
+          dependency-set: lowest
+          latte: '2.4.1'
+          application: '2.4.1'
+          forms: '2.4.0'
+          utils: '2.4.0'
+        - php-version: '7.2'
+          dependency-set: highest
+          latte: '^2.4.0'
+          application: '~2.4.0'
+          forms: '~2.4.0'
+          utils: '^2.4.0'
+        - php-version: '7.4'
+          dependency-set: lowest
+          latte: '2.4.1'
+          application: '2.4.1'
+          forms: '2.4.0'
+          utils: '2.4.0'
+        - php-version: '7.4'
+          dependency-set: highest
+          latte: '^2.4.0'
+          application: '~2.4.0'
+          forms: '~2.4.0'
+          utils: '^2.4.0'
+        - php-version: '8.0'
+          dependency-set: lowest
+          latte: '2.4.9'
+          application: '2.4.17'
+          forms: '2.4.11'
+          utils: '2.5.5'
+        - php-version: '8.0'
+          dependency-set: highest
+          latte: '^2.4.0'
+          application: '~2.4.0'
+          forms: '~2.4.0'
+          utils: '^2.4.0'
+
+    name: Integration / PHP ${{ matrix.php-version }} / ${{ matrix.dependency-set }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v7
+
+    - name: Setup PHP ${{ matrix.php-version }}
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        coverage: none
+        tools: composer:v2.2
+
+    - name: Resolve application dependencies
+      working-directory: tests/integration
+      run: |
+        composer update --no-interaction --prefer-dist \
+          --with "latte/latte:${{ matrix.latte }}" \
+          --with "nette/application:${{ matrix.application }}" \
+          --with "nette/forms:${{ matrix.forms }}" \
+          --with "nette/utils:${{ matrix.utils }}"
+
+    - name: Run integration application
+      working-directory: tests/integration
+      run: php smoke.php
