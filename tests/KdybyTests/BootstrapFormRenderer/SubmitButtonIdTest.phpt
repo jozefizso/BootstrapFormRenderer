@@ -12,6 +12,7 @@ namespace KdybyTests\FormRenderer;
 use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
 use Latte\Engine;
 use Nette;
+use Nette\Bridges\ApplicationLatte\DefaultTemplate;
 use Nette\Bridges\ApplicationLatte\Template;
 use Nette\Forms\Form;
 use Nette\Utils\Strings;
@@ -102,12 +103,10 @@ class SubmitButtonIdTest extends TestCase
 	 */
 	private function assertTemplateOutput(Form $form, $latteFile, $expectedOutput)
 	{
-		$template = $this->createTemplate()
-			->setFile($latteFile)
-			->setParameters(array('form' => $form));
+		$template = $this->createTemplate();
 
-		$actual = Strings::normalize($this->captureOutput(function () use ($template) {
-			$template->render();
+		$actual = Strings::normalize($this->captureOutput(function () use ($template, $latteFile, $form) {
+			$template->render($latteFile, array('form' => $form));
 		}));
 		$expected = Strings::normalize(file_get_contents($expectedOutput));
 		Assert::same($expected, $actual);
@@ -121,7 +120,7 @@ class SubmitButtonIdTest extends TestCase
 	{
 		$engine = new Engine();
 		$engine->setTempDirectory(TEMP_DIR . '/latte');
-		return new Template($engine);
+		return class_exists(DefaultTemplate::class) ? new DefaultTemplate($engine) : new Template($engine);
 	}
 }
 

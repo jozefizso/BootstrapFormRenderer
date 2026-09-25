@@ -24,19 +24,21 @@ and layout structure that Bootstrap requires.
 
 ## Requirements
 
-- PHP 5.6, 7.1, 7.2, 7.4 and 8.0
-- [Nette Framework](https://github.com/nette/nette) 2.4
-- Latte 2.4 through 2.11; PHP 8.0 applications require PHP-compatible Nette patch releases
+- PHP 7.1 through 8.3
+- [Nette Framework](https://github.com/nette/nette) 3.0 or 3.1
+- Latte 2.6 through 2.11 (Nette Application 3.1 requires Latte 2.7.1+)
 
 The integration suite tests both ends of the supported dependency matrix:
 
-| PHP | Lowest Latte / Application / Forms / Utils | Highest tested Latte / Application / Forms / Utils |
-|-----|--------------------------------------------|----------------------------------------------------|
-| 5.6 | 2.4.0 / 2.4.0 / 2.4.0 / 2.4.0 | 2.4.x / 2.4.17 / 2.4.11 / 2.5.x |
-| 7.1 | 2.4.1 / 2.4.1 / 2.4.0 / 2.4.0 | 2.11.x / 2.4.17 / 2.4.11 / 2.5.x |
-| 7.2 | 2.4.1 / 2.4.1 / 2.4.0 / 2.4.0 | 2.11.x / 2.4.17 / 2.4.11 / 2.5.x |
-| 7.4 | 2.4.1 / 2.4.1 / 2.4.0 / 2.4.0 | 2.11.x / 2.4.17 / 2.4.11 / 2.5.x |
-| 8.0 | 2.4.9 / 2.4.17 / 2.4.11 / 2.5.5 | 2.11.x / 2.4.17 / 2.4.11 / 2.5.x |
+| PHP | Dependency set | Latte / Application / Forms / Utils |
+|-----|----------------|-------------------------------------|
+| 7.1 | lowest | 2.6.0 / 3.0.8 / 3.0.7 / 3.1.0 |
+| 7.2 | highest Nette 3.1 | 2.11.x / 3.1.x / 3.1.x / 3.2.x or 4.0.x |
+| 7.4 | highest Nette 3.0 | 2.11.x / 3.0.x / 3.0.x / 3.2.x |
+| 8.0 | highest Nette 3.0 | 2.11.x / 3.0.x / 3.0.x / 3.2.x |
+| 8.1 | highest Nette 3.1 | 2.11.x / 3.1.x / 3.1.x / 3.2.x or 4.0.x |
+| 8.2 | highest Nette 3.1 | 2.11.x / 3.1.x / 3.1.x / 3.2.x or 4.0.x |
+| 8.3 | highest Nette 3.1 | 2.11.x / 3.1.x / 3.1.x / 3.2.x or 4.0.x |
 
 ## Getting Started
 
@@ -50,7 +52,7 @@ composer require jozefizso/bootstrap-form-renderer
 
 | Version  | Branch      | PHP      | compatible | Nette series  |
 |----------|-------------|----------|------------|---------------|
-| `^3.0.0` | `main`      | `>= 7.1` | `8.0`      | Nette 3.0     |
+| `^3.0.0` | `main`      | `>= 7.1` | `8.3`      | Nette 3.0, 3.1 |
 | `^2.4.0` | `nette-2.4` | `>= 5.6` | `8.0`      | Nette 2.4     |
 | `^2.3.0` | `nette-2.3` | `>= 5.6` | `7.1`      | Nette 2.3     |
 | `^2.2.0` | `nette-2.2` | `>= 5.6` | `7.0`      | Nette 2.2     |
@@ -79,10 +81,9 @@ and the Latte macro extensions like  `{form body}`, `{pair}`, `{group}` and `{co
 Use configuration files to register only the Latte macros extensions:
 
 ```neon
-nette:
-    latte:
-        macros:
-            - Kdyby\BootstrapFormRenderer\Latte\FormMacros
+latte:
+    macros:
+        - Kdyby\BootstrapFormRenderer\Latte\FormMacros
 ```
 
 #### Alternative: programmatic bootstrap
@@ -372,21 +373,17 @@ BootstrapFormRenderer works seamlessly with Nette 2.2's built-in translation sys
 
 ## Latte Variable Conventions
 
-BootstrapFormRenderer aligns with Latte 2.2 standard runtime variable conventions:
+`{form name}` resolves the form as a component of the current control:
 
-- **`$_control`** - The current component/presenter context (required for form lookup)
+- **`uiControl` Latte provider** - Registered by Nette 3 application templates (`$control` in the template); used for form lookup
+- **`$_control`** - Fallback for templates rendered without a `uiControl` provider, e.g. a plain Latte engine
 - **`$_form`** - The current form inside `{form}...{/form}` blocks
-
-These variables are automatically provided by Nette 2.2 presenter templates.
 
 ### Template Requirements
 
-When rendering forms in your templates:
-- Ensure templates are rendered within a Nette presenter context
-- The `$_control` variable must be available for the `{form name}` macro to resolve forms
-- Inside `{form}...{/form}` blocks, `$_form` provides access to the current form
-
-This is automatically handled in standard Nette 2.2 presenter templates and requires no additional configuration.
+Presenter and control templates created by Nette's `TemplateFactory` need no configuration.
+When rendering a template on a plain Latte engine, pass the owning component as `_control`,
+or register it with `$latte->addProvider('uiControl', $control)`.
 
 
 ## License

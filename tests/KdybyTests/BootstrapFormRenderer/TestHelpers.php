@@ -28,6 +28,18 @@ trait BootstrapFormRendererTestHelpers
 
 
 	/**
+	 * nette/forms 3.0.7 (and 2.x) appends an IE-only hidden input to </form>; newer releases do not.
+	 *
+	 * @param string $html
+	 * @return string
+	 */
+	protected function stripLegacyIeHack($html)
+	{
+		return preg_replace('#<!--\[if IE\]>\s*<input type=IEbug disabled style="display:none">\s*<!\[endif\]-->#', '', $html);
+	}
+
+
+	/**
 	 * @param \Nette\Forms\Form $form
 	 * @return void
 	 */

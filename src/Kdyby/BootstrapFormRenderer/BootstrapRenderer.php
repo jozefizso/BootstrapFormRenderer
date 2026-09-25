@@ -12,6 +12,7 @@ namespace Kdyby\BootstrapFormRenderer;
 
 use Latte\Engine;
 use Nette;
+use Nette\Bridges\ApplicationLatte\DefaultTemplate;
 use Nette\Bridges\ApplicationLatte\Template;
 use Nette\Bridges\ApplicationLatte\UIMacros;
 use Nette\Bridges\FormsLatte\FormMacros;
@@ -72,7 +73,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	/**
 	 * @param \Nette\Bridges\ApplicationLatte\Template $template
 	 */
-	public function __construct(Template $template = NULL)
+	public function __construct(?Template $template = NULL)
 	{
 		$this->template = $template;
 		$this->templateInjected = $template !== NULL;
@@ -88,7 +89,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param array $args
 	 * @return string
 	 */
-	public function render(Nette\Forms\Form $form, $mode = NULL, $args = NULL)
+	public function render(Nette\Forms\Form $form, $mode = NULL, $args = NULL): string
 	{
 		/** @var \Nette\Application\UI\Presenter|null $presenter */
 		$presenter = $form->lookup('Nette\Application\UI\Presenter', FALSE);
@@ -120,7 +121,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 				$engine = $this->createLatteEngine(FALSE);
 			}
 
-			$this->template = $template ?: new Template($engine);
+			$this->template = $template ?: (class_exists(DefaultTemplate::class) ? new DefaultTemplate($engine) : new Template($engine));
 			$this->templatePresenter = $presenter;
 		}
 
@@ -191,7 +192,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 		}
 
 
-		unset($this->template->mode);
+		$this->template->mode = NULL;
 
 		$this->template->setFile(__DIR__ . '/@form.latte');
 		$this->template->_form = $this->form;
@@ -205,10 +206,10 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			return (string) $this->template;
 
 		} elseif ($mode === 'begin') {
-			return FormsLatteRuntime::renderFormBegin($this->form, (array) $args);
+			return (string) FormsLatteRuntime::renderFormBegin($this->form, (array) $args);
 
 		} elseif ($mode === 'end') {
-			return FormsLatteRuntime::renderFormEnd($this->form);
+			return (string) FormsLatteRuntime::renderFormEnd($this->form);
 
 		} else {
 			// Partial templates use form macros without an enclosing {form} block.
@@ -330,10 +331,6 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			return array();
 		}
 
-		// In Nette 2.1, validation rule messages are already translated
-		// by Rules::formatMessage() using the form translator.
-		// We return errors as-is to avoid double translation.
-		// Html instances are also supported and passed through.
 		return $formErrors;
 	}
 
@@ -376,7 +373,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param boolean $buttons
 	 * @return \Iterator
 	 */
-	public function findControls(Nette\Forms\Container $container = NULL, $buttons = NULL)
+	public function findControls(?Nette\Forms\Container $container = NULL, $buttons = NULL)
 	{
 		$container = $container ? : $this->form;
 		return new \CallbackFilterIterator($container->getControls(), function ($control) use ($buttons) {
@@ -422,7 +419,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			return NULL; // do not render empty groups
 		}
 
-		$groupAttrs = $group->getOption('container', Html::el())->setName(NULL);
+		$groupAttrs = $group->getOption('container', Html::el())->setName('');
 		/** @var Html $groupAttrs */
 		$groupAttrs->attrs += array_diff_key($group->getOptions(), array_fill_keys(array(
 			'container', 'label', 'description', 'visual', 'template', // these are not attributes
@@ -463,8 +460,8 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 		}
 
 		// If we have translator, translate!
-		if (!$desc instanceof Html && ($translator = $control->form->getTranslator())) {
-			$desc = $translator->translate($desc); // wtf?
+		if (!$desc instanceof Html && ($translator = $control->getForm()->getTranslator())) {
+			$desc = $translator->translate($desc);
 		}
 
 		// create element
@@ -485,11 +482,6 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			return Html::el();
 		}
 		$error = reset($errors);
-
-		// In Nette 2.1, validation rule messages are already translated
-		// by Rules::formatMessage() using the form translator.
-		// We return errors as-is to avoid double translation.
-		// Html instances are also supported and passed through.
 
 		// create element
 		return Html::el('p', array('class' => 'help-inline'))
@@ -527,7 +519,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param \Nette\Forms\IControl $control
 	 * @return bool
 	 */
-	public static function isSubmitButton(Nette\Forms\IControl $control = NULL)
+	public static function isSubmitButton(?Nette\Forms\IControl $control = NULL)
 	{
 		return $control instanceof Nette\Forms\ISubmitterControl;
 	}
@@ -671,7 +663,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	 * @param array $attrs
 	 * @return \Nette\Utils\Html
 	 */
-	public static function mergeAttrs(Html $_this = NULL, array $attrs)
+	public static function mergeAttrs(?Html $_this, array $attrs)
 	{
 		if ($_this === NULL) {
 			return Html::el();
@@ -685,15 +677,15 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 
 	/**
 	 * @param \Nette\Utils\Html $el
-	 * @return bool
+	 * @return string
 	 */
-	private static function getClasses(Html $el)
+	private static function getClasses(Html $el): string
 	{
 		if (is_array($el->class)) {
 			$classes = array_filter(array_merge(array_keys($el->class), $el->class), 'is_string');
 			return implode(' ', $classes);
 		}
-		return $el->class;
+		return (string) $el->class;
 	}
 
 }

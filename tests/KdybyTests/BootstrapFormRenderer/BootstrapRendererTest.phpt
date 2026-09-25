@@ -596,8 +596,12 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 			}
 			foreach ($form->getComponents(TRUE, 'Nette\Forms\Controls\CsrfProtection') as $control) {
 				/** @var \Nette\Forms\Controls\CsrfProtection $control */
+				// Nette 3 starts a native session when protection is attached to a standalone form.
+				if ($control->session) {
+					$control->session->close();
+				}
 				$control->session = new Nette\Http\Session($form->httpRequest, new Nette\Http\Response);
-				$control->session->setHandler(new ArraySessionStorage($control->session));
+				$control->session->setHandler(new ArraySessionStorage());
 				$control->session->start();
 			}
 
@@ -636,8 +640,12 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 		}
 		foreach ($form->getComponents(TRUE, 'Nette\Forms\Controls\CsrfProtection') as $control) {
 			/** @var \Nette\Forms\Controls\CsrfProtection $control */
+			// Nette 3 starts a native session when protection is attached to a standalone form.
+			if ($control->session) {
+				$control->session->close();
+			}
 			$control->session = new Nette\Http\Session($form->httpRequest, new Nette\Http\Response);
-			$control->session->setHandler(new ArraySessionStorage($control->session));
+			$control->session->setHandler(new ArraySessionStorage());
 			$control->session->start();
 		}
 
@@ -689,7 +697,7 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 			});
 		};
 
-		$output = $strip(Strings::normalize($rendered));
+		$output = $strip(Strings::normalize($this->stripLegacyIeHack($rendered)));
 		$expected = $strip(Strings::normalize(file_get_contents($expectedOutput)));
 		Assert::match($expected, $output);
 	}
@@ -725,13 +733,7 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 
 
-	public function __construct(Nette\Http\Session $session)
-	{
-		$session->setOptions(array('cookie_disabled' => TRUE));
-	}
-
-
-
+	#[\ReturnTypeWillChange]
 	public function open($savePath, $sessionName)
 	{
 		$this->storage = array();
@@ -740,6 +742,7 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 
 
+	#[\ReturnTypeWillChange]
 	public function close()
 	{
 		$this->storage = array();
@@ -748,6 +751,7 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 
 
+	#[\ReturnTypeWillChange]
 	public function read($id)
 	{
 		return isset($this->storage[$id]) ? $this->storage[$id] : '';
@@ -755,6 +759,7 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 
 
+	#[\ReturnTypeWillChange]
 	public function write($id, $data)
 	{
 		$this->storage[$id] = $data;
@@ -763,6 +768,7 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 
 
+	#[\ReturnTypeWillChange]
 	public function destroy($id)
 	{
 		unset($this->storage[$id]);
@@ -771,6 +777,7 @@ class ArraySessionStorage implements \SessionHandlerInterface
 
 
 
+	#[\ReturnTypeWillChange]
 	public function gc($maxlifetime)
 	{
 		return true;
@@ -804,10 +811,10 @@ class DummyTranslator implements Nette\Localization\ITranslator
 	 * Translates the given string to Slovak
 	 *
 	 * @param string $message
-	 * @param int $count
+	 * @param mixed ...$parameters
 	 * @return string
 	 */
-	public function translate($message, $count = NULL)
+	public function translate($message, ...$parameters): string
 	{
 		if (isset($this->translations[$message])) {
 			return $this->translations[$message];
@@ -858,10 +865,10 @@ class TranslationTestTranslator implements Nette\Localization\ITranslator
 	 * Translates the given string to Slovak
 	 *
 	 * @param string $message
-	 * @param int $count
+	 * @param mixed ...$parameters
 	 * @return string
 	 */
-	public function translate($message, $count = NULL)
+	public function translate($message, ...$parameters): string
 	{
 		// For Html instances, return as-is (translator shouldn't be called on these)
 		if ($message instanceof Html) {

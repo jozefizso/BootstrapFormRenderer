@@ -31,7 +31,7 @@ use Nette\Forms\Form;
  * {/form} as {$form->render('end')}
  * </code>
  *
- * Self-closing form (Latte 2.1 semantics):
+ * Self-closing form:
  *
  * <code>
  * {form name /} as {form name}{/form} (begin + hidden fields + end; no body)
@@ -51,7 +51,7 @@ use Nette\Forms\Form;
  * </code>
  *
  * Related:
- * - {@see \Nette\Bridges\FormsLatte\FormMacros} (Latte 2.2 core form macros)
+ * - {@see \Nette\Bridges\FormsLatte\FormMacros} (core form macros)
  * - {@see \Kdyby\BootstrapFormRenderer\BootstrapRenderer} (Bootstrap rendering implementation)
  *
  * @author Filip Procházka <filip@prochazka.su>
@@ -100,7 +100,7 @@ class FormMacros extends Latte\Macros\MacroSet
 		$node->tokenizer->reset();
 		$node->empty = in_array($word, $inlineParts, TRUE);
 
-		return $writer->write('$form = $_form = ' . ($node->empty ? '' : '$this->global->formsStack[] = ') . get_called_class() . '::renderFormPart(%node.word, %node.array, get_defined_vars())');
+		return $writer->write('$form = $_form = ' . ($node->empty ? '' : '$this->global->formsStack[] = ') . get_called_class() . '::renderFormPart(%node.word, %node.array, get_defined_vars(), isset($this->global->uiControl) ? $this->global->uiControl : NULL)');
 	}
 
 
@@ -168,19 +168,25 @@ class FormMacros extends Latte\Macros\MacroSet
 
 
 	/**
-	 * @param string $mode
+	 * Resolves a named form through the uiControl Latte provider that Nette 3 application templates
+	 * register, falling back to a $_control template variable for templates rendered without one.
+	 *
+	 * @param string|Form $mode
 	 * @param array $args
 	 * @param array $scope
+	 * @param \Nette\ComponentModel\IContainer|null $uiControl
 	 * @throws \Nette\InvalidStateException
 	 * @return \Nette\Forms\Form
 	 */
-	public static function renderFormPart($mode, array $args, array $scope)
+	public static function renderFormPart($mode, array $args, array $scope, $uiControl = NULL)
 	{
+		$control = $uiControl ?: (isset($scope['_control']) ? $scope['_control'] : NULL);
+
 		if ($mode instanceof Form) {
 			self::renderFormBegin($mode, $args);
 			return $mode;
 
-		} elseif (isset($scope['_control']) && ($form = $scope['_control']->getComponent($mode, FALSE)) instanceof Form) {
+		} elseif (is_string($mode) && $control && ($form = $control->getComponent($mode, FALSE)) instanceof Form) {
 			self::renderFormBegin($form, $args);
 			return $form;
 
@@ -188,7 +194,7 @@ class FormMacros extends Latte\Macros\MacroSet
 			$scope['_form']->render($mode, $args);
 
 		} else {
-			throw new Nette\InvalidStateException('No instanceof Nette\Forms\Form found in local scope. Ensure $_control is available in your template.');
+			throw new Nette\InvalidStateException('No instanceof Nette\Forms\Form found in local scope. Ensure the template has a uiControl provider or a $_control variable.');
 		}
 
 		return $scope['_form'];
@@ -206,6 +212,10 @@ class FormMacros extends Latte\Macros\MacroSet
 			$form->render('begin', $args);
 
 		} else {
+			// nette/forms 3.1 moved fireRenderEvents() out of renderFormBegin() into initializeForm().
+			if (method_exists(FormsLatteRuntime::class, 'initializeForm')) {
+				FormsLatteRuntime::initializeForm($form);
+			}
 			echo FormsLatteRuntime::renderFormBegin($form, $args);
 		}
 	}

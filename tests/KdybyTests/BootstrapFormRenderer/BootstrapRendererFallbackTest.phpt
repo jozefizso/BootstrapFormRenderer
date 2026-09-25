@@ -46,7 +46,7 @@ class BootstrapRendererFallbackTest extends TestCase
 			$s = preg_replace("#\\n{3,}#", "\n\n", $s);
 			return trim($s);
 		};
-		Assert::same($normalize($expected), $normalize($actual));
+		Assert::same($normalize($expected), $normalize($this->stripLegacyIeHack($actual)));
 	}
 }
 

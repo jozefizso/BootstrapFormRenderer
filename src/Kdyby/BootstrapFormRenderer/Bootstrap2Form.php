@@ -5,6 +5,7 @@
 
 namespace Kdyby\BootstrapFormRenderer;
 
+use Nette;
 use Nette\Application\UI\Form;
 
 /**
@@ -32,10 +33,10 @@ class Bootstrap2Form extends Form
 	/**
 	 * Creates a new form with Bootstrap 2 renderer already configured.
 	 *
-	 * @param \Nette\ComponentModel\IContainer $parent Optional parent component
-	 * @param string $name Optional component name
+	 * @param \Nette\ComponentModel\IContainer|null $parent Optional parent component
+	 * @param string|null $name Optional component name
 	 */
-	public function __construct($parent = NULL, $name = NULL)
+	public function __construct(?Nette\ComponentModel\IContainer $parent = NULL, ?string $name = NULL)
 	{
 		parent::__construct($parent, $name);
 		$this->setRenderer(new BootstrapRenderer);

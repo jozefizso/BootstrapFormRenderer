@@ -38,11 +38,11 @@ class Bootstrap2FormFactory
 	 * {@see BootstrapRenderer}. The form is ready to use with Bootstrap 2 CSS
 	 * classes and markup.
 	 *
-	 * @param \Nette\ComponentModel\IContainer $parent Optional parent component
-	 * @param string $name Optional component name
+	 * @param \Nette\ComponentModel\IContainer|null $parent Optional parent component
+	 * @param string|null $name Optional component name
 	 * @return Bootstrap2Form Form instance configured with Bootstrap 2 renderer
 	 */
-	public function create($parent = NULL, $name = NULL)
+	public function create(?Nette\ComponentModel\IContainer $parent = NULL, ?string $name = NULL): Bootstrap2Form
 	{
 		return new Bootstrap2Form($parent, $name);
 	}

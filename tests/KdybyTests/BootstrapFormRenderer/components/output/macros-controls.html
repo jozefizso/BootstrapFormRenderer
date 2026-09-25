@@ -5,69 +5,69 @@
 </head>
 <body>
 <div class="container">
-	<div id="frm-foo-grouped-name-pair" class="control-group">
-		<label class="test control-label" for="frm-foo-grouped-name">Jméno</label>
+	<div id="frm-foo-foo-grouped-name-pair" class="control-group">
+		<label class="test control-label" for="frm-foo-foo-grouped-name">Jméno</label>
 
 		<div class="controls">
-			<input type="text" name="grouped[name]" id="frm-foo-grouped-name">
+			<input type="text" name="grouped[name]" id="frm-foo-foo-grouped-name">
 		</div>
 	</div>
-	<div id="frm-foo-grouped-email-pair" class="control-group">
-		<label class="control-label" for="frm-foo-grouped-email">Email</label>
+	<div id="frm-foo-foo-grouped-email-pair" class="control-group">
+		<label class="control-label" for="frm-foo-foo-grouped-email">Email</label>
 
 		<div class="controls">
 			<div class="input-prepend">
 				<span class="add-on">@</span>
-				<input type="email" name="grouped[email]" id="frm-foo-grouped-email">
+				<input type="email" name="grouped[email]" id="frm-foo-foo-grouped-email">
 			</div>
 		</div>
 	</div>
-	<div id="frm-foo-grouped-sex-pair" class="control-group">
-		<label class="control-label" for="frm-foo-grouped-sex">Pohlaví</label>
+	<div id="frm-foo-foo-grouped-sex-pair" class="control-group">
+		<label class="control-label" for="frm-foo-foo-grouped-sex">Pohlaví</label>
 
 		<div class="controls">
-			<select name="grouped[sex]" id="frm-foo-grouped-sex">
+			<select name="grouped[sex]" id="frm-foo-foo-grouped-sex">
 				<option value="1">Muž</option>
 				<option value="2">Žena</option>
 			</select>
 		</div>
 	</div>
-	<div id="frm-foo-grouped-mailing-pair" class="control-group">
+	<div id="frm-foo-foo-grouped-mailing-pair" class="control-group">
 		<div class="controls">
-			<label class="checkbox" for="frm-foo-grouped-mailing">
-				<input type="checkbox" name="grouped[mailing]" id="frm-foo-grouped-mailing">Zasílat novinky</label>
+			<label class="checkbox" for="frm-foo-foo-grouped-mailing">
+				<input type="checkbox" name="grouped[mailing]" id="frm-foo-foo-grouped-mailing">Zasílat novinky</label>
 		</div>
 	</div>
-	<div id="frm-foo-other-sexy-pair" class="control-group">
+	<div id="frm-foo-foo-other-sexy-pair" class="control-group">
 		<label class="control-label">Sexy</label>
 
 		<div class="controls">
-			<label for="frm-foo-other-sexy-1" class="radio">
-				<input type="radio" name="other[sexy]" id="frm-foo-other-sexy-1" value="1">Ano</label>
-			<label for="frm-foo-other-sexy-2" class="radio">
-				<input type="radio" name="other[sexy]" id="frm-foo-other-sexy-2" value="2">Ne</label>
+			<label for="frm-foo-foo-other-sexy-1" class="radio">
+				<input type="radio" name="other[sexy]" id="frm-foo-foo-other-sexy-1" value="1">Ano</label>
+			<label for="frm-foo-foo-other-sexy-2" class="radio">
+				<input type="radio" name="other[sexy]" id="frm-foo-foo-other-sexy-2" value="2">Ne</label>
 		</div>
 	</div>
-	<div id="frm-foo-other-heslo-pair" class="control-group error">
-		<label class="control-label" for="frm-foo-other-heslo">Heslo</label>
+	<div id="frm-foo-foo-other-heslo-pair" class="control-group error">
+		<label class="control-label" for="frm-foo-foo-other-heslo">Heslo</label>
 
 		<div class="controls">
-			<input type="password" name="other[heslo]" id="frm-foo-other-heslo">
+			<input type="password" name="other[heslo]" id="frm-foo-foo-other-heslo">
 
 			<p class="help-inline">chybka!</p>
 		</div>
 	</div>
-	<div id="frm-foo-photo-pair" class="control-group">
-		<label class="control-label" for="frm-foo-photo">Fotka</label>
+	<div id="frm-foo-foo-photo-pair" class="control-group">
+		<label class="control-label" for="frm-foo-foo-photo">Fotka</label>
 
 		<div class="controls">
-			<input type="file" name="photo" id="frm-foo-photo">
+			<input type="file" name="photo" id="frm-foo-foo-photo" data-nette-rules='[{"op":":fileSize","msg":"The size of the uploaded file can be up to 2097152 bytes.","arg":2097152}]'>
 		</div>
 	</div>
-	<div id="frm-foo-desc-pair" class="control-group">
-		<label class="control-label" for="frm-foo-desc">Popis</label>
+	<div id="frm-foo-foo-desc-pair" class="control-group">
+		<label class="control-label" for="frm-foo-foo-desc">Popis</label>
 
-		<div class="controls"><textarea name="desc" id="frm-foo-desc"></textarea>
+		<div class="controls"><textarea name="desc" id="frm-foo-foo-desc"></textarea>
 		</div>
 	</div>
 </div>
