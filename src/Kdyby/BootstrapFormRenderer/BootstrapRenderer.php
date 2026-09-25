@@ -92,6 +92,9 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 	{
 		/** @var \Nette\Application\UI\Presenter|null $presenter */
 		$presenter = $form->lookup('Nette\Application\UI\Presenter', FALSE);
+		// A form owned by a child control must resolve sibling forms through that control.
+		/** @var \Nette\Application\UI\Control|null $control */
+		$control = $presenter ? $form->lookup('Nette\Application\UI\Control', FALSE) : NULL;
 
 		// Keep application Latte configuration for custom group and control templates.
 		if ($this->template === NULL || (!$this->templateInjected && $this->templatePresenter !== $presenter)) {
@@ -126,7 +129,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 		$latte = $this->template->getLatte();
 		$providers = $latte->getProviders();
 		if ($presenter) {
-			$uiControl = $presenter;
+			$uiControl = $control;
 			$nonce = array_key_exists('uiNonce', $providers) ? $providers['uiNonce'] : NULL;
 			try {
 				$presenterProviders = $presenter->getTemplate()->getLatte()->getProviders();
@@ -162,8 +165,8 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 
 		// Provide conventional Nette template variables for included user templates (e.g. control templates using {form name}).
 		// This is independent from Latte providers used by UI macros.
-		$this->template->control = $presenter;
-		$this->template->_control = $presenter;
+		$this->template->control = $control;
+		$this->template->_control = $control;
 		$this->template->presenter = $presenter;
 		$this->template->_presenter = $presenter;
 
