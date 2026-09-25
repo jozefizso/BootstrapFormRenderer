@@ -31,7 +31,7 @@ use Nette\Forms\Form;
  * {/form} as {$form->render('end')}
  * </code>
  *
- * Self-closing form (Latte 2.1 semantics):
+ * Self-closing form:
  *
  * <code>
  * {form name /} as {form name}{/form} (begin + hidden fields + end; no body)
@@ -51,7 +51,7 @@ use Nette\Forms\Form;
  * </code>
  *
  * Related:
- * - {@see \Nette\Bridges\FormsLatte\FormMacros} (Latte 2.2 core form macros)
+ * - {@see \Nette\Bridges\FormsLatte\FormMacros} (core form macros)
  * - {@see \Kdyby\BootstrapFormRenderer\BootstrapRenderer} (Bootstrap rendering implementation)
  *
  * @author Filip Procházka <filip@prochazka.su>

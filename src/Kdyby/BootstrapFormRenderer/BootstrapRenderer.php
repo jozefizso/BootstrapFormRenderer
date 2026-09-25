@@ -331,10 +331,6 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			return array();
 		}
 
-		// In Nette 2.1, validation rule messages are already translated
-		// by Rules::formatMessage() using the form translator.
-		// We return errors as-is to avoid double translation.
-		// Html instances are also supported and passed through.
 		return $formErrors;
 	}
 
@@ -465,7 +461,7 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 
 		// If we have translator, translate!
 		if (!$desc instanceof Html && ($translator = $control->getForm()->getTranslator())) {
-			$desc = $translator->translate($desc); // wtf?
+			$desc = $translator->translate($desc);
 		}
 
 		// create element
@@ -486,11 +482,6 @@ class BootstrapRenderer implements Nette\Forms\IFormRenderer
 			return Html::el();
 		}
 		$error = reset($errors);
-
-		// In Nette 2.1, validation rule messages are already translated
-		// by Rules::formatMessage() using the form translator.
-		// We return errors as-is to avoid double translation.
-		// Html instances are also supported and passed through.
 
 		// create element
 		return Html::el('p', array('class' => 'help-inline'))
