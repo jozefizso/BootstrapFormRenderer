@@ -46,12 +46,6 @@ class RendererExtension extends Nette\DI\CompilerExtension
 		$definition->getResultDefinition()
 			->addSetup('addExtension', [new Statement(Kdyby\BootstrapFormRenderer\Latte\FormsExtension::class)]);
 
-		// Early nette/application 3.2 releases (e.g. 3.2.0) add the core FormsExtension in TemplateFactory::createTemplate(), after the setup above.
-		$templateFactory = $builder->getByType(Nette\Application\UI\TemplateFactory::class);
-		if ($templateFactory !== NULL) {
-			$builder->getDefinition($templateFactory)
-				->addSetup('?->onCreate[] = function (Nette\Bridges\ApplicationLatte\Template $template): void { Kdyby\BootstrapFormRenderer\Latte\FormsExtension::install($template->getLatte()); }', ['@self']);
-		}
 	}
 
 
