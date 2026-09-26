@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-22.04', 'ubuntu-24.04']
+        os: ['ubuntu-22.04', 'ubuntu-24.04', 'ubuntu-26.04']
         php-version: ['8.3', '8.4', '8.5']
 
     name: ${{ matrix.os }} / PHP ${{ matrix.php-version }}
