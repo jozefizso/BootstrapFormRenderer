@@ -81,5 +81,6 @@ $packages = array(
 	'nette/application' => InstalledVersions::getPrettyVersion('nette/application'),
 	'nette/forms' => InstalledVersions::getPrettyVersion('nette/forms'),
 	'nette/utils' => InstalledVersions::getPrettyVersion('nette/utils'),
+	'nette/component-model' => InstalledVersions::getPrettyVersion('nette/component-model'),
 );
 echo json_encode($packages, JSON_UNESCAPED_SLASHES) . PHP_EOL;
