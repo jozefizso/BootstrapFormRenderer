@@ -22,8 +22,8 @@ use Latte\Compiler\Tag;
 /**
  * {bootstrapFormContext $form} ... {/bootstrapFormContext}
  *
- * Pushes the form onto the forms stack so {input} and {label} resolve, like the core {formContext},
- * but without re-initializing the form: controls already printed before a partial render stay marked as rendered.
+ * Opens the form scope so {input} and {label} resolve, like the core {formContext},
+ * but controls already printed before a partial render stay marked as rendered.
  *
  * @internal used by @parts.latte
  */
@@ -51,7 +51,7 @@ final class FormContextNode extends StatementNode
 	public function print(PrintContext $context): string
 	{
 		return $context->format(
-			'$this->global->formsStack[] = %node %line; try { %node } finally { array_pop($this->global->formsStack); }' . "\n",
+			'Kdyby\BootstrapFormRenderer\Latte\Runtime::beginContext(%node, $this->global) %line; try { %node } finally { $this->global->forms->end(); }' . "\n",
 			$this->form,
 			$this->position,
 			$this->content,

@@ -1,5 +1,24 @@
 # Changelog
 
+## v3.3.0
+
+This release targets Nette Framework 3.3 with Latte 3.1.4+ on PHP 8.3 through 8.5.
+
+### Breaking changes
+
+- Requires PHP >= 8.3, `latte/latte` `^3.1.4`, `nette/application` and `nette/forms` `~3.3.0`, `nette/utils` `^4.1` and `nette/component-model` `^3.2 || ^4.0`.
+- The `{form}`, `{pair}`, `{group}` and `{container}` tags use the nette/forms 3.3 `forms` runtime provider (`$this->global->forms`). The `formsStack` provider and the static `Nette\Bridges\FormsLatte\Runtime::renderFormBegin()`/`renderFormEnd()` calls are gone. Templates that pushed a form with `addProvider('formsStack', …)` must call `$latte->getProviders()['forms']->begin($form)` before rendering and `->end()` after it instead.
+- `Kdyby\BootstrapFormRenderer\Latte\Runtime::renderBegin()` takes the Latte `$global` as a third argument (internal helper of compiled templates).
+
+### Changes
+
+- `BootstrapRenderer::render()` renders the `begin` and `end` modes itself (ported from the removed forms 3.2 static runtime): GET forms drop the action query and emit its parameters as hidden fields, followed by unrendered hidden controls and `</form>`.
+- `{form scope name}` and `{form detached name}`, new in nette/forms 3.3, are delegated to the nette/forms core node, so they keep their semantics when the Bootstrap extension overrides `{form}`.
+- Partial rendering keeps controls printed before it (e.g. with `{input}`) marked as rendered, although `FormsLatte\Runtime::begin()` resets that option.
+- `findControls()` wraps the iterable returned by forms 3.3 `Container::getControls()`.
+- `RendererExtension` no longer hooks `TemplateFactory::$onCreate`; that workaround was needed only for nette/application 3.2.0.
+- CI tests PHP 8.3–8.5 and the lowest (Latte 3.1.4, application/forms 3.3.0, utils 4.1.0, component-model 3.2.0) and highest Nette 3.3 dependency sets.
+
 ## v3.2.0
 
 This release targets Nette Framework 3.2 with Latte 3.0.18+ on PHP 8.1 through 8.5.

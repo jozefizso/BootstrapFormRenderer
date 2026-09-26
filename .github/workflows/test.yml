@@ -12,8 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-22.04', 'ubuntu-24.04']
-        php-version: ['8.1', '8.2', '8.3', '8.4', '8.5']
+        os: ['ubuntu-22.04', 'ubuntu-24.04', 'ubuntu-26.04']
+        php-version: ['8.3', '8.4', '8.5']
 
     name: ${{ matrix.os }} / PHP ${{ matrix.php-version }}
 
@@ -26,7 +26,7 @@ jobs:
       with:
         php-version: ${{ matrix.php-version }}
         coverage: none
-        tools: composer:v2.2
+        tools: composer:2.10
 
     - name: Diagnose pdo_sqlite extension
       run: |
@@ -66,42 +66,34 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - php-version: '8.1'
-          dependency-set: lowest
-          latte: '3.0.18'
-          application: '3.2.0'
-          forms: '3.2.0'
-          utils: '4.0.4'
-        - php-version: '8.1'
-          dependency-set: highest-nette-3.2
-          latte: '^3.0.18 <3.2'
-          application: '~3.2.0'
-          forms: '~3.2.0'
-          utils: '^4.0.4'
-        - php-version: '8.2'
-          dependency-set: highest-nette-3.2
-          latte: '^3.0.18 <3.2'
-          application: '~3.2.0'
-          forms: '~3.2.0'
-          utils: '^4.0.4'
         - php-version: '8.3'
-          dependency-set: highest-nette-3.2
-          latte: '^3.0.18 <3.2'
-          application: '~3.2.0'
-          forms: '~3.2.0'
-          utils: '^4.0.4'
+          dependency-set: lowest
+          latte: '3.1.4'
+          application: '3.3.0'
+          forms: '3.3.0'
+          utils: '4.1.0'
+          component-model: '3.2.0'
+        - php-version: '8.3'
+          dependency-set: highest-nette-3.3
+          latte: '^3.1.4 <3.2'
+          application: '~3.3.0'
+          forms: '~3.3.0'
+          utils: '^4.1'
+          component-model: '^3.2 || ^4.0'
         - php-version: '8.4'
-          dependency-set: highest-nette-3.2
-          latte: '^3.0.18 <3.2'
-          application: '~3.2.0'
-          forms: '~3.2.0'
-          utils: '^4.0.4'
+          dependency-set: highest-nette-3.3
+          latte: '^3.1.4 <3.2'
+          application: '~3.3.0'
+          forms: '~3.3.0'
+          utils: '^4.1'
+          component-model: '^3.2 || ^4.0'
         - php-version: '8.5'
-          dependency-set: highest-nette-3.2
-          latte: '^3.0.18 <3.2'
-          application: '~3.2.0'
-          forms: '~3.2.0'
-          utils: '^4.0.4'
+          dependency-set: highest-nette-3.3
+          latte: '^3.1.4 <3.2'
+          application: '~3.3.0'
+          forms: '~3.3.0'
+          utils: '^4.1'
+          component-model: '^3.2 || ^4.0'
 
     name: Integration / PHP ${{ matrix.php-version }} / ${{ matrix.dependency-set }}
 
@@ -114,7 +106,7 @@ jobs:
       with:
         php-version: ${{ matrix.php-version }}
         coverage: none
-        tools: composer:v2.2
+        tools: composer:2.10
 
     - name: Resolve application dependencies
       working-directory: tests/integration
@@ -123,7 +115,8 @@ jobs:
           --with "latte/latte:${{ matrix.latte }}" \
           --with "nette/application:${{ matrix.application }}" \
           --with "nette/forms:${{ matrix.forms }}" \
-          --with "nette/utils:${{ matrix.utils }}"
+          --with "nette/utils:${{ matrix.utils }}" \
+          --with "nette/component-model:${{ matrix.component-model }}"
 
     - name: Run integration application
       working-directory: tests/integration

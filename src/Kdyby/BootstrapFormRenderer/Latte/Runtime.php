@@ -14,7 +14,6 @@ namespace Kdyby\BootstrapFormRenderer\Latte;
 
 use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
 use Nette;
-use Nette\Bridges\FormsLatte\Runtime as FormsLatteRuntime;
 use Nette\Forms\Form;
 
 
@@ -49,18 +48,36 @@ final class Runtime
 
 
 	/**
-	 * Renders the opening form tag, through BootstrapRenderer when the form uses it.
+	 * Renders the opening tag of the form on top of the forms runtime,
+	 * through BootstrapRenderer when the form uses it.
 	 */
-	public static function renderBegin(Form $form, array $args): string
+	public static function renderBegin(Form $form, array $args, \stdClass $global): string
 	{
 		$renderer = $form->getRenderer();
-		if ($renderer instanceof BootstrapRenderer) {
-			$form->fireRenderEvents();
-			return $renderer->render($form, 'begin', $args);
+		return $renderer instanceof BootstrapRenderer
+			? $renderer->render($form, 'begin', $args)
+			: $global->forms->renderFormBegin($args);
+	}
+
+
+
+	/**
+	 * Opens the form scope for {input} and {label} without printing <form>.
+	 * FormsLatte\Runtime::begin() resets the "rendered" option of every control;
+	 * controls printed before a partial render must stay rendered, so the options are restored.
+	 */
+	public static function beginContext(Form $form, \stdClass $global): void
+	{
+		$rendered = [];
+		foreach ($form->getControls() as $control) {
+			$rendered[] = [$control, $control->getOption('rendered')];
 		}
 
-		FormsLatteRuntime::initializeForm($form);
-		return FormsLatteRuntime::renderFormBegin($form, $args);
+		$global->forms->begin($form, global: $global);
+
+		foreach ($rendered as [$control, $value]) {
+			$control->setOption('rendered', $value);
+		}
 	}
 
 }
