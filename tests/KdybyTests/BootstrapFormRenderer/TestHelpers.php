@@ -3,7 +3,7 @@
 namespace KdybyTests\FormRenderer;
 
 use Kdyby\BootstrapFormRenderer\DI\RendererExtension;
-use Nette\Configurator;
+use Nette\Bootstrap\Configurator;
 use Nette\Forms\Form;
 use Tester\Assert;
 
@@ -24,6 +24,19 @@ trait BootstrapFormRendererTestHelpers
 		}
 
 		return ob_get_clean();
+	}
+
+
+	/**
+	 * Latte 3 resolves included templates relative to the including file unless the path is absolute,
+	 * so stream-wrapper mocks cannot be used as group/control templates.
+	 */
+	protected function createTemplateFile(string $latte): string
+	{
+		static $counter = 0;
+		$file = TEMP_DIR . '/template-' . (++$counter) . '.latte';
+		file_put_contents($file, $latte);
+		return $file;
 	}
 
 
@@ -63,8 +76,15 @@ trait BootstrapFormRendererTestHelpers
 }
 
 
+/**
+ * Presenter without a template factory; HTTP services are injected like in an application.
+ */
 class PresenterMock extends \Nette\Application\UI\Presenter
 {
+	public function __construct()
+	{
+		$this->injectPrimary(new \Nette\Http\Request(new \Nette\Http\UrlScript('http://localhost/')), new \Nette\Http\Response());
+	}
 }
 
 

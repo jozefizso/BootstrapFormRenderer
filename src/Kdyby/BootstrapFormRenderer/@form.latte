@@ -8,40 +8,61 @@
 {layout none}
 
 
-{define #form}
+{define form}
 {form $form}
-{block #errors}
+{include errors}
+{include body}
+{/form}
+{/define}
+{define errors}
 
 <div n:foreach="$renderer->findErrors() as $error" class="alert alert-error">
     <a class="close" data-dismiss="alert">×</a>{$error}
 </div>
-{/block}
-{block #body}
+{/define}
+{define body}
 {* controls with group *}
-{foreach $renderer->findGroups() as $group}{block #group}
+{foreach $renderer->findGroups() as $group}{include group, group: $group}{/foreach}
 
-    <fieldset{$group->attrs->attributes()|noescape}>
+{* controls without group *}
+{include controls, controls: $renderer->findControls()}
+{/define}
+{define group}
+
+    {var $fieldset = (clone $group->attrs)->setName('fieldset')}
+    {$fieldset->startTag()|noescape}
         <legend n:if="$group->label">{$group->label}</legend>
         <p n:if="$group->description">{$group->description}</p>
 
         {var $controls = $group->controls}
         {if isset($group->template) && $group->template}
-            {include "$group->template", group => $group, controls => $controls, form => $form, _form => $form}
+            {include $group->template, group: $group, controls: $controls, form: $form}
 
         {else}
-            {block #controls}
+            {include controls, controls: $controls}
+
+        {/if}
+    {$fieldset->endTag()|noescape}
+{/define}
+{define controls}
             {foreach $controls as $controlItem}
             {if $renderer->isSubmitButton($controlItem)}
                 {if $iterator->first}{='<div class="form-actions">'|noescape}{/if}
                 {input $renderer->getControlName($controlItem)}
                 {if !$renderer->isSubmitButton($iterator->nextValue)}{="</div>"|noescape}{/if}
-                {php continue}
+                {continueIf true}
             {/if}
 			{var $attrs = ['input' => [], 'label' => []]}
 
-            {block #control}
-            {var $controlItem = isset($controlItem) ? $controlItem : $control}
-            <div{$controlItem->getOption('pairContainer')->attributes()|noescape} n:tag-if="$controlItem->getOption('pairContainer')">
+            {include control, controlItem: $controlItem, attrs: $attrs}
+
+            {if $renderer->isSubmitButton($iterator->nextValue)}{='<div class="form-actions">'|noescape}{/if}
+            {/foreach}
+{/define}
+{define control}
+            {var $controlItem = $controlItem ?? $control}
+            {var $pairContainer = $controlItem->getOption('pairContainer')}
+            {if $pairContainer}{$pairContainer->startTag()|noescape}{/if}
                 {var
                     $name = $renderer->getControlName($controlItem),
                     $description = $renderer->getControlDescription($controlItem),
@@ -49,7 +70,7 @@
                 }
 
                 {if $controlTemplate = $renderer->getControlTemplate($controlItem)}
-                    {include "$controlTemplate", name => $name, description => $description, error => $error, control => $controlItem, form => $form, _form => $form, attrs => $attrs}
+                    {include $controlTemplate, name: $name, description: $description, error: $error, control: $controlItem, form: $form, attrs: $attrs}
 
                 {elseif $renderer->isSubmitButton($controlItem)}
 
@@ -103,23 +124,9 @@
                     </div>
 
                 {/if}
-            </div>
-            {/block}
-
-            {if $renderer->isSubmitButton($iterator->nextValue)}{='<div class="form-actions">'|noescape}{/if}
-            {/foreach}
-            {/block}
-
-        {/if}
-    </fieldset>
-{/block}{/foreach}
-
-{* controls without group *}
-{include #controls, controls => $renderer->findControls()}
-{/block}
-{/form}
+            {if $pairContainer}{$pairContainer->endTag()|noescape}{/if}
 {/define}
 
 {if $mode === NULL}
-    {include #form, form => $form, renderer => $renderer}
+    {include form, form: $form, renderer: $renderer}
 {/if}

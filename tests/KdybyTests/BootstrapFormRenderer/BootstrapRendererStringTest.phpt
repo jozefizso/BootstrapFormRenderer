@@ -20,9 +20,9 @@ require_once __DIR__ . '/../bootstrap.php';
 
 
 /**
- * Regression test for the IFormRenderer return-value contract.
+ * Regression test for the FormRenderer return-value contract.
  *
- * Nette calls IFormRenderer::render() when a form is converted to a string.
+ * Nette calls FormRenderer::render() when a form is converted to a string.
  * BootstrapRenderer must use the Latte template's string-conversion API so the
  * generated HTML is returned without leaking output to the response.
  */
@@ -68,10 +68,11 @@ class BootstrapRendererStringTest extends TestCase
 		$renderer = new BootstrapRenderer(new StringRenderingTemplate($engine));
 
 		Assert::same(StringRenderingTemplate::HTML, $renderer->render($form));
+		// The injected engine is used as-is; its providers are not rewritten.
 		$providers = $engine->getProviders();
 		Assert::same($presenter, $providers['uiControl']);
-		Assert::same($presenter, $providers['uiPresenter']);
 		Assert::same('injected-nonce', $providers['uiNonce']);
+		Assert::false(isset($providers['uiPresenter']));
 	}
 
 	public function testPresenterTemplateSubclassIsKept()
@@ -82,15 +83,36 @@ class BootstrapRendererStringTest extends TestCase
 
 		Assert::same('presenter-template-state', $renderer->render($form));
 	}
+
+	public function testTemplateSetupErrorIsNotHiddenByFallback()
+	{
+		$presenter = new FailingTemplatePresenter();
+		$form = new \Nette\Application\UI\Form($presenter, 'form');
+		$renderer = new BootstrapRenderer();
+
+		Assert::exception(function () use ($renderer, $form) {
+			$renderer->render($form);
+		}, \Nette\InvalidStateException::class, 'Template setup failed.');
+	}
 }
 
 
 
 class RendererStringPresenter extends \Nette\Application\UI\Presenter
 {
-	protected function createTemplate(): \Nette\Application\UI\ITemplate
+	protected function createTemplate(?string $class = NULL): \Nette\Application\UI\Template
 	{
 		return new StringRenderingTemplate(new Engine(), 'presenter-template-state');
+	}
+}
+
+
+
+class FailingTemplatePresenter extends \Nette\Application\UI\Presenter
+{
+	protected function createTemplate(?string $class = NULL): \Nette\Application\UI\Template
+	{
+		throw new \Nette\InvalidStateException('Template setup failed.');
 	}
 }
 

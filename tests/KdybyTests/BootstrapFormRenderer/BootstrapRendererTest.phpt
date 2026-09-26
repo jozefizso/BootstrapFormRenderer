@@ -277,7 +277,7 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 
 	public function testMultipleFormsInTemplate()
 	{
-		$control = new Nette\ComponentModel\Container();
+		$control = new ControlMock();
 
 		$control->addComponent($a = new Form, 'a');
 		$a->addText('nemam', 'Nemam');
@@ -288,12 +288,12 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 		$b->setRenderer(new BootstrapRenderer($this->createTemplate()));
 
 		$this->assertTemplateOutput(array(
-			'control' => $control, '_control' => $control
+			'control' => $control
 		), __DIR__ . '/edge/input/multipleFormsInTemplate.latte',
 			__DIR__ . '/edge/output/multipleFormsInTemplate.html');
 
 		$this->assertTemplateOutput(array(
-				'control' => $control, '_control' => $control
+				'control' => $control
 			), __DIR__ . '/edge/input/multipleFormsInTemplate_parts.latte',
 			__DIR__ . '/edge/output/multipleFormsInTemplate_parts.html');
 	}
@@ -425,7 +425,7 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 		$control = new ControlMock();
 		$control['foo'] = $form;
 
-		$this->assertTemplateOutput(array('form' => $form, '_form' => $form, 'control' => $control, '_control' => $control), __DIR__ . '/group-ordering/input/' . $latteFile, __DIR__ . '/group-ordering/output/' . basename($latteFile, '.latte') . '.html');
+		$this->assertTemplateOutput(array('form' => $form, 'control' => $control), __DIR__ . '/group-ordering/input/' . $latteFile, __DIR__ . '/group-ordering/output/' . basename($latteFile, '.latte') . '.html');
 	}
 
 
@@ -608,7 +608,7 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 			$controlMock = new ControlMock();
 			$controlMock['foo'] = $form;
 
-			$this->assertTemplateOutput(array('form' => $form, '_form' => $form, 'control' => $controlMock, '_control' => $controlMock), __DIR__ . '/errors-at-inputs/input/' . $latteFile, __DIR__ . '/errors-at-inputs/output/' . basename($latteFile, '.latte') . '.html');
+			$this->assertTemplateOutput(array('form' => $form, 'control' => $controlMock), __DIR__ . '/errors-at-inputs/input/' . $latteFile, __DIR__ . '/errors-at-inputs/output/' . basename($latteFile, '.latte') . '.html');
 
 			foreach ($form->getComponents(TRUE, 'Nette\Forms\Controls\CsrfProtection') as $control) {
 				/** @var \Nette\Forms\Controls\CsrfProtection $control */
@@ -652,7 +652,7 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 		$control = new ControlMock();
 		$control['foo'] = $form;
 
-		$this->assertTemplateOutput(array('form' => $form, '_form' => $form, 'control' => $control, '_control' => $control), $latteFile, $expectedOutput);
+		$this->assertTemplateOutput(array('form' => $form, 'control' => $control), $latteFile, $expectedOutput);
 
 		foreach ($form->getComponents(TRUE, 'Nette\Forms\Controls\CsrfProtection') as $control) {
 			/** @var \Nette\Forms\Controls\CsrfProtection $control */
@@ -674,17 +674,13 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 		$latte = $template->getLatte();
 
 		// Ensure `{form foo}` resolves from the provided control component tree.
-		if (isset($params['_control']) && is_object($params['_control'])) {
-			$latte->addProvider('uiControl', $params['_control']);
-		} elseif (isset($params['control']) && is_object($params['control'])) {
+		if (isset($params['control']) && is_object($params['control'])) {
 			$latte->addProvider('uiControl', $params['control']);
 		}
 
 		// Ensure `{input ...}` works even when template uses manual `$form->render('begin')` without `{form ...}`.
 		if (isset($params['form']) && $params['form'] instanceof \Nette\Forms\Form) {
 			$latte->addProvider('formsStack', array($params['form']));
-		} elseif (isset($params['_form']) && $params['_form'] instanceof \Nette\Forms\Form) {
-			$latte->addProvider('formsStack', array($params['_form']));
 		}
 
 		$rendered = $this->captureOutput(function () use ($template) {
@@ -709,8 +705,8 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 	 */
 	private function createTemplate()
 	{
-		/** @var \Nette\Application\UI\ITemplateFactory $templateFactory */
-		$templateFactory = $this->container->getByType('Nette\Application\UI\ITemplateFactory');
+		/** @var \Nette\Application\UI\TemplateFactory $templateFactory */
+		$templateFactory = $this->container->getByType('Nette\Application\UI\TemplateFactory');
 		return $templateFactory->createTemplate(new ControlMock());
 	}
 

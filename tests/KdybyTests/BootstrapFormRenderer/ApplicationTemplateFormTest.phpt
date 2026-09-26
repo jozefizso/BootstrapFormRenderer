@@ -20,8 +20,8 @@ require_once __DIR__ . '/TestHelpers.php';
 
 
 /**
- * Application templates expose the owning control only through the uiControl
- * provider and $control; Nette 3 no longer defines $_control.
+ * Application templates expose the owning control through the uiControl provider,
+ * which {form name} uses for the lookup.
  */
 class ApplicationTemplateFormTest extends BootstrapContainerTestCase
 {
@@ -31,8 +31,8 @@ class ApplicationTemplateFormTest extends BootstrapContainerTestCase
 	 */
 	private function renderControlTemplate(Control $control, $latte)
 	{
-		/** @var \Nette\Application\UI\ITemplateFactory $templateFactory */
-		$templateFactory = $this->container->getByType('Nette\Application\UI\ITemplateFactory');
+		/** @var \Nette\Application\UI\TemplateFactory $templateFactory */
+		$templateFactory = $this->container->getByType('Nette\Application\UI\TemplateFactory');
 		$template = $templateFactory->createTemplate($control);
 		$template->setFile(FileMock::create($latte, 'latte'));
 

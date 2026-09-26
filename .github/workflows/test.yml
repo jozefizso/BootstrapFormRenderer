@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-22.04', 'ubuntu-24.04']
-        php-version: ['7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3']
+        php-version: ['8.1', '8.2', '8.3', '8.4', '8.5']
 
     name: ${{ matrix.os }} / PHP ${{ matrix.php-version }}
 
@@ -27,10 +27,6 @@ jobs:
         php-version: ${{ matrix.php-version }}
         coverage: none
         tools: composer:v2.2
-
-    - name: Remove JSON extension configuration for PHP 8
-      if: startsWith(matrix.php-version, '8')
-      run: sed -i '/^extension=json\.so$/d' ./tests/php-tests.ini
 
     - name: Diagnose pdo_sqlite extension
       run: |
@@ -70,48 +66,42 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - php-version: '7.1'
-          dependency-set: lowest
-          latte: '2.6.0'
-          application: '3.0.8'
-          forms: '3.0.7'
-          utils: '3.1.0'
-        - php-version: '7.2'
-          dependency-set: highest-nette-3.1
-          latte: '^2.7.1'
-          application: '~3.1.0'
-          forms: '~3.1.0'
-          utils: '^3.2.5'
-        - php-version: '7.4'
-          dependency-set: highest-nette-3.0
-          latte: '^2.6'
-          application: '~3.0.0'
-          forms: '~3.0.0'
-          utils: '^3.1'
-        - php-version: '8.0'
-          dependency-set: highest-nette-3.0
-          latte: '^2.6'
-          application: '~3.0.0'
-          forms: '~3.0.0'
-          utils: '^3.1'
         - php-version: '8.1'
-          dependency-set: highest-nette-3.1
-          latte: '^2.7.1'
-          application: '~3.1.0'
-          forms: '~3.1.0'
-          utils: '^3.2.5'
+          dependency-set: lowest
+          latte: '3.0.18'
+          application: '3.2.0'
+          forms: '3.2.0'
+          utils: '4.0.4'
+        - php-version: '8.1'
+          dependency-set: highest-nette-3.2
+          latte: '^3.0.18 <3.2'
+          application: '~3.2.0'
+          forms: '~3.2.0'
+          utils: '^4.0.4'
         - php-version: '8.2'
-          dependency-set: highest-nette-3.1
-          latte: '^2.7.1'
-          application: '~3.1.0'
-          forms: '~3.1.0'
-          utils: '^3.2.5'
+          dependency-set: highest-nette-3.2
+          latte: '^3.0.18 <3.2'
+          application: '~3.2.0'
+          forms: '~3.2.0'
+          utils: '^4.0.4'
         - php-version: '8.3'
-          dependency-set: highest-nette-3.1
-          latte: '^2.7.1'
-          application: '~3.1.0'
-          forms: '~3.1.0'
-          utils: '^3.2.5'
+          dependency-set: highest-nette-3.2
+          latte: '^3.0.18 <3.2'
+          application: '~3.2.0'
+          forms: '~3.2.0'
+          utils: '^4.0.4'
+        - php-version: '8.4'
+          dependency-set: highest-nette-3.2
+          latte: '^3.0.18 <3.2'
+          application: '~3.2.0'
+          forms: '~3.2.0'
+          utils: '^4.0.4'
+        - php-version: '8.5'
+          dependency-set: highest-nette-3.2
+          latte: '^3.0.18 <3.2'
+          application: '~3.2.0'
+          forms: '~3.2.0'
+          utils: '^4.0.4'
 
     name: Integration / PHP ${{ matrix.php-version }} / ${{ matrix.dependency-set }}
 
