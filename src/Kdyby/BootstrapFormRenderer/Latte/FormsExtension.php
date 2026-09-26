@@ -77,9 +77,12 @@ final class FormsExtension extends Latte\Extension
 
 
 
+	/**
+	 * Bump whenever the PHP code emitted by the nodes changes, so cached compiled templates are recompiled.
+	 */
 	public function getCacheKey(Latte\Engine $engine): mixed
 	{
-		return 1;
+		return 2;
 	}
 
 }
