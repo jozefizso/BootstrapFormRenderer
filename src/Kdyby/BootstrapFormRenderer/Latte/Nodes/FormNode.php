@@ -21,16 +21,20 @@ use Latte\Compiler\Nodes\StatementNode;
 use Latte\Compiler\Position;
 use Latte\Compiler\PrintContext;
 use Latte\Compiler\Tag;
+use Latte\Compiler\Token;
+use Nette\Bridges\FormsLatte\Nodes\FormNode as CoreFormNode;
 
 
 /**
  * {form name [, attributes]} ... {/form}
  * {form name /}
  * {form errors|body|controls|buttons [, args]}
+ * {form scope name}...{/form} and {form detached name, attrs}...{/form} use the nette/forms core node
  */
 final class FormNode extends StatementNode
 {
 	private const INLINE_PARTS = ['errors', 'body', 'controls', 'buttons'];
+	private const CORE_MODES = ['scope', 'detached'];
 
 	public ExpressionNode $name;
 	public ArrayNode $attributes;
@@ -50,6 +54,10 @@ final class FormNode extends StatementNode
 		if ($tag->parser->isEnd()) {
 			throw new CompileException("Missing form name in {{$tag->name}}.", $tag->position);
 		}
+		if (self::isCoreMode($tag)) {
+			// {form scope ...} and {form detached ...} print no Bootstrap markup; keep nette/forms semantics.
+			return CoreFormNode::create($tag);
+		}
 
 		$node = new self;
 		$node->position = $tag->position;
@@ -66,6 +74,25 @@ final class FormNode extends StatementNode
 		}
 
 		return self::createPaired($tag, $node);
+	}
+
+
+
+	/**
+	 * `scope`/`detached` is a mode only when a form name follows; `{form scope}` alone names a form "scope".
+	 */
+	private static function isCoreMode(Tag $tag): bool
+	{
+		$stream = $tag->parser->stream;
+		if (!in_array($stream->peek()->text, self::CORE_MODES, TRUE)) {
+			return FALSE;
+		}
+
+		$offset = 1;
+		while (($next = $stream->tryPeek($offset)) && $next->is(Token::Php_Whitespace)) {
+			$offset++;
+		}
+		return $next !== NULL && !$next->isEnd() && $next->text !== ',';
 	}
 
 

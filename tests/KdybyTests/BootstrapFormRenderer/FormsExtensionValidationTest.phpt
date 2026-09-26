@@ -63,6 +63,34 @@ class FormsExtensionValidationTest extends TestCase
 
 
 	/**
+	 * {form scope} and {form detached} keep the nette/forms 3.3 semantics instead of the Bootstrap {form} tag.
+	 */
+	public function testCoreFormModesUseNetteFormNode()
+	{
+		$scope = $this->compile('{form scope myForm}{input name}{/form}');
+		Assert::notContains('Kdyby\\BootstrapFormRenderer\\Latte\\Runtime', $scope);
+		Assert::notContains('renderFormBegin', $scope);
+
+		$detached = $this->compile('{form detached myForm}{/form}');
+		Assert::contains('detached: true', $detached);
+		Assert::notContains('Kdyby\\BootstrapFormRenderer\\Latte\\Runtime', $detached);
+	}
+
+
+
+	/**
+	 * Forms named "scope" or "detached" still render through the Bootstrap {form} tag.
+	 */
+	public function testFormsNamedLikeCoreModesUseBootstrapFormNode()
+	{
+		foreach (['{form scope}{/form}', '{form detached /}', '{form scope, class: x}{/form}'] as $template) {
+			Assert::contains('Kdyby\\BootstrapFormRenderer\\Latte\\Runtime::resolveForm', $this->compile($template), $template);
+		}
+	}
+
+
+
+	/**
 	 * Test that {form} without name throws CompileException
 	 */
 	public function testFormWithoutNameThrowsException()
