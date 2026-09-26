@@ -680,7 +680,7 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 
 		// Ensure `{input ...}` works even when template uses manual `$form->render('begin')` without `{form ...}`.
 		if (isset($params['form']) && $params['form'] instanceof \Nette\Forms\Form) {
-			$latte->addProvider('formsStack', array($params['form']));
+			$latte->getProviders()['forms']->begin($params['form']);
 		}
 
 		$rendered = $this->captureOutput(function () use ($template) {

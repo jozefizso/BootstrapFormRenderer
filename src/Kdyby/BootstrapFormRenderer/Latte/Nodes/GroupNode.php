@@ -45,7 +45,7 @@ final class GroupNode extends StatementNode
 	public function print(PrintContext $context): string
 	{
 		return $context->format(
-			'$ʟ_f = end($this->global->formsStack); $ʟ_f->render(is_object($ʟ_g = %node) ? $ʟ_g : $ʟ_f->getGroup($ʟ_g)) %line;',
+			'$ʟ_f = $this->global->forms->getScope(); $ʟ_f->render(is_object($ʟ_g = %node) ? $ʟ_g : $ʟ_f->getGroup($ʟ_g)) %line;',
 			$this->name,
 			$this->position,
 		);

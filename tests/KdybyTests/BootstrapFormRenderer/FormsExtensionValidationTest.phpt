@@ -124,7 +124,7 @@ class FormsExtensionValidationTest extends TestCase
 	{
 		$compiled = $this->compile('<form n:name="myForm">{form body}</form>');
 		Assert::type('string', $compiled);
-		Assert::contains("end(\$this->global->formsStack)->render('body', [])", $compiled);
+		Assert::contains("\$this->global->forms->getScope()->render('body', [])", $compiled);
 	}
 
 
@@ -146,9 +146,9 @@ class FormsExtensionValidationTest extends TestCase
 	{
 		$compiled = $this->compile('<form n:name="myForm">{form errors}{form controls}{form buttons}</form>');
 		Assert::type('string', $compiled);
-		Assert::contains("end(\$this->global->formsStack)->render('errors', [])", $compiled);
-		Assert::contains("end(\$this->global->formsStack)->render('controls', [])", $compiled);
-		Assert::contains("end(\$this->global->formsStack)->render('buttons', [])", $compiled);
+		Assert::contains("\$this->global->forms->getScope()->render('errors', [])", $compiled);
+		Assert::contains("\$this->global->forms->getScope()->render('controls', [])", $compiled);
+		Assert::contains("\$this->global->forms->getScope()->render('buttons', [])", $compiled);
 	}
 
 }

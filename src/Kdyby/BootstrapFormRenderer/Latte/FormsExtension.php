@@ -33,7 +33,7 @@ use Nette\Bridges\FormsLatte\FormsExtension as NetteFormsExtension;
  * </code>
  *
  * Must be added after {@see \Nette\Bridges\FormsLatte\FormsExtension}, whose {form} tag it overrides
- * and whose formsStack provider, {input} and {label} tags it relies on.
+ * and whose forms runtime provider, {input} and {label} tags it relies on.
  */
 final class FormsExtension extends Latte\Extension
 {

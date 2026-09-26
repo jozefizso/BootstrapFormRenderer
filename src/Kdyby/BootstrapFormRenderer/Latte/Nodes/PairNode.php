@@ -50,7 +50,7 @@ final class PairNode extends StatementNode
 	public function print(PrintContext $context): string
 	{
 		return $context->format(
-			'end($this->global->formsStack)->render(end($this->global->formsStack)[%node], %node) %line;',
+			'$ʟ_f = $this->global->forms->getScope(); $ʟ_f->render($ʟ_f[%node], %node) %line;',
 			$this->name,
 			$this->args,
 			$this->position,

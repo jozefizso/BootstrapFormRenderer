@@ -93,7 +93,7 @@ final class FormNode extends StatementNode
 	{
 		if ($this->content === NULL) {
 			return $context->format(
-				'end($this->global->formsStack)->render(%node, %node) %line;',
+				'$this->global->forms->getScope()->render(%node, %node) %line;',
 				$this->name,
 				$this->attributes,
 				$this->position,
@@ -101,11 +101,11 @@ final class FormNode extends StatementNode
 		}
 
 		return $context->format(
-			'$form = $this->global->formsStack[] = Kdyby\BootstrapFormRenderer\Latte\Runtime::resolveForm(%node, $this->global) %line;'
-			. 'echo Kdyby\BootstrapFormRenderer\Latte\Runtime::renderBegin($form, %node) %1.line;'
+			'$this->global->forms->begin($form = Kdyby\BootstrapFormRenderer\Latte\Runtime::resolveForm(%node, $this->global), global: $this->global) %line;'
+			. 'echo Kdyby\BootstrapFormRenderer\Latte\Runtime::renderBegin($form, %node, $this->global) %1.line;'
 			. ' %3.node '
-			. 'echo Nette\Bridges\FormsLatte\Runtime::renderFormEnd(array_pop($this->global->formsStack))'
-			. " %4.line;\n\n",
+			. 'echo $this->global->forms->renderFormEnd() %4.line;'
+			. '$this->global->forms->end();' . "\n\n",
 			$this->name,
 			$this->position,
 			$this->attributes,
