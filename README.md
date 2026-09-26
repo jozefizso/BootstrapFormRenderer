@@ -52,7 +52,10 @@ composer require jozefizso/bootstrap-form-renderer
 
 | Version  | Branch      | PHP      | compatible | Nette series  |
 |----------|-------------|----------|------------|---------------|
-| `^3.0.0` | `main`      | `>= 7.1` | `8.3`      | Nette 3.0, 3.1 |
+| `^4.x`.  | `main`      | `>= 8.3` | `8.5`      | Nette 4       |
+| `^3.3.0` | `nette-3.3` | `>= 8.2` | `8.5`      | Nette 3.3, Latte 3.1 |
+| `^3.2.0` | `nette-3.2` | `>= 8.1` | `8.5`      | Nette 3.2, Latte 3.0 |
+| `^3.0.0` | `nette-3.0` | `>= 7.1` | `8.3`      | Nette 3.0, 3.1, Latte 2 |
 | `^2.4.0` | `nette-2.4` | `>= 5.6` | `8.0`      | Nette 2.4     |
 | `^2.3.0` | `nette-2.3` | `>= 5.6` | `7.1`      | Nette 2.3     |
 | `^2.2.0` | `nette-2.2` | `>= 5.6` | `7.0`      | Nette 2.2     |
