@@ -24,16 +24,16 @@ and layout structure that Bootstrap requires.
 
 ## Requirements
 
-- PHP 8.1 through 8.5
-- [Nette Framework](https://github.com/nette/nette) 3.2
-- Latte 3.0.18 or newer (Latte 2 is not supported; for Latte 2 use v3.0.x of this library with Nette 3.0 or 3.1)
+- PHP 8.3 through 8.5
+- [Nette Framework](https://github.com/nette/nette) 3.3
+- Latte 3.1.4 or newer (Latte 2 is not supported; for Latte 2 use v3.0.x of this library with Nette 3.0 or 3.1)
 
 The integration suite tests both ends of the supported dependency matrix:
 
-| PHP | Dependency set | Latte / Application / Forms / Utils |
-|-----|----------------|-------------------------------------|
-| 8.1 | lowest | 3.0.18 / 3.2.0 / 3.2.0 / 4.0.4 |
-| 8.1 – 8.5 | highest Nette 3.2 | 3.1.x / 3.2.x / 3.2.x / 4.x |
+| PHP | Dependency set | Latte / Application / Forms / Utils / Component model |
+|-----|----------------|-----------------------------------------------------|
+| 8.3 | lowest | 3.1.4 / 3.3.0 / 3.3.0 / 4.1.0 / 3.2.0 |
+| 8.3 – 8.5 | highest Nette 3.3 | 3.1.x / 3.3.x / 3.3.x / 4.x / 4.x |
 
 ## Getting Started
 
@@ -48,7 +48,7 @@ composer require jozefizso/bootstrap-form-renderer
 | Version  | Branch      | PHP      | compatible | Nette series  |
 |----------|-------------|----------|------------|---------------|
 | `^4.x`.  | `main`      | `>= 8.3` | `8.5`      | Nette 4       |
-| `^3.3.0` | `nette-3.3` | `>= 8.2` | `8.5`      | Nette 3.3, Latte 3.1 |
+| `^3.3.0` | `nette-3.3` | `>= 8.3` | `8.5`      | Nette 3.3, Latte 3.1 |
 | `^3.2.0` | `nette-3.2` | `>= 8.1` | `8.5`      | Nette 3.2, Latte 3.0 |
 | `^3.0.0` | `nette-3.0` | `>= 7.1` | `8.3`      | Nette 3.0, 3.1, Latte 2 |
 | `^2.4.0` | `nette-2.4` | `>= 5.6` | `8.0`      | Nette 2.4     |
