@@ -48,6 +48,23 @@ class BootstrapRendererFallbackTest extends TestCase
 		};
 		Assert::same($normalize($expected), $normalize($this->stripLegacyIeHack($actual)));
 	}
+
+
+	public function testBeginAndEndModesMoveGetActionQueryToHiddenFields()
+	{
+		$form = new Form();
+		$form->setMethod('get');
+		$form->setAction('/search?q=a%20b&page=2');
+		$form->addText('page', 'Page');
+		$form->addHidden('token', 'x');
+		$form->setRenderer(new BootstrapRenderer());
+
+		Assert::same('<form action="/search" method="get" class="form-horizontal">', $form->getRenderer()->render($form, 'begin'));
+		Assert::same(
+			'<input type="hidden" name="q" value="a b"><input type="hidden" name="token" id="frm-token" value="x"></form>' . "\n",
+			$form->getRenderer()->render($form, 'end')
+		);
+	}
 }
 
 

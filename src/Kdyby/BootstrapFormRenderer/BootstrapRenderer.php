@@ -18,7 +18,6 @@ use Nette\Bridges\ApplicationLatte\DefaultTemplate;
 use Nette\Bridges\ApplicationLatte\Template;
 use Nette\Bridges\ApplicationLatte\UIExtension;
 use Kdyby\BootstrapFormRenderer\Latte\FormsExtension as BootstrapFormsExtension;
-use Nette\Bridges\FormsLatte\Runtime as FormsLatteRuntime;
 use Nette\Forms\Controls;
 use Nette\Utils\Html;
 
@@ -158,10 +157,10 @@ class BootstrapRenderer implements Nette\Forms\FormRenderer
 			return (string) $this->template;
 
 		} elseif ($mode === 'begin') {
-			return FormsLatteRuntime::renderFormBegin($this->form, (array) $args);
+			return $this->renderBegin((array) $args);
 
 		} elseif ($mode === 'end') {
-			return FormsLatteRuntime::renderFormEnd($this->form);
+			return $this->renderEnd();
 
 		} else {
 			$attrs = array('input' => array(), 'label' => array());
@@ -180,6 +179,53 @@ class BootstrapRenderer implements Nette\Forms\FormRenderer
 			$this->template->attrs = $attrs;
 			return (string) $this->template;
 		}
+	}
+
+
+
+	/**
+	 * Opening <form> tag; forms 3.3 no longer renders it without a Latte runtime.
+	 * GET forms drop the action query, whose parameters renderEnd() emits as hidden fields.
+	 */
+	private function renderBegin(array $attrs): string
+	{
+		$el = $this->form->getElementPrototype();
+		$el->action = (string) $el->action;
+		$el = clone $el;
+		if ($this->form->isMethod('get')) {
+			$el->action = preg_replace('~\?[^#]*~', '', (string) $el->action, 1);
+		}
+
+		return $el->addAttributes($attrs)->startTag();
+	}
+
+
+
+	/**
+	 * Unrendered hidden fields, the action query of GET forms, and the closing </form> tag.
+	 */
+	private function renderEnd(): string
+	{
+		$s = '';
+		if ($this->form->isMethod('get')) {
+			$query = (string) parse_url((string) $this->form->getElementPrototype()->action, PHP_URL_QUERY);
+			foreach (preg_split('#[;&]#', $query, -1, PREG_SPLIT_NO_EMPTY) as $param) {
+				$parts = explode('=', $param, 2);
+				$name = urldecode($parts[0]);
+				$prefix = explode('[', $name, 2)[0];
+				if (!isset($this->form[$prefix])) {
+					$s .= Html::el('input', ['type' => 'hidden', 'name' => $name, 'value' => urldecode($parts[1] ?? '')]);
+				}
+			}
+		}
+
+		foreach ($this->form->getControls() as $control) {
+			if ($control->getOption('type') === 'hidden' && !$control->getOption('rendered')) {
+				$s .= $control->getControl();
+			}
+		}
+
+		return $s . $this->form->getElementPrototype()->endTag() . "\n";
 	}
 
 
