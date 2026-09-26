@@ -369,7 +369,7 @@ class BootstrapRenderer implements Nette\Forms\FormRenderer
 	public function findControls(?Nette\Forms\Container $container = NULL, ?bool $buttons = NULL): \Iterator
 	{
 		$container = $container ? : $this->form;
-		return new \CallbackFilterIterator($container->getControls(), function ($control) use ($buttons) {
+		return new \CallbackFilterIterator(new \IteratorIterator($container->getControls()), function ($control) use ($buttons) {
 			$isButton = $control instanceof Controls\Button || $control instanceof Nette\Forms\SubmitterControl;
 			return !$control->getOption('rendered')
 				&& !$control instanceof Controls\HiddenField

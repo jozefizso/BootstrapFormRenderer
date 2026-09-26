@@ -594,7 +594,7 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 			if (property_exists($form, 'httpRequest')) {
 				$form->httpRequest = new Nette\Http\Request(new Nette\Http\UrlScript('http://www.kdyby.org'));
 			}
-			foreach ($form->getComponents(TRUE, 'Nette\Forms\Controls\CsrfProtection') as $control) {
+			foreach (self::csrfControls($form) as $control) {
 				/** @var \Nette\Forms\Controls\CsrfProtection $control */
 				// Nette 3 starts a native session when protection is attached to a standalone form.
 				if ($control->session) {
@@ -610,7 +610,7 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 
 			$this->assertTemplateOutput(array('form' => $form, 'control' => $controlMock), __DIR__ . '/errors-at-inputs/input/' . $latteFile, __DIR__ . '/errors-at-inputs/output/' . basename($latteFile, '.latte') . '.html');
 
-			foreach ($form->getComponents(TRUE, 'Nette\Forms\Controls\CsrfProtection') as $control) {
+			foreach (self::csrfControls($form) as $control) {
 				/** @var \Nette\Forms\Controls\CsrfProtection $control */
 				$control->session->close();
 			}
@@ -638,7 +638,7 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 		if (property_exists($form, 'httpRequest')) {
 			$form->httpRequest = new Nette\Http\Request(new Nette\Http\UrlScript('http://www.kdyby.org'));
 		}
-		foreach ($form->getComponents(TRUE, 'Nette\Forms\Controls\CsrfProtection') as $control) {
+		foreach (self::csrfControls($form) as $control) {
 			/** @var \Nette\Forms\Controls\CsrfProtection $control */
 			// Nette 3 starts a native session when protection is attached to a standalone form.
 			if ($control->session) {
@@ -654,7 +654,7 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 
 		$this->assertTemplateOutput(array('form' => $form, 'control' => $control), $latteFile, $expectedOutput);
 
-		foreach ($form->getComponents(TRUE, 'Nette\Forms\Controls\CsrfProtection') as $control) {
+		foreach (self::csrfControls($form) as $control) {
 			/** @var \Nette\Forms\Controls\CsrfProtection $control */
 			$control->session->close();
 		}
@@ -701,7 +701,19 @@ class BootstrapRendererTest extends BootstrapContainerTestCase
 
 
 	/**
-	 * @return Nette\Application\UI\ITemplate
+	 * @return Nette\Forms\Controls\CsrfProtection[]
+	 */
+	private static function csrfControls(Form $form): array
+	{
+		return array_filter($form->getComponentTree(), function ($component) {
+			return $component instanceof Nette\Forms\Controls\CsrfProtection;
+		});
+	}
+
+
+
+	/**
+	 * @return Nette\Application\UI\Template
 	 */
 	private function createTemplate()
 	{
